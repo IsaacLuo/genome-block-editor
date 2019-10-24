@@ -1,13 +1,15 @@
 import * as React from 'react'
+import { useDispatch } from "redux-react-hook";
 
 export interface IProps {
   children: any;
   blockId: string;
+  pos: number;
 }
 
-const Component = ({children, blockId}:IProps) => {
-  const [count, setCount] = React.useState(0);
+const Component = ({children, blockId, pos}:IProps) => {
   const [opacity, setOpacity] = React.useState(1);
+  const dispatch = useDispatch();
   return (
     <div
     style={{
@@ -19,20 +21,29 @@ const Component = ({children, blockId}:IProps) => {
       opacity,
     }}
     draggable={true}
-    onDragStart={(event)=>{setOpacity(0.1); event.dataTransfer.setData('Any', blockId)}}
+    onDragStart={(event)=>{setOpacity(0.1); event.dataTransfer.setData('draggingBlockId', JSON.stringify({id:blockId, posFrom:pos}))}}
     onDragOver={(event)=>{event.preventDefault();}}
     onDragEnd={()=>{setOpacity(1)}}
-    onDrop={(e)=>{e.preventDefault();console.log('drop', e.dataTransfer.getData('Any'))}}
-    onClick={() => setCount(count + 1)}>
-      {count}
+    onDrop={(e)=>{
+      e.preventDefault();
+      const {id, posFrom} = JSON.parse(e.dataTransfer.getData('draggingBlockId'));
+      console.log('drop', id, '->', blockId)
+      dispatch({type:'MOVE_BLOCK_TO_BLOCK', data: {id, posFrom, posTo:pos}});
+    }}
+    >
+      {blockId}
+      <br/>
+      {pos}
+      <br/>
+      -------------
       <br/>
       {children}
     </div>
   );
 };
 
-Component.defaultProps = {
-  blockId: 'unknown'
-}
+// Component.defaultProps = {
+//   blockId: 'unknown'
+// }
 
 export default Component
