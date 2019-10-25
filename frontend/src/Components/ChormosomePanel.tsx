@@ -1,8 +1,6 @@
 import * as React from 'react'
-import {reducer, defaultStoreState} from 'reducer'
 import Block from './Block'
-import {useDispatch, useMappedState} from 'redux-react-hook';
-import {StoreContext} from 'redux-react-hook';
+import {useMappedState} from 'redux-react-hook';
 
 export interface IProps {
   children: any;

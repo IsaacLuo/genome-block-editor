@@ -22,7 +22,7 @@ export const reducer = (state:IStoreState|undefined, action:IAction):IStoreState
       }
     }
     case 'COPY_BLOCK_TO_BLOCK': {
-      const {id,posTo,data} = action.data;
+      const {posTo,data} = action.data;
       const project = [...state.currentProject];
       if (posTo>=0) {
         project.splice(posTo, 0, data);
@@ -33,7 +33,7 @@ export const reducer = (state:IStoreState|undefined, action:IAction):IStoreState
       }
     }
     case 'COPY_BLOCK_TO_BASKET': {
-      const {id,data} = action.data;
+      const {data} = action.data;
       const project = [...state.currentProject];
       project.push(data);
       return {...state, currentProject:project};

@@ -45,7 +45,7 @@ const Component = ({children, blockId, pos, panelType, data, defaultOperation}:I
     onDrop={(e)=>{
       if (panelType === 'ProjectBasket') {
         e.preventDefault();
-        const {id, posFrom, data, operation, panelType} = JSON.parse(e.dataTransfer.getData('draggingBlockId'));
+        const {id, posFrom, data, operation} = JSON.parse(e.dataTransfer.getData('draggingBlockId'));
         dispatch({type:`${operation}_BLOCK_TO_BLOCK`, data: {id, posFrom, posTo:pos, data}});
         e.stopPropagation();
       }

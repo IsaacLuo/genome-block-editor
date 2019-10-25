@@ -1,5 +1,4 @@
 import * as React from 'react'
-import {reducer, defaultStoreState} from 'reducer'
 import Block from './Block'
 import {useDispatch, useMappedState} from 'redux-react-hook';
 
@@ -14,28 +13,19 @@ const Component = () => {
     project: state.currentProject,
   }));
   const dispatch = useDispatch();
-  
-
   return <div 
       style={{
         display:'flex',
         flexWrap:'wrap',
-        // border: borderColor === 'unset' ? 'unset' : 'solid',
-        // borderColor: borderColor,
         minHeight: 200,
       }}
       draggable={true}
       onDragOver={(event)=>{
         event.preventDefault();
-        // setBorderColor('#0f0');
+        
       }}
-      // onDragLeave={(event)=>{
-      //   event.preventDefault();
-      //   setBorderColor('unset');
-      // }}
       onDrop={(e)=>{
           e.preventDefault();
-          // setBorderColor('unset');
           const {id, data, panelType} = JSON.parse(e.dataTransfer.getData('draggingBlockId'));
           if (panelType !== 'ProjectBasket') {
             dispatch({type:`COPY_BLOCK_TO_BASKET`, data: {id, data}});

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {useDispatch, useMappedState} from 'redux-react-hook';
+import {useMappedState} from 'redux-react-hook';
 
 const Component = () => {
   const {project} = useMappedState((state:IStoreState)=>({

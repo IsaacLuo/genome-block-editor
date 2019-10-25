@@ -4,8 +4,8 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import {StoreContext} from 'redux-react-hook';
-import {createStore, Reducer} from 'redux';
-import {reducer, defaultStoreState} from './reducer';
+import {createStore} from 'redux';
+import {reducer} from './reducer';
 
 const store = createStore(reducer);
 
