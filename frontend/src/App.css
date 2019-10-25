@@ -20,3 +20,18 @@
 .App-link {
   color: #09d3ac;
 }
+
+.main-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.basket-panel {
+  width: 90%;
+  border: solid 1px;
+  padding: 20px;
+}
+.file-panel {
+  padding: 20px;
+}
