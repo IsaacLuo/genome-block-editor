@@ -1,13 +1,17 @@
 import * as React from 'react'
 import { useDispatch } from "redux-react-hook";
+import getPen from '../featureColors'
 
 export interface IProps {
   children: any;
   blockId: string;
   pos: number;
+  panelType: string;
+  data: any;
+  defaultOperation: string;
 }
 
-const Component = ({children, blockId, pos}:IProps) => {
+const Component = ({children, blockId, pos, panelType, data, defaultOperation}:IProps) => {
   const [opacity, setOpacity] = React.useState(1);
   const dispatch = useDispatch();
   return (
@@ -19,23 +23,37 @@ const Component = ({children, blockId, pos}:IProps) => {
       borderColor:'black',
       border:'solid',
       opacity,
+      fontSize: 11,
+      wordBreak: 'break-all',
+      margin:1,
+      backgroundColor: getPen(data.feature),
+      cursor:'grab',
     }}
     draggable={true}
-    onDragStart={(event)=>{setOpacity(0.1); event.dataTransfer.setData('draggingBlockId', JSON.stringify({id:blockId, posFrom:pos}))}}
+    onDragStart={(event)=>{
+      setOpacity(0.1); 
+      event.dataTransfer.setData('draggingBlockId', JSON.stringify({
+        operation: defaultOperation,
+        id:blockId, 
+        posFrom:pos, 
+        panelType,
+        data,
+        }))}
+      }
     onDragOver={(event)=>{event.preventDefault();}}
     onDragEnd={()=>{setOpacity(1)}}
     onDrop={(e)=>{
-      e.preventDefault();
-      const {id, posFrom} = JSON.parse(e.dataTransfer.getData('draggingBlockId'));
-      console.log('drop', id, '->', blockId)
-      dispatch({type:'MOVE_BLOCK_TO_BLOCK', data: {id, posFrom, posTo:pos}});
+      if (panelType === 'ProjectBasket') {
+        e.preventDefault();
+        const {id, posFrom, data, operation, panelType} = JSON.parse(e.dataTransfer.getData('draggingBlockId'));
+        dispatch({type:`${operation}_BLOCK_TO_BLOCK`, data: {id, posFrom, posTo:pos, data}});
+        e.stopPropagation();
+      }
     }}
     >
-      {blockId}
+      [{pos}] {blockId}
       <br/>
-      {pos}
-      <br/>
-      -------------
+      ------
       <br/>
       {children}
     </div>

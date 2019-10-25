@@ -21,14 +21,13 @@ const Component = () => {
   },[]);
 
   return (
-    <div
-      className="file-panel"
-    >
+    <div>
       {files.map((v,i)=>
       <div key={i}
+        style={{cursor:'zoom-in'}}
         onClick={async ()=>{
-          const blocks = await axios.get(backendURL + `/api/file/${v}`);
-          dispatch({type:'SET_BLOCKS', data: blocks});
+          const res = await axios.get(backendURL + `/api/file/${v}`);
+          dispatch({type:'SET_CHROMOSOME_BLOCKS', data: res.data.blocks});
         }}
       >{v}</div>)}
     </div>

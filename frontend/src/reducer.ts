@@ -5,22 +5,44 @@ export const reducer = (state:IStoreState|undefined, action:IAction):IStoreState
   console.log('action', action.type, action.data);
   switch(action.type) {
     case 'MOVE_BLOCK_TO_BLOCK': {
-      const {id,posFrom,posTo} = action.data;
+      const {id,posFrom,posTo, data} = action.data;
       const project = [...state.currentProject];
       if (posFrom>=0) {
-        if (state.currentProject[posFrom] === id) {
+        if (state.currentProject[posFrom].name === id) {
           project.splice(posFrom, 1);
         }
       }
       if (posTo>=0) {
-        project.splice(posTo, 0, id);
+        project.splice(posTo, 0, data);
       }
-      console.log(project);
       return {
         ...state,
         moveHistory: [...state.moveHistory, action.data],
         currentProject: project,
       }
+    }
+    case 'COPY_BLOCK_TO_BLOCK': {
+      const {id,posTo,data} = action.data;
+      const project = [...state.currentProject];
+      if (posTo>=0) {
+        project.splice(posTo, 0, data);
+      }
+      return {
+        ...state,
+        currentProject: project,
+      }
+    }
+    case 'COPY_BLOCK_TO_BASKET': {
+      const {id,data} = action.data;
+      const project = [...state.currentProject];
+      project.push(data);
+      return {...state, currentProject:project};
+    }
+    case 'SET_CHROMOSOME_BLOCKS': {
+      return {
+        ...state, 
+        chromosomeBlocks: action.data,
+      };
     }
   }
   return state;
@@ -28,5 +50,6 @@ export const reducer = (state:IStoreState|undefined, action:IAction):IStoreState
 
 export const defaultStoreState = {
   moveHistory: [],
-  currentProject: ['A', 'B', 'C','D','E','F'],
+  currentProject: [],
+  chromosomeBlocks: [],
 };

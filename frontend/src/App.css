@@ -34,4 +34,7 @@
 }
 .file-panel {
   padding: 20px;
+  height: 200px;
+  width: 300px;
+  overflow-y: scroll;
 }
