@@ -16,6 +16,9 @@ const App: React.FC = () => {
         <div className="basket-panel">
           <ProjectBasket/>
         </div>
+        <div className="basket-panel">
+          <ProjectBasket/>
+        </div>
       </div>
     </div>
   );
