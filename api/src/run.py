@@ -20,7 +20,7 @@ class HelloWorld(Resource):
 
 class Files(Resource):
     def get(self):
-        lst = os.listdir('./dna_source')
+        lst = sorted(os.listdir('./dna_source'))
         return {'files': lst}
 
 class File(Resource):
@@ -38,6 +38,9 @@ class File(Resource):
 api.add_resource(HelloWorld, '/')
 api.add_resource(Files,'/api/files')
 api.add_resource(File,'/api/file/<file_name>')
+
+def start():
+    app.run()
 
 if __name__ == '__main__':
     app.run(debug=True)

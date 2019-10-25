@@ -1,0 +1,27 @@
+version: '3.0'
+services:
+  api:
+    container_name: gbe-api
+    ports:
+      - "5000:5000"
+    build: ./api
+    working_dir: /app
+    # command: ['pipenv', 'run', 'python', 'src/run.py']
+    # environment:
+    #   - GUNICORN_CMD_ARGS="--chdir=src"
+    command: ['gunicorn', '-b 0.0.0.0:5000','src.run:app']
+    restart: always
+    network_mode: bridge
+
+  frontend:
+    container_name: gbe-frontend
+    build: ./frontend
+    restart: always
+    ports:
+      - "1880:80"
+    links:
+      - api
+    depends_on:
+      - api
+    network_mode: bridge
+    command: ['nginx', '-g', 'daemon off;']
