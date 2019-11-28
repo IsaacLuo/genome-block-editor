@@ -1,7 +1,10 @@
-FROM python:3.8
+FROM node:10
 WORKDIR /app
-# RUN apt update
-# RUN apt install -y gunicorn
-RUN pip install gunicorn
+EXPOSE 8000
+ADD ./package.json .
+ADD ./yarn.lock .
+RUN yarn install
 ADD . .
-RUN pip install -r requirements.txt
+RUN yarn build
+CMD ["yarn", "run production"]
+

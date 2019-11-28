@@ -1,0 +1,152 @@
+[
+    {
+        "name": "conn A-B",
+        "pos": [0,1],
+        "sequence": "TAGGTCCACTGGTGAGGACGTGTGTGACTATCTGACTGTTGATTATGG"
+    },
+    {
+        "name": "conn A-C",
+        "pos": [0,2],
+        "sequence": "TAGGTCTTGTATTCAGTCTCGCACTTTAGACATGGTCTTCTGCTGCCCGTGGTCCTCTATTCGTCGGATGTTCTGTCGATTCTTCCTGTCTATCTGGACT"
+    },
+    {
+        "pos": [1,2],
+        "name": "conn B-C",
+        "sequence": "ATGGACTAACTACGGTGAAAGAGACTTAGAAGGAGATTGAGAGAGACT"
+    },
+    {
+        "pos": [1,4],
+        "name": "conn B-E",
+        "sequence": "ATGGACTAACTACGGTGAAAGAGACTTAGAAGGAGATTGAGAGATCCG"
+    },
+    {
+        "pos": [1,12],
+        "name": "conn B-L",
+        "sequence": "ATGGACTGGTCGCTTGGAATCTCCACTTACCTGCCTCCCATTTACGTC"
+    },
+    {
+        "pos": [3,4],
+        "name": "conn D-E",
+        "sequence": "GGACTTAGCCTTTAGTGAACCGTCAGAATTAATTCAGATCGATCTATCCG"
+    },
+    {
+        "pos": [3,5],
+        "name": "conn D-F",
+        "sequence": "GGACTTAGCCTTTAGTGAACCGTCAGAATTAATTCAGATCGATCTACCAG"
+    },
+    {
+        "pos": [4,5],
+        "name": "conn E-F",
+        "sequence": "TCCGTTAGCCTTTAGTGAACCGTCAGAATTAATTCAGATCGATCTACCAG"
+    },
+    {
+        "pos": [7,8],
+        "name": "conn H-Ha",
+        "sequence": "AGGCTAATAACAGCTTCCGGACTCTAGAACATCCCTACAGGTGATATCCTCGATCC"
+    },
+    {
+        "pos": [7,10],
+        "name": "conn H-J",
+        "sequence": "AGGCTAATAACAGCTTCCGGACTCTAGAACATCCCTACAGGTGATATCCTCGTGCT"
+    },
+    {
+        "pos": [7,11],
+        "name": "conn H-K",
+        "sequence": "AGGCTAATAACAGCTTCCGGACTCTAGAACATCCCTACAGGTGATATCCTCGGGTA"
+    },
+    {
+        "pos": [8,10],
+        "name": "conn Ha-J",
+        "sequence": "ATCCGAGGCTAACTGAAACACGGAAGGAGACAATACAGGAAGGAACTGCT"
+    },
+    {
+        "pos": [8,11],
+        "name": "conn Ha-K",
+        "sequence": "ATCCGAGGCTAACTGAAACACGGAAGGAGACAATACAGGAAGGAACGGTA"
+    },
+    {
+        "pos": [10,11],
+        "name": "conn J-K",
+        "sequence": "TGCTGAGGCTAACTGAAACACGGAAGGAGACAATACAGGAAGGAACGGTA"
+    },
+    {
+        "pos": [12,13],
+        "name": "conn L-M",
+        "sequence": "CGTCTATGATGAGGATGTTGGTGGAGAGCATGTGGAGGAAGTGGATAGGGAAGGTTGTAGAGTAGATCCGGTTGAAGTGATGAGGATAGGAGGAGGTCAC"
+    },
+    {
+        "pos": [12,14],
+        "name": "conn L-N",
+        "sequence": "CGTCTATGATGAGGATGTTGGTGGAGAGCATGTGGAGGAAGTGGATAGGGAAGGTTGTAGAGTAGATCCGGTTGAAGTGATGAGGATAGGAGGAGGCTAC"
+    },
+    {
+        "pos": [12,18],
+        "name": "conn L-R",
+        "sequence": "CGTCTATGATGAGGATGTTGGTGGAGAGCATGTGGAGGAAGTGGATAGGGAAGGTTGTAGAGTAGATCCGGTTGAAGTGATGAGGATAGGAGGAGGCGGT"
+    },
+    {
+        "pos": [12,23],
+        "name": "conn L-W",
+        "sequence": "CGTCTATGATGAGGATGTTGGTGGAGAGCATGTGGAGGAAGTGGATAGGGAAGGTTGTAGAGTAGATCCGGTTGAAGTGATGAGGATAGGAGGAGGCGAA"
+    },
+    {
+        "pos": [12,25],
+        "name": "conn L-Y",
+        "sequence": "CGTCTATGATGAGGATGTTGGTGGAGAGCATGTGGAGGAAGTGGATAGGGAAGGTTGTAGAGTAGATCCGGTTGAAGTGATGAGGATAGGAGGAGGACTG"
+    },
+    {
+        "pos": [13,18],
+        "name": "conn M-R",
+        "sequence": "TCACGACATAATCCACCATCAACATGCAAGTCCAGTCAACAACTTTCCCTCAGACGTTAGTGGTAATCGAACCTCAACACCTAGCCCAGAACAAGCCGGT"
+    },
+    {
+        "pos": [14,18],
+        "name": "conn N-R",
+        "sequence": "CTACGACATAATCCACCATCAACATGCAAGTCCAGTCAACAACTTTCCCTCAGACGTTAGTGGTAATCGAACCTCAACACCTAGCCCAGAACAAGCCGGT"
+    },
+    {
+        "pos": [17,18],
+        "name": "conn Q-R",
+        "sequence": "GCTCGACATAATCCACCATCAACATGCAAGTCCAGTCAACAACTTTCCCTCAGACGTTAGTGGTAATCGAACCTCAACACCTAGCCCAGAACAAGCCGGT"
+    },
+    {
+        "pos": [17,23],
+        "name": "conn Q-W",
+        "sequence": "GCTCGACATAATCCACCATCAACATGCAAGTCCAGTCAACAACTTTCCCTCAGACGTTAGTGGTAATCGAACCTCAACACCTAGCCCAGAACAAGCCGAA"
+    },
+    {
+        "pos": [18,23],
+        "name": "conn R-W",
+        "sequence": "CGGTCCTACCCAACTACAAAGCCCTCCGAAGTCCCTACCAGCTCCGAA"
+    },
+    {
+        "pos": [20,22],
+        "name": "conn T-V",
+        "sequence": "AGCGGCTAATAATTCACTCCTCCTGGTCGCCTCTTCATACTCCCGTTG"
+    },
+    {
+        "pos": [21,22],
+        "name": "conn U-V",
+        "sequence": "TGGATAATCCAACAACCCCATAACACCCGCCACACATACAGTTG"
+    },
+    {
+        "pos": [23,24],
+        "name": "conn W-X",
+        "sequence": "CGAATCTTGTATTCAGTCTCGCACTTTAGACATGGTCTTCTGCTGCCCGTGGTCCTCTATTCGTCGGATGTTCTGTCGATTCTTCCTGTCTATCTGCACG"
+    },
+    {
+        "pos": [23,25],
+        "name": "conn W-Y",
+        "sequence": "CGAACACATATTGATCCtCGTCACAACCACACCAGCACACCTCAAATCCCACACCACTCCCACAATTACCATTCACTCAACAAACTCACACATCCCACTG"
+    },
+    {
+        "pos": [23,26],
+        "name": "conn W-Z",
+        "sequence": "CGAACACATATTGATCCtCGTCACAACCACACCAGCACACCTCAAATCCCACACCACTCCCACAATTACCATTCACTCAACAAACTCACACATCCCACGA"
+    },
+    {
+        "pos": [25,26],
+        "name": "conn Y-Z",
+        "sequence": "ACTGCACATATTGATCCtCGTCACAACCACACCAGCACACCTCAAATCCCACACCACTCCCACAATTACCATTCACTCAACAAACTCACACATCCCACGA"
+    }
+]
