@@ -4,14 +4,14 @@ with open('BY4741.json') as fp:
     species = 'BY4741'
     dct = {}
     content = json.load(fp)
-    for chrId, record in enumerate(content['records']):
+    for record in content['records']:
         if record['seqName'] not in dct:
             dct[record['seqName']] = []
 
         feature = {
             'featureType':record['feature'],
             'species': species,
-            'chrId': chrId,
+            'chrId': int(record['seqName'][3:]),
             'chrName': record['seqName'],
             'name':record['attribute']['Name'],
             'start':record['start'],
@@ -66,7 +66,12 @@ for key in dct.keys():
                 'original': True,
             })
         final_features.append(features[i])
+
+    final_dct[key] = final_features
     
-    with open(key, 'w') as fp:
-        json.dump(final_features, fp)
+    # with open(key, 'w') as fp:
+    #     json.dump(final_features, fp)
+
+with open('files.json', 'w') as fp:
+        json.dump(final_dct, fp, indent=4)
 

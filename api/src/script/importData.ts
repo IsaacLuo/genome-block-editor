@@ -1,10 +1,79 @@
-import { Project } from './../models';
-import parts from './parts.json'
-import connectors from './connectors.json'
 import conf from '../../conf' 
-
+import files from './files.json'
 import mongoose from 'mongoose';
-import {IPartDefinition, PartDefinition, Connector} from '../models';
+import {Project, AnnotationPart, SourceChromosome} from '../models';
+
+declare interface IAction {
+  type: string;
+  data: any;
+}
+
+declare interface IGLobalConfig {
+  maxTubeDeleteLimit: number,
+  host: string,
+  port: number,
+  publicURL?: string,
+}
+
+declare interface IUserEssential {
+  _id: any,
+  email: string,
+  name: string, // user's full name
+  groups: string[], // array of group name, 'guest', 'users', 'visitors', or 'administrators'
+}
+
+declare interface ITokenContent extends IUserEssential{
+  iat:number,
+  exp:number,
+}
+
+declare interface IUser extends IUserEssential {
+  lastLogin?: Date,
+  lastIP?: string,
+}
+
+declare interface ICustomState {
+  user?: ITokenContent,
+  data?: any,
+}
+
+interface IAnnotationPart {
+  _id: any;
+  featureType: string;
+  species: string;
+  chrId: number;
+  chrName: string;
+  start: number;
+  end: number;
+  strand: string;
+  original: boolean;
+  origin?: string|IAnnotationPart;
+}
+
+declare interface IProject {
+  _id: any;
+  name: string,
+  version: string,
+  parts: Array<IAnnotationPart>,
+  owner: IUser,
+  group: string,
+  permission: Number,
+  createdAt: Date,
+  updatedAt: Date,
+  history: [any],
+}
+
+declare interface ISourceChomosome {
+  _id: any;
+  name: string,
+  version: string,
+  parts: Array<IAnnotationPart>,
+  owner: IUser,
+  group: string,
+  permission: Number,
+  createdAt: Date,
+  updatedAt: Date,
+}
 
 async function main() {
   try {
@@ -26,56 +95,27 @@ async function main() {
     
   }
 
-  await PartDefinition.deleteMany({}).exec();
+  await AnnotationPart.deleteMany({}).exec();
   await Project.deleteMany({}).exec();
-  await Connector.deleteMany({}).exec();
+  await SourceChromosome.deleteMany({}).exec();
 
   console.log('start import');
 
   const allPromises:any[] = [];
 
-  for(const pos of parts) {
-    for (const p of pos.parts) {
-      
-      console.log(p.name);
-      const now = new Date();
-      allPromises.push(PartDefinition.create({
-        owner: '5c88cea93c27125df4ff9f4a',
-        group:'all',
-        createdAt: now,
-        updatedAt: now,
-        permission: 0x666,
-        part: {
-          position: p.position,
-          len:p.len,
-          name: p.name,
-          labName: p.labName,
-          category: p.category,
-          subCategory: p.subCategory,
-          comment: p.comment,
-          sequence: p.sequence,
-          plasmidLength: p.plasmidLength,
-          backboneLength: p.backboneLength,
-        }
-      }));
-    }
+  const now = new Date();
+  for (const chrName in files) {
+    const chrFile = files[chrName];
+    const parts = await AnnotationPart.create(chrFile);
+    await SourceChromosome.create({
+      name: chrName,
+      parts,
+      group: 'all',
+      permission: 0x666,
+      createdAt: now,
+      updatedAt: now,
+    })
   }
-
-  let index = 0;
-  for (const connector of connectors) {
-      console.log(connector.name);
-      await Connector.create({
-        name: connector.name,
-        posBegin: connector.pos[0],
-        posEnd: connector.pos[1],
-        sequence: connector.sequence,
-        index,
-      });
-      index++;
-  }
-
-  await Promise.all(allPromises);
-
   console.log('finish')
 }
 

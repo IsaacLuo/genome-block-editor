@@ -1,7 +1,4 @@
-[2019-11-28T20:54:54.982] [ERROR] default - >>>>error db connection error
-[2019-11-28T20:55:31.985] [INFO] default - start listening at 8000
-[2019-11-28T20:55:34.673] [INFO] default - guest GET /graphql
-[2019-11-28T20:55:37.222] [INFO] default - guest POST /graphql
-[2019-11-28T20:55:37.260] [INFO] default - guest POST /graphql
-[2019-11-28T20:55:45.516] [INFO] default - guest POST /graphql
-[2019-11-28T20:55:57.426] [INFO] default - guest POST /graphql
+[2019-11-29T17:15:53.427] [INFO] default - start listening at 8000
+[2019-11-29T17:15:58.260] [INFO] default - start listening at 8000
+[2019-11-29T18:03:57.426] [INFO] default - start listening at 8000
+[2019-11-29T18:13:17.415] [INFO] default - start listening at 8000

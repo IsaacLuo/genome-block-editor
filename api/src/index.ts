@@ -12,7 +12,6 @@ import cors from 'koa-cors';
 import mongoose from 'mongoose';
 // import { graphqlKoa, graphiqlKoa } from 'graphql-server-koa'
 import {useApolloServer} from './graphql'
-import GraphqlSchema from './graphql/schema'
 
 const GUEST_ID = '000000000000000000000000';
 

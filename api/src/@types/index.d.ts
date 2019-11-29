@@ -32,7 +32,7 @@ declare interface ICustomState {
   data?: any,
 }
 
-interface IAnnotation {
+interface IAnnotationPart {
   _id: any;
   featureType: string;
   species: string;
@@ -42,18 +42,30 @@ interface IAnnotation {
   end: number;
   strand: string;
   original: boolean;
-  origin?: string|IAnnotation;
+  origin?: string|IAnnotationPart;
 }
 
 declare interface IProject {
   _id: any;
   name: string,
   version: string,
-  parts: Array<IAnnotation>,
+  parts: Array<IAnnotationPart>,
   owner: IUser,
   group: string,
   permission: Number,
   createdAt: Date,
   updatedAt: Date,
   history: [any],
+}
+
+declare interface ISourceChomosome {
+  _id: any;
+  name: string,
+  version: string,
+  parts: Array<IAnnotationPart>,
+  owner: IUser,
+  group: string,
+  permission: Number,
+  createdAt: Date,
+  updatedAt: Date,
 }
