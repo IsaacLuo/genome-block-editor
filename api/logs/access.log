@@ -1,4 +1,11 @@
-[2019-11-29T17:15:53.427] [INFO] default - start listening at 8000
-[2019-11-29T17:15:58.260] [INFO] default - start listening at 8000
-[2019-11-29T18:03:57.426] [INFO] default - start listening at 8000
-[2019-11-29T18:13:17.415] [INFO] default - start listening at 8000
+[2019-12-02T15:06:23.635] [INFO] default - start listening at 8000
+[2019-12-02T15:06:23.951] [INFO] default - guest POST /graphql
+[2019-12-02T15:06:40.371] [INFO] default - start listening at 8000
+[2019-12-02T15:06:42.360] [INFO] default - guest POST /graphql
+[2019-12-02T15:06:49.370] [INFO] default - guest POST /graphql
+[2019-12-02T15:07:06.864] [INFO] default - guest POST /graphql
+[2019-12-02T15:07:34.278] [INFO] default - guest POST /graphql
+[2019-12-02T17:54:25.767] [INFO] default - guest POST /graphql
+[2019-12-02T17:55:24.603] [INFO] default - guest POST /graphql
+[2019-12-02T17:57:48.098] [INFO] default - guest POST /graphql
+[2019-12-02T17:58:25.509] [INFO] default - guest POST /graphql

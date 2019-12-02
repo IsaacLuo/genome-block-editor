@@ -1,3 +1,5 @@
+/// <reference path="../@types/index.d.ts" />
+
 import conf from '../../conf' 
 import files from './files.json'
 import mongoose from 'mongoose';

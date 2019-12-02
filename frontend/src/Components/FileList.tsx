@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from "redux-react-hook";
 import axios from 'axios';
 import { backendURL } from 'conf';
+import ApolloClient from 'apollo-boost';
+import { gql } from "apollo-boost";
+
+const client = new ApolloClient({
+  uri: 'http://localhost:8000/graphql',
+});
 
 const Component = () => {
   const [files, setFiles] = useState([]);
@@ -9,9 +15,18 @@ const Component = () => {
 
   const requestFiles = async () => {
     try {
-      const response = await axios.get(backendURL + '/api/files');
-      const files = response.data.files;
-      setFiles(files);
+      const result = await client.query({
+        query: gql`
+        {
+          sourceFiles {
+              _id
+              name
+            }
+          }
+        `
+      })
+      const {sourceFiles} = result.data;
+      setFiles(sourceFiles);
     } catch (err) {
       console.error(err);
     }
@@ -20,16 +35,17 @@ const Component = () => {
     requestFiles();
   },[]);
 
+  const fetchFile = (_id:string) => {
+    console.log(_id)
+  }
+
   return (
     <div>
-      {files.map((v,i)=>
+      {files.map((v:any,i:number)=>
       <div key={i}
         style={{cursor:'zoom-in'}}
-        onClick={async ()=>{
-          const res = await axios.get(backendURL + `/api/file/${v}`);
-          dispatch({type:'SET_CHROMOSOME_BLOCKS', data: res.data.blocks});
-        }}
-      >{v}</div>)}
+        onClick={event=>fetchFile(v._id)}
+      >{v.name}</div>)}
     </div>
   );
 };

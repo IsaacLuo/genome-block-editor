@@ -43,7 +43,7 @@ export const ProjectSchema = new Schema({
   version: String,
   parts: [{
     type: Schema.Types.ObjectId,
-    ref: 'AnnotationSchema',
+    ref: 'AnnotationPart',
   }],
   owner: {
     type:Schema.Types.ObjectId,
@@ -64,7 +64,7 @@ export const SourceChromosomeSchema = new Schema({
   version: String,
   parts: [{
     type: Schema.Types.ObjectId,
-    ref: 'AnnotationSchema',
+    ref: 'AnnotationPart',
   }],
   owner: {
     type:Schema.Types.ObjectId,
