@@ -35,8 +35,31 @@ const Component = () => {
     requestFiles();
   },[]);
 
-  const fetchFile = (_id:string) => {
-    console.log(_id)
+  const fetchFile = async (_id:string) => {
+    const result = await client.query({
+      query: gql`
+      {
+        sourceFile(_id:"${_id}") {
+          _id
+          name
+          parts {
+            _id
+            featureType
+            species
+            chrId
+            chrName
+            start
+            end
+            len
+            strand
+          }
+        }
+      }
+      `
+    })
+    console.log(result.data)
+    const {sourceFile} = result.data;
+    dispatch({type:'SET_SOURCE_FILE', data: sourceFile,});
   }
 
   return (

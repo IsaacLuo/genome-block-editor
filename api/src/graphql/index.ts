@@ -4,6 +4,7 @@ import { SourceChromosome } from '../models';
 export function useApolloServer(app:any) {
     const typeDefs = gql`
     type Part {
+        _id: ID
         len: Int
         featureType: String
         start: Int
@@ -14,6 +15,7 @@ export function useApolloServer(app:any) {
     }
 
     type OriginPart {
+        _id: ID
         featureType: String
         species: String
         chrId: Int

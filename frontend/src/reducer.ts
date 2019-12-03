@@ -44,6 +44,13 @@ export const reducer = (state:IStoreState|undefined, action:IAction):IStoreState
         chromosomeBlocks: action.data,
       };
     }
+    case 'SET_SOURCE_FILE': {
+      return {
+        ...state,
+        sourceFile: action.data,
+        chromosomeBlocks: action.data.parts,
+      }
+    }
   }
   return state;
 }
@@ -52,4 +59,5 @@ export const defaultStoreState = {
   moveHistory: [],
   currentProject: [],
   chromosomeBlocks: [],
+  sourceFile: undefined,
 };
