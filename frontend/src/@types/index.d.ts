@@ -4,6 +4,7 @@ declare interface IAction {
 }
 
 declare interface IBlock {
+  _id: string;
   name:string;
   feature:string;
   start:number;
@@ -12,10 +13,15 @@ declare interface IBlock {
   seq:string;
 }
 
+declare interface IFeature extends IBlock{
+  row: number;
+}
+
 declare interface ISourceFile {
   _id: string;
   name: string;
   parts: IBlock[];
+  len: number;
 }
 
 declare interface IStoreState {
