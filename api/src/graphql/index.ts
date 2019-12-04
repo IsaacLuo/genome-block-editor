@@ -38,7 +38,8 @@ export function useApolloServer(app:any) {
     type SourceFile {
         _id: ID
         name: String
-        parts: [OriginPart]
+        len: Int
+        parts(from:Int, to:Int): [OriginPart]
     }
 
     type Query {
@@ -53,11 +54,12 @@ export function useApolloServer(app:any) {
             projects: () => [],
 
             sourceFiles: async () => {
-                return await SourceChromosome.find({}).select('_id name').exec();
+                return await SourceChromosome.find({}).select('_id name len').exec();
             },
 
             sourceFile: async (parent:any, args:any, context: any) => {
                 const {_id} = args;
+                console.log(args, context);
                 const result = await SourceChromosome.findById(_id).populate('parts').exec();
                 return result;
             }

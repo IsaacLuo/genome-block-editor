@@ -21,6 +21,7 @@ const Component = () => {
           sourceFiles {
               _id
               name
+              len
             }
           }
         `
@@ -42,6 +43,7 @@ const Component = () => {
         sourceFile(_id:"${_id}") {
           _id
           name
+          len
           parts {
             _id
             featureType
@@ -68,7 +70,7 @@ const Component = () => {
       <div key={i}
         style={{cursor:'zoom-in'}}
         onClick={event=>fetchFile(v._id)}
-      >{v.name}</div>)}
+      >{v.name} ({v.len})</div>)}
     </div>
   );
 };

@@ -66,6 +66,7 @@ export const SourceChromosomeSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'AnnotationPart',
   }],
+  len: Number,
   owner: {
     type:Schema.Types.ObjectId,
     ref: 'User'

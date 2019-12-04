@@ -2,6 +2,7 @@
 
 import conf from '../../conf' 
 import files from './files.json'
+import gff from './BY4741.json'
 import mongoose from 'mongoose';
 import {Project, AnnotationPart, SourceChromosome} from '../models';
 
@@ -70,6 +71,7 @@ declare interface ISourceChomosome {
   name: string,
   version: string,
   parts: Array<IAnnotationPart>,
+  len: number,
   owner: IUser,
   group: string,
   permission: Number,
@@ -108,10 +110,12 @@ async function main() {
   const now = new Date();
   for (const chrName in files) {
     const chrFile = files[chrName];
+    const len = gff.fasta[chrName].length;
     const parts = await AnnotationPart.create(chrFile);
     await SourceChromosome.create({
       name: chrName,
       parts,
+      len,
       group: 'all',
       permission: 0x666,
       createdAt: now,

@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import ProjectBasket from 'Components/ProjectBasket'
 import FileList from 'Components/FileList'
-import ChromosomePanel from 'Components/ChormosomePanel'
+import GenomeBrowser from 'Components/GenomeBrowser'
 import ResultSequence from 'Components/ResultPanel'
 
 const App: React.FC = () => {
@@ -13,7 +13,8 @@ const App: React.FC = () => {
           <FileList/>
         </div>
         <div className="basket-panel">
-          <ChromosomePanel/>
+          {/* <ChromosomePanel/> */}
+          <GenomeBrowser/>
         </div>
         <div className="basket-panel">
           <ProjectBasket/>
