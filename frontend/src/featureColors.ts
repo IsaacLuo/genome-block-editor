@@ -1,6 +1,6 @@
 export const pens:any = {
   unknown: '#b3b3b3',
-  gene: '#66ffb3',
+  gene: '#7aff93',
   mRNA: '#99b3ff',
   CDS: '#66ffb3',
   intron: '#ab6dcf',

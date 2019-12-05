@@ -26,7 +26,7 @@ const Component = ({children, blockId, pos, panelType, data, defaultOperation}:I
       fontSize: 11,
       wordBreak: 'break-all',
       margin:1,
-      backgroundColor: getPen(data.feature),
+      backgroundColor: getPen(data.featureType),
       cursor:'grab',
     }}
     draggable={true}

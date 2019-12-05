@@ -111,6 +111,9 @@ async function main() {
   for (const chrName in files) {
     const chrFile = files[chrName];
     const len = gff.fasta[chrName].length;
+    if (chrFile.attribute && chrFile.attribute.Alias) {
+      chrFile.name = chrFile.attribute.Alias;
+    }
     const parts = await AnnotationPart.create(chrFile);
     await SourceChromosome.create({
       name: chrName,

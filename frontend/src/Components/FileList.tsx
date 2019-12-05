@@ -46,6 +46,7 @@ const Component = () => {
           len
           parts {
             _id
+            name
             featureType
             species
             chrId

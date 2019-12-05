@@ -41,6 +41,7 @@ interface IAnnotationPart {
   start: number;
   end: number;
   strand: string;
+  name: string;
   original: boolean;
   origin?: string|IAnnotationPart;
 }

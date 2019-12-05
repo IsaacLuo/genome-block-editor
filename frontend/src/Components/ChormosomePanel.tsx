@@ -31,7 +31,7 @@ const Component = () => {
           panelType = "ChomosomePanel"
           defaultOperation={'COPY'}
           data= {v}
-        >{v.feature}<br/>{v.end-v.start} bp</Block>)
+        >{v.featureType}<br/>{v.end-v.start} bp</Block>)
         }
       </div>
     </div>;

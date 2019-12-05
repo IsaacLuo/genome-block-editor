@@ -25,6 +25,7 @@ export const AnnotationPartSchema = new Schema({
   len: Number,
   strand: String,
   sequence: String,
+  name: String,
   original: Boolean,
   origin: {
     type: Schema.Types.ObjectId,

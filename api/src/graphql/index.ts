@@ -10,6 +10,7 @@ export function useApolloServer(app:any) {
         start: Int
         end: Int
         strand: String
+        name: String
         original: Boolean
         origin: OriginPart
     }
@@ -24,6 +25,7 @@ export function useApolloServer(app:any) {
         end: Int
         len: Int
         strand: String
+        name: String
     }
 
     type Project {
@@ -61,6 +63,7 @@ export function useApolloServer(app:any) {
                 const {_id} = args;
                 console.log(args, context);
                 const result = await SourceChromosome.findById(_id).populate('parts').exec();
+                console.log(result)
                 return result;
             }
         },

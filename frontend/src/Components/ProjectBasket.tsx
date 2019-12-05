@@ -8,9 +8,14 @@ export interface IProps {
   pos: number;
 }
 
+const Corsor = () => <div
+  style={{width:1, height:100}}
+/>
+
 const Component = () => {
-  const {project} = useMappedState((state:IStoreState)=>({
+  const {project, projectCorsor} = useMappedState((state:IStoreState)=>({
     project: state.currentProject,
+    projectCorsor: state.projectCorsor,
   }));
   const dispatch = useDispatch();
   return <div 
@@ -33,18 +38,22 @@ const Component = () => {
       }}
     >
       {project.map((v,i)=>
-      <Block
-        key = {i}
-        blockId = {v.name}
-        pos = {i}
-        data = {v}
-        panelType = "ProjectBasket"
-        defaultOperation="MOVE"
-      >
-        {v.feature}
-        <br/>
-        {v.end-v.start} bp
-      </Block>)
+        <React.Fragment>
+          {i===projectCorsor && <Corsor/>}
+          <Block
+            key = {i}
+            blockId = {v.name}
+            pos = {i}
+            data = {v}
+            panelType = "ProjectBasket"
+            defaultOperation="MOVE"
+          >
+            {v.featureType}
+            <br/>
+            {v.end-v.start} bp
+          </Block>
+        </React.Fragment>
+        )
       }
     </div>;
 };

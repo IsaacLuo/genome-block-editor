@@ -6,7 +6,7 @@ declare interface IAction {
 declare interface IBlock {
   _id: string;
   name:string;
-  feature:string;
+  featureType:string;
   start:number;
   end:number;
   strand:string;
@@ -29,4 +29,5 @@ declare interface IStoreState {
   currentProject: IBlock[];
   chromosomeBlocks: IBlock[];
   sourceFile?: ISourceFile;
+  projectCorsor: number;
 }
