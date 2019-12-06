@@ -18,9 +18,9 @@ const Component = ({x,y,blockId, name, width, height, style, shape, onMouseMove,
   const dispatch = useDispatch();
   let block;
   const maxHeadLen = height / 3;
-  const headLen = width < maxHeadLen ? width/2 : maxHeadLen;
+  const headLen = width/3 < maxHeadLen ? width/3 : maxHeadLen;
   const bodyWidth = width - headLen;
-  let textOffset = 0;
+  let textOffset = 2;
   switch (shape) {
     case '+':
       block = <path 
@@ -33,7 +33,7 @@ const Component = ({x,y,blockId, name, width, height, style, shape, onMouseMove,
     case '-':
       block = <path 
         d={`M ${x+width} ${y} l ${-bodyWidth} 0 l ${-headLen} ${height/2} l ${headLen} ${height/2} l ${bodyWidth} 0 Z`}
-        style={style}
+        style={{...style, stroke:'#00f'}}
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}  
         />
@@ -61,7 +61,7 @@ const Component = ({x,y,blockId, name, width, height, style, shape, onMouseMove,
         <text 
           x={x+textOffset} 
           y={y+height/2} 
-          alignment-baseline="middle"
+          alignmentBaseline="middle"
           fontFamily="Inconsolata"
           fontSize="12"
         >

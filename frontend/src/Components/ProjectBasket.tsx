@@ -9,7 +9,12 @@ export interface IProps {
 }
 
 const Corsor = () => <div
-  style={{width:1, height:100}}
+  style={{
+    width:1, 
+    height:100,
+    backgroundColor: 'red',
+  }}
+
 />
 
 const Component = () => {

@@ -51,6 +51,16 @@ export const reducer = (state:IStoreState|undefined, action:IAction):IStoreState
         chromosomeBlocks: action.data.parts,
       }
     }
+    case 'ADD_NEW_BLOCK': {
+      const data = action.data;
+      const project = [...state.currentProject];
+        project.push(data);
+        console.log(project);
+      return {
+        ...state,
+        currentProject:project,
+      }
+    }
   }
   return state;
 }

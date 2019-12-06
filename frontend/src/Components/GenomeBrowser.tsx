@@ -16,7 +16,7 @@ const Component = () => {
   }));
 
   const [zoomLevel, setZoomLevel] = useState(128);
-  const [toolTipPos, setToolTopPos] = useState({x:-1, y:-1, text: ''});
+const [toolTipPos, setToolTopPos] = useState({x:-1, y:-1, text: <div/>});
 
   const zoom = (v:number) => v / zoomLevel;
   if(!sourceFile) {
@@ -91,17 +91,25 @@ const Component = () => {
                 name={v.name}
                 onMouseMove={(event)=>{
                   if (event.buttons === 0) {
-                    setToolTopPos({x:event.pageX+20, y:event.pageY+20, text:v.name});
+                    setToolTopPos({x:event.pageX+20, y:event.pageY+20, text:<div>
+                      {v.name}
+                      <br/>
+                      {v.featureType}
+                      <br/>
+                      {v.start} - {v.end} ({v.end-v.start} bp)
+                      </div>});
                   }
                 }}
-                onMouseLeave={()=>setToolTopPos({x:-1, y:-1, text: ''})}
+                onMouseLeave={()=>setToolTopPos({x:-1, y:-1, text: <div/>})}
               />
             </g>
           )
         }
       </g>
     </svg>
-    <div style={{position:'absolute', left:toolTipPos.x, top:toolTipPos.y, backgroundColor: "yellow"}}>{toolTipPos.text}</div>
+    <div style={{position:'absolute', left:toolTipPos.x, top:toolTipPos.y, backgroundColor: "yellow"}}>
+      {toolTipPos.text}
+    </div>
     </div></div>;
 };
 
