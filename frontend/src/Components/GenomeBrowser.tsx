@@ -34,7 +34,7 @@ const Component = () => {
       }
       if(zoom(features[i].start) >= rowLength[row]) {
         features[i].row = row;
-        rowLength[row] = zoom(features[i].end)+3;
+        rowLength[row] = zoom(features[i].end);
         break;
       } else {
         row++

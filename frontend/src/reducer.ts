@@ -55,9 +55,10 @@ export const reducer = (state:IStoreState|undefined, action:IAction):IStoreState
   return state;
 }
 
-export const defaultStoreState = {
+export const defaultStoreState : IStoreState = {
   moveHistory: [],
   currentProject: [],
   chromosomeBlocks: [],
   sourceFile: undefined,
+  projectCorsor: 0,
 };
