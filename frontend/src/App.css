@@ -28,13 +28,22 @@
   align-items: center;
 }
 .basket-panel {
+  box-sizing: border-box;
   width: 90%;
   border: solid 1px;
   padding: 20px;
+  height: 450px;
 }
 .file-panel {
   padding: 20px;
   height: 200px;
   width: 300px;
   overflow-y: scroll;
+}
+.project-basket {
+  box-sizing: border-box;
+  display:flex;
+  width: 90%;
+  border: solid 1px;
+  height: 200px;
 }

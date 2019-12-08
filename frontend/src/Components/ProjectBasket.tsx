@@ -42,7 +42,7 @@ const Component = () => {
           }
       }}
     >
-      {project.map((v,i)=>
+      {project.parts.map((v,i)=>
         <React.Fragment>
           {i===projectCorsor && <Corsor/>}
           <Block
@@ -53,6 +53,8 @@ const Component = () => {
             panelType = "ProjectBasket"
             defaultOperation="MOVE"
           >
+            {v.strand === '+' ? '--->' : v.strand === '-' ?  '<---': '----'}
+            <br/>
             {v.featureType}
             <br/>
             {v.end-v.start} bp

@@ -8,13 +8,13 @@ export interface IProps {
   height: number;
   blockId: string;
   style: any;
-  name: string;
+  annotationPart: IAnnotationPart;
   shape: string;
   onMouseMove?: (event: React.MouseEvent<any, MouseEvent>) => void;
   onMouseLeave?: (event: React.MouseEvent<any, MouseEvent>) => void;
 }
 
-const Component = ({x,y,blockId, name, width, height, style, shape, onMouseMove, onMouseLeave}:IProps) => {
+const Component = ({x,y,blockId, annotationPart, width, height, style, shape, onMouseMove, onMouseLeave}:IProps) => {
   const dispatch = useDispatch();
   let block;
   const maxHeadLen = height / 3;
@@ -53,11 +53,11 @@ const Component = ({x,y,blockId, name, width, height, style, shape, onMouseMove,
   }
   return (
     <g
-      onDoubleClick={()=>dispatch({type:'ADD_NEW_BLOCK', data: {id:blockId, name}})}
+      onDoubleClick={()=>dispatch({type:'ADD_NEW_BLOCK', data: annotationPart})}
     >
       {block}
-      {width > name.length*8 && 
-        name !== 'unknown' && 
+      {width > annotationPart.name.length*8 && 
+        annotationPart.name !== 'unknown' && 
         <text 
           x={x+textOffset} 
           y={y+height/2} 
@@ -65,7 +65,7 @@ const Component = ({x,y,blockId, name, width, height, style, shape, onMouseMove,
           fontFamily="Inconsolata"
           fontSize="12"
         >
-          {name}
+          {annotationPart.name}
         </text>
       }
     </g>

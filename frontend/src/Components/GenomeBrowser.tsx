@@ -16,7 +16,7 @@ const Component = () => {
   }));
 
   const [zoomLevel, setZoomLevel] = useState(128);
-const [toolTipPos, setToolTopPos] = useState({x:-1, y:-1, text: <div/>});
+  const [toolTipPos, setToolTopPos] = useState({x:-1, y:-1, text: <div/>});
 
   const zoom = (v:number) => v / zoomLevel;
   if(!sourceFile) {
@@ -82,13 +82,13 @@ const [toolTipPos, setToolTopPos] = useState({x:-1, y:-1, text: <div/>});
                 width={zoom(v.end-v.start)}
                 height={30}
                 blockId={v._id}
+                annotationPart={v}
                 shape={v.strand}
                 style={{
                   fill: calcFeatureColor(v.featureType),
                   stroke: 'black',
                   strokeWidth: 1,
                 }}
-                name={v.name}
                 onMouseMove={(event)=>{
                   if (event.buttons === 0) {
                     setToolTopPos({x:event.pageX+20, y:event.pageY+20, text:<div>

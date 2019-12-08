@@ -17,17 +17,45 @@ declare interface IFeature extends IBlock{
   row: number;
 }
 
+interface IAnnotationPart {
+  _id: any;
+  featureType: string;
+  species: string;
+  chrId: number;
+  chrName: string;
+  start: number;
+  end: number;
+  len: number;
+  strand: string;
+  name: string;
+  original: boolean;
+  origin?: string|IAnnotationPart;
+}
+
 declare interface ISourceFile {
   _id: string;
   name: string;
-  parts: IBlock[];
+  parts: IAnnotationPart[];
   len: number;
+}
+
+declare interface IProject {
+  _id: any;
+  name?: string,
+  version?: string,
+  parts: IAnnotationPart[],
+  owner?: IUser,
+  group: string,
+  permission: Number,
+  createdAt: Date,
+  updatedAt: Date,
+  history: any[],
 }
 
 declare interface IStoreState {
   moveHistory: Array<{id:string, posFrom:number, posTo:number}>;
-  currentProject: IBlock[];
-  chromosomeBlocks: IBlock[];
+  currentProject: IProject;
   sourceFile?: ISourceFile;
   projectCorsor: number;
 }
+

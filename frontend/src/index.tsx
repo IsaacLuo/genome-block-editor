@@ -7,7 +7,13 @@ import {StoreContext} from 'redux-react-hook';
 import {createStore} from 'redux';
 import {reducer} from './reducer';
 
-const store = createStore(reducer);
+// const store = createStore(reducer);
+/* eslint-disable no-underscore-dangle */
+const store = createStore(
+  reducer, /* preloadedState, */
+  (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__()
+);
+/* eslint-enable */
 
 ReactDOM.render(
   <StoreContext.Provider value={store}>

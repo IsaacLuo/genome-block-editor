@@ -53,8 +53,6 @@ const Component = ({children, blockId, pos, panelType, data, defaultOperation}:I
     >
       [{pos}] {blockId}
       <br/>
-      ------
-      <br/>
       {children}
     </div>
   );

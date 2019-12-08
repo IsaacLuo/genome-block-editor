@@ -1,20 +1,15 @@
 import * as React from 'react'
-import {useMappedState} from 'redux-react-hook';
+import {useDispatch, useMappedState} from 'redux-react-hook';
 
 const Component = () => {
   const {project} = useMappedState((state:IStoreState)=>({
     project: state.currentProject,
   }));
-  const sequence = project.map(v=>v.seq).join('');
-  return <div 
-      style={{
-        wordBreak: 'break-all',
-        textAlign:'left',
-        fontSize: 11,
-      }}
-    >
-      {sequence}
-    </div>;
+  const dispatch = useDispatch();
+
+  return <div>
+    
+  </div>;
 };
 
 export default Component
