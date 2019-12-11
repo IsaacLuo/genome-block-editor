@@ -45,19 +45,12 @@ export function useApolloServer(app:any) {
     strand: String
     name: String
     origin: ID
-
-    #will not use
-    #chrId: Int
-    #chrName: String
-    #start: Int
-    #end: Int
-    #original: Boolean
   }
 
   input ProjectInput {
     _id: ID
     name: String
-    parts: [PartInput]
+    parts: [PartInput!]
   }
 
   type SourceFile {
@@ -95,9 +88,7 @@ export function useApolloServer(app:any) {
 
       sourceFile: async (parent:any, args:any, context: any) => {
         const {_id} = args;
-        console.log(args, context);
         const result = await SourceChromosome.findById(_id).populate('parts').exec();
-        console.log(result)
         return result;
       }
     },
@@ -107,8 +98,8 @@ export function useApolloServer(app:any) {
         console.log(_id);
         return {code:200, success:true, message:'OK'}
       },
-      saveProject: async (parent:any, args:{_id?:string, name?:string, parts:any[]}, context: any) => {
-        const projectForm = args;
+      saveProject: async (parent:any, args:any, context: any) => {
+        const projectForm = args.project;
         let project = projectForm._id ? await Project.findById(projectForm._id).exec() : new Project({name: projectForm.name});
         project.parts = await Promise.all(
           projectForm.parts.map(async v=>{

@@ -31,6 +31,7 @@ const Component = () => {
         origin: part.origin && (part.origin as IAnnotationPart)._id ? (part.origin as IAnnotationPart)._id : part.origin 
       }))
     }
+    console.log(projectSaveForm);
     saveProject({variables: {project:projectSaveForm,}});
     console.log(data);
   }

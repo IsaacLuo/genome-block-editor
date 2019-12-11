@@ -51,6 +51,7 @@ interface IAnnotationPart {
   strand: string;
   original: boolean;
   origin?: string|IAnnotationPart;
+  sequence: string;
 }
 
 declare interface IProject {
