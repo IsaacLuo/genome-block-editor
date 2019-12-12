@@ -7,6 +7,8 @@ import ResultSequence from 'Components/ResultPanel'
 import ProjectOperationPanel from 'Components/ProjectOperationPanel'
 import { ApolloProvider } from '@apollo/react-hooks';
 import ApolloClient from 'apollo-boost';
+import 'antd/dist/antd.css';
+
 
 const client = new ApolloClient({
   uri: 'http://localhost:8000/graphql',

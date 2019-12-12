@@ -52,9 +52,9 @@ export const ProjectSchema = new Schema({
   },
   group: String,
   permission: Number,
-  createdAt: Date,
-  updatedAt: Date,
   history: [Schema.Types.ObjectId],
+}, {
+  timestamps: true
 });
 
 export interface IProjectModel extends IProject, Document{}

@@ -1,8 +1,9 @@
-import * as React from 'react'
+import React, { useState, useEffect } from 'react';
 import {useDispatch, useMappedState} from 'redux-react-hook';
 import ApolloClient from 'apollo-boost';
 import { gql } from "apollo-boost";
-import {useMutation} from '@apollo/react-hooks';
+import {useMutation, useQuery} from '@apollo/react-hooks';
+import { Modal, Button } from 'antd';
 
 const Component = () => {
   const {project, projectCorsor} = useMappedState((state:IStoreState)=>({
@@ -18,6 +19,31 @@ const Component = () => {
     }
   `;
   const [saveProject, {data}] = useMutation(SAVE_PROJECT);
+  const queryProjects = useQuery(gql`
+    {
+      projects{
+        _id
+        name
+        updatedAt
+      }
+    }
+  `);
+  const [openDialogVisible, setOpenDialogVisible] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+
+  const onClickOpenProject = async ()=>{
+    setOpenDialogVisible(true);
+    setConfirmLoading(false);
+    console.log(queryProjects.data);
+  }
+
+  const handleOpenDialogOk = async ()=>{
+    setConfirmLoading(true);
+
+    setOpenDialogVisible(false);
+  }
+
   const onClickSaveProject = ()=>{
     const projectSaveForm = {
       _id: project._id,
@@ -35,13 +61,29 @@ const Component = () => {
     saveProject({variables: {project:projectSaveForm,}});
     console.log(data);
   }
-
   const onClickExportGenbank = ()=>{
     dispatch({type:'EXPORT_GENBANK'});
   }
   return <React.Fragment>
-    <div><a onClick={onClickSaveProject}>save project</a></div> 
+    <div><a onClick={onClickOpenProject}>open project</a></div>
+    <div><a onClick={onClickSaveProject}>save project</a></div>
     <div><a onClick={onClickExportGenbank}>export genbank</a></div>
+
+    <Modal
+      title="Title"
+      visible={openDialogVisible}
+      onOk={handleOpenDialogOk}
+      confirmLoading={confirmLoading}
+    >
+    <p>{queryProjects.loading ? 
+      'loading': 
+      <div>
+        {queryProjects.data.projects.map(
+          (v:any, i:number)=><div key={i}>{v.name}</div>
+        )}
+      </div>
+    }</p>
+    </Modal>
   </React.Fragment>;
 };
 

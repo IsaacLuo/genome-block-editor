@@ -80,7 +80,13 @@ export function useApolloServer(app:any) {
 
   const resolvers = {
     Query: {
-      projects: () => [],
+      projects: async () => {
+        return await Project
+          .find({})
+          .select('_id name owner group permission createdAt updatedAt')
+          .exec();
+        
+      },
 
       sourceFiles: async () => {
         return await SourceChromosome.find({}).select('_id name len').exec();
