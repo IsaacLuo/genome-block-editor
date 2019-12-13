@@ -5,6 +5,8 @@ import FileList from 'Components/FileList'
 import GenomeBrowser from 'Components/GenomeBrowser'
 import ResultSequence from 'Components/ResultPanel'
 import ProjectOperationPanel from 'Components/ProjectOperationPanel'
+import OpenFileDialog from 'Components/OpenFileDialog'
+import SaveFileDialog from 'Components/SaveFileDialog'
 import { ApolloProvider } from '@apollo/react-hooks';
 import ApolloClient from 'apollo-boost';
 import 'antd/dist/antd.css';
@@ -36,6 +38,8 @@ const App: React.FC = () => {
         </div>
         <ResultSequence/>
       </div>
+      <OpenFileDialog/>
+      <SaveFileDialog/>
     </div>
     </ApolloProvider>
   );

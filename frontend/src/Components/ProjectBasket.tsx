@@ -42,7 +42,7 @@ const Component = () => {
           }
       }}
     >
-      {project.parts.map((v,i)=>
+      {project && project.parts.map((v,i)=>
         <React.Fragment key={i}>
           {i===projectCorsor && <Corsor/>}
           <Block

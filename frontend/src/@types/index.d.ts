@@ -52,10 +52,17 @@ declare interface IProject {
   history: any[],
 }
 
+declare interface IComponentVisibleState {
+  openFileDialogVisible: boolean;
+  saveFileDialogVisible: boolean;
+  saveFileDialogNewFile: boolean;
+}
+
 declare interface IStoreState {
   moveHistory: Array<{id:string, posFrom:number, posTo:number}>;
   currentProject: IProject;
   sourceFile?: ISourceFile;
   projectCorsor: number;
+  componentVisible: IComponentVisibleState;
 }
 
