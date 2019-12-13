@@ -11,7 +11,8 @@ import jwt from 'jsonwebtoken';
 import cors from 'koa-cors';
 import mongoose from 'mongoose';
 // import { graphqlKoa, graphiqlKoa } from 'graphql-server-koa'
-import {useApolloServer} from './graphql'
+import {useApolloServer} from './graphql';
+import serve from 'koa-static';
 
 const GUEST_ID = '000000000000000000000000';
 
@@ -21,7 +22,9 @@ const router = new Router();
 type Ctx = koa.ParameterizedContext<ICustomState, {}>;
 type Next = ()=>Promise<any>;
 
+
 app.use(cors({credentials: true}));
+app.use(serve('./public'));
 app.use(koaBody());
 middleware(app);
 

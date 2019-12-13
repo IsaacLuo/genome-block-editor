@@ -4,6 +4,7 @@ import ApolloClient from 'apollo-boost';
 import { gql } from "apollo-boost";
 import {useMutation, useQuery} from '@apollo/react-hooks';
 import { Modal, Button } from 'antd';
+import {backendURL} from '../conf'
 
 const Component = () => {
   const {project, projectCorsor} = useMappedState((state:IStoreState)=>({
@@ -11,14 +12,14 @@ const Component = () => {
     projectCorsor: state.projectCorsor,
   }));
   const dispatch = useDispatch();
-  const SAVE_PROJECT = gql`
-    mutation SaveProject($project: ProjectInput) {
-      saveProject(project: $project) {
+  const [exportProjectExec, exportProject] = useMutation(gql`
+    mutation ExportProject($projectId: ID) {
+      exportProject(projectId: $projectId) {
         success
+        _id
       }
     }
-  `;
-  const [saveProject, {data}] = useMutation(SAVE_PROJECT);
+  `);
   const queryProjects = useQuery(gql`
     {
       projects{
@@ -29,14 +30,30 @@ const Component = () => {
     }
   `);
 
-  const onClickExportGenbank = ()=>{
+  const onClickExportGenbank = async ()=>{
     dispatch({type:'EXPORT_GENBANK'});
+    await exportProjectExec({variables:{projectId:project._id}})
   }
+
+  if (exportProject.data && exportProject.data.exportProject.success) {
+    const fileURL = exportProject.data.exportProject._id
+    const a = document.createElement('a');
+    a.href = `${backendURL}/${fileURL}`;
+    a.target =  '_blank';
+    a.download = `test.gb`;
+    a.click();
+  }
+  
   return <React.Fragment>
     <div><a onClick={()=>dispatch({type:'SHOW_OPEN_FILE_DIALOG'})}>open project</a></div>
-    <div><a onClick={()=>dispatch({type:'SHOW_SAVE_FILE_DIALOG', data:{newFile: false}})}>save</a></div>
-    <div><a onClick={()=>dispatch({type:'SHOW_SAVE_FILE_DIALOG', data:{newFile: true}})}>save as...</a></div>
-    <div><a onClick={onClickExportGenbank}>export genbank</a></div>
+    
+    {project && project.parts.length > 0 && 
+      <React.Fragment>
+        <div><a onClick={()=>dispatch({type:'SHOW_SAVE_FILE_DIALOG', data:{newFile: false}})}>save</a></div>
+        <div><a onClick={()=>dispatch({type:'SHOW_SAVE_FILE_DIALOG', data:{newFile: true}})}>save as...</a></div>
+        <div><a onClick={onClickExportGenbank}>export genbank</a></div>
+      </React.Fragment>
+    }
   </React.Fragment>;
 };
 

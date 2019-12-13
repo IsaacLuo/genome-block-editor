@@ -70,3 +70,21 @@ declare interface ISourceChomosome {
   createdAt: Date,
   updatedAt: Date,
 }
+
+declare interface IProcess {
+  // processId: string;
+  // subProcessInst?: ChildProcessWithoutNullStreams;
+  program: string;
+  params: string[];
+  options?: {
+    cwd?: string,
+    env?: any,
+  }
+  // taskName: string;
+  // state: 'ready'| 'running' | 'done' | 'error';
+  // webSockets: Set<ws>;
+  // result: any;
+  // createdAt?: Date;
+  // startedAt?: Date;
+  // doneAt?: Date;
+}

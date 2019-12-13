@@ -1,5 +1,6 @@
 import {ApolloServer, gql} from 'apollo-server-koa'
 import { SourceChromosome, Project, AnnotationPart } from '../models';
+import {runExe} from '../runExe'
 
 export function useApolloServer(app:any) {
   const typeDefs = gql`
@@ -66,6 +67,13 @@ export function useApolloServer(app:any) {
     message: String!
   }
 
+  type MutationResultCreatedId {
+    code: String!
+    success: Boolean!
+    message: String!
+    _id: ID
+  }
+
   type Query {
     projects: [Project]
     project(_id: ID): Project
@@ -76,6 +84,7 @@ export function useApolloServer(app:any) {
   type Mutation {
     saveTestObject(_id:Int): MutationResult
     saveProject(project: ProjectInput): MutationResult
+    exportProject(projectId:ID): MutationResultCreatedId
   }
   `;
 
@@ -112,7 +121,7 @@ export function useApolloServer(app:any) {
       },
       saveProject: async (parent:any, args:any, context: any) => {
         const projectForm = args.project;
-        console.log(projectForm);
+        // console.log(projectForm);
         let project = projectForm._id ? await Project.findById(projectForm._id).exec() : new Project();
         project.parts = await Promise.all(
           projectForm.parts.map(async v=>{
@@ -133,7 +142,28 @@ export function useApolloServer(app:any) {
         project.name = projectForm.name
         await project.save();
         return {code:200, success:true, message:'OK'}
-      }
+      },
+
+      exportProject: async (parent:any, args:any, context: any) => {
+        const {projectId} = args;
+        let project = await Project.findById(projectId).populate('parts').exec();
+        if (!project) {
+          return {code:404, success:false, message:'no project found'}
+        }
+        let targetFileId:string|undefined;
+        await runExe(
+          {
+            program:'pipenv', 
+            params:['run', 'python', 'exportGB.py'], 
+            options:{cwd:'utility'}
+          }, 
+          project, 
+          (outputObj:any)=>{
+            targetFileId = outputObj.fileURL;
+        });
+        return {code:200, success:true, message:'OK', _id:targetFileId}
+      },
+
     }
   }
 
