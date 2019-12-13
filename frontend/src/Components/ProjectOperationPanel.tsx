@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {useDispatch, useMappedState} from 'redux-react-hook';
-import ApolloClient from 'apollo-boost';
 import { gql } from "apollo-boost";
-import {useMutation, useQuery} from '@apollo/react-hooks';
-import { Modal, Button } from 'antd';
+import {useLazyQuery, useQuery} from '@apollo/react-hooks';
 import {backendURL} from '../conf'
 
 const Component = () => {
@@ -12,36 +10,24 @@ const Component = () => {
     projectCorsor: state.projectCorsor,
   }));
   const dispatch = useDispatch();
-  const [exportProjectExec, exportProject] = useMutation(gql`
-    mutation ExportProject($projectId: ID) {
-      exportProject(projectId: $projectId) {
-        success
-        _id
-      }
+  const [queryProjectGanbankExec, queryProjectGanbank] = useLazyQuery(gql`
+    query ProjectGenbank($id: ID!){
+      projectGenbank (_id:$id)
     }
   `);
-  const queryProjects = useQuery(gql`
-    {
-      projects{
-        _id
-        name
-        updatedAt
-      }
-    }
-  `);
-
   const onClickExportGenbank = async ()=>{
-    dispatch({type:'EXPORT_GENBANK'});
-    await exportProjectExec({variables:{projectId:project._id}})
-  }
-
-  if (exportProject.data && exportProject.data.exportProject.success) {
-    const fileURL = exportProject.data.exportProject._id
+    await queryProjectGanbankExec({variables:{id:project._id}})
+    console.log(queryProjectGanbank);
+    const fileURL = queryProjectGanbank.data.projectGenbank
     const a = document.createElement('a');
     a.href = `${backendURL}/${fileURL}`;
     a.target =  '_blank';
     a.download = `test.gb`;
     a.click();
+  }
+
+  if (queryProjectGanbank.data && queryProjectGanbank.data.projectGenbank.success) {
+
   }
   
   return <React.Fragment>

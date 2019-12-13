@@ -23,18 +23,21 @@ blocks = project['parts']
 seq = ''
 features = []
 strand_dict = {"+":1, "-": -1, ".": 0}
+start = 0
 for block in blocks:
     seq += block['sequence']
+    end = start + len(block['sequence'])
     features.append(
         SeqFeature(
             FeatureLocation(
-                block['start'], 
-                block['end'], 
+                start,
+                end,
                 strand=strand_dict[block['strand']]
             ),
         type=block['featureType'],
         id=block['name'])
     )
+    start = end
 
 sequence = Seq(seq, DNAAlphabet())
 # features = [SeqFeature(FeatureLocation(1, 3, strand=1), type="CDS"), SeqFeature(FeatureLocation(5, 7, strand=-1), type="intron", id="someid",qualifiers={"quqqli":"bar"})]

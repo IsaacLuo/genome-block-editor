@@ -67,24 +67,17 @@ export function useApolloServer(app:any) {
     message: String!
   }
 
-  type MutationResultCreatedId {
-    code: String!
-    success: Boolean!
-    message: String!
-    _id: ID
-  }
-
   type Query {
     projects: [Project]
     project(_id: ID): Project
     sourceFiles: [SourceFile]
     sourceFile(_id: ID): SourceFile
+    projectGenbank(_id:ID): String
   }
 
   type Mutation {
     saveTestObject(_id:Int): MutationResult
     saveProject(project: ProjectInput): MutationResult
-    exportProject(projectId:ID): MutationResultCreatedId
   }
   `;
 
@@ -101,6 +94,26 @@ export function useApolloServer(app:any) {
       project: async (parent:any, args:any, context: any) => {
         const {_id} = args;
         return await Project.findById(_id).populate('parts').exec();
+      },
+
+      projectGenbank: async (parent:any, args:any, context: any) => {
+        const {_id} = args;
+        let project = await Project.findById(_id).populate('parts').exec();
+        if (!project) {
+          return {code:404, success:false, message:'no project found'}
+        }
+        let targetFileId:string|undefined;
+        await runExe(
+          {
+            program:'pipenv', 
+            params:['run', 'python', 'exportGB.py'], 
+            options:{cwd:'utility'}
+          }, 
+          project, 
+          (outputObj:any)=>{
+            targetFileId = outputObj.fileURL;
+        });
+        return targetFileId;
       },
 
       sourceFiles: async () => {
@@ -144,25 +157,25 @@ export function useApolloServer(app:any) {
         return {code:200, success:true, message:'OK'}
       },
 
-      exportProject: async (parent:any, args:any, context: any) => {
-        const {projectId} = args;
-        let project = await Project.findById(projectId).populate('parts').exec();
-        if (!project) {
-          return {code:404, success:false, message:'no project found'}
-        }
-        let targetFileId:string|undefined;
-        await runExe(
-          {
-            program:'pipenv', 
-            params:['run', 'python', 'exportGB.py'], 
-            options:{cwd:'utility'}
-          }, 
-          project, 
-          (outputObj:any)=>{
-            targetFileId = outputObj.fileURL;
-        });
-        return {code:200, success:true, message:'OK', _id:targetFileId}
-      },
+      // exportProject: async (parent:any, args:any, context: any) => {
+      //   const {projectId} = args;
+      //   let project = await Project.findById(projectId).populate('parts').exec();
+      //   if (!project) {
+      //     return {code:404, success:false, message:'no project found'}
+      //   }
+      //   let targetFileId:string|undefined;
+      //   await runExe(
+      //     {
+      //       program:'pipenv', 
+      //       params:['run', 'python', 'exportGB.py'], 
+      //       options:{cwd:'utility'}
+      //     }, 
+      //     project, 
+      //     (outputObj:any)=>{
+      //       targetFileId = outputObj.fileURL;
+      //   });
+      //   return {code:200, success:true, message:'OK', _id:targetFileId}
+      // },
 
     }
   }
