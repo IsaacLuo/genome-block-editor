@@ -5,7 +5,7 @@ import { gql } from "apollo-boost";
 import {useMutation, useQuery, useLazyQuery} from '@apollo/react-hooks';
 import { Modal, Button } from 'antd';
 
-const Component = () => {
+const OpenFileDialog = () => {
   const {openFileDialogVisible, project} = useMappedState((state:IStoreState)=>({
     openFileDialogVisible: state.componentVisible.openFileDialogVisible,
     project: state.currentProject,
@@ -64,6 +64,7 @@ const Component = () => {
       visible={openFileDialogVisible}
       onOk={handleOpenDialogOk}
       onCancel={handleOpenDialogOk}
+      destroyOnClose={true}
     >
     <div>{queryProjects.loading ? 
       'loading': 
@@ -78,4 +79,4 @@ const Component = () => {
     </div> : <div/>
 };
 
-export default Component
+export default OpenFileDialog

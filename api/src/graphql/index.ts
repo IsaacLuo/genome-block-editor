@@ -102,7 +102,7 @@ export function useApolloServer(app:any) {
         if (!project) {
           return {code:404, success:false, message:'no project found'}
         }
-        let targetFileId:string|undefined;
+        let targetFileContent:string|undefined;
         await runExe(
           {
             program:'pipenv', 
@@ -111,9 +111,9 @@ export function useApolloServer(app:any) {
           }, 
           project, 
           (outputObj:any)=>{
-            targetFileId = outputObj.fileURL;
+            targetFileContent = outputObj.content;
         });
-        return targetFileId;
+        return targetFileContent;
       },
 
       sourceFiles: async () => {

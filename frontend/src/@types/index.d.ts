@@ -56,6 +56,7 @@ declare interface IComponentVisibleState {
   openFileDialogVisible: boolean;
   saveFileDialogVisible: boolean;
   saveFileDialogNewFile: boolean;
+  exportGenbankDialogVisible: boolean;
 }
 
 declare interface IStoreState {

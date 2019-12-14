@@ -7,6 +7,7 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
       openFileDialogVisible: false,
       saveFileDialogVisible: false,
       saveFileDialogNewFile: true,
+      exportGenbankDialogVisible: false,
     }
   }
   
@@ -22,6 +23,12 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
     }
     case 'HIDE_SAVE_FILE_DIALOG': {
       return {...state, saveFileDialogVisible: false, saveFileDialogNewFile: true};
+    }
+    case 'SHOW_EXPORT_GENBANK_DIALOG': {
+      return {...state, exportGenbankDialogVisible: true};
+    }
+    case 'HIDE_EXPORT_GENBANK_DIALOG': {
+      return {...state, exportGenbankDialogVisible: false};
     }
     default:
       return state;
@@ -137,5 +144,6 @@ export const defaultStoreState : IStoreState = {
     openFileDialogVisible: false,
     saveFileDialogVisible: false,
     saveFileDialogNewFile: true,
+    exportGenbankDialogVisible: false,
   }
 };
