@@ -3,13 +3,14 @@ services:
   api:
     container_name: gbe-api
     ports:
-      - "5000:5000"
+      - "8000:8000"
     build: ./api
     working_dir: /app
     # command: ['pipenv', 'run', 'python', 'src/run.py']
     # environment:
     #   - GUNICORN_CMD_ARGS="--chdir=src"
-    command: ['gunicorn', '-b 0.0.0.0:5000','src.run:app']
+    # command: ['gunicorn', '-b 0.0.0.0:5000','src.run:app']
+    command: ['yarn', 'run', 'production']
     restart: always
     network_mode: bridge
 

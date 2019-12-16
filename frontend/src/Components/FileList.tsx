@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from "redux-react-hook";
 import axios from 'axios';
-import { backendURL } from 'conf';
+import conf from 'conf';
 import ApolloClient from 'apollo-boost';
 import { gql } from "apollo-boost";
 
 const client = new ApolloClient({
-  uri: 'http://localhost:8000/graphql',
+  uri: `${conf.backendURL}/graphql`,
 });
 
 const Component = () => {

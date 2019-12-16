@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {useDispatch, useMappedState} from 'redux-react-hook';
 import { gql } from "apollo-boost";
 import {useLazyQuery, useQuery} from '@apollo/react-hooks';
-import {backendURL} from '../conf'
 import OpenFileDialog from 'Components/OpenFileDialog'
 import SaveFileDialog from 'Components/SaveFileDialog'
 import ExportGenbankDialog from 'Components/ExportGenbankDialog'
