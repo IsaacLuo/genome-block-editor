@@ -9,5 +9,8 @@ WORKDIR /app/utility
 RUN pipenv install
 WORKDIR /app
 RUN yarn run build
-CMD ["yarn", "run production"]
+ENTRYPOINT []
+ENV NODE_ENV=production
+CMD ["node", "build/src/index.js"]
+
 

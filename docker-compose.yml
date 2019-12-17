@@ -19,7 +19,7 @@ services:
     build: ./frontend
     restart: always
     ports:
-      - "1880:80"
+      - "10080:80"
     links:
       - api
     depends_on:
