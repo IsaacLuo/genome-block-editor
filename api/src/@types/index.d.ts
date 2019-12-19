@@ -88,3 +88,10 @@ declare interface IProcess {
   // startedAt?: Date;
   // doneAt?: Date;
 }
+
+declare interface IProjectFolder {
+  _id: any;
+  name: String;
+  subFolders: any[];
+  projects: IProject[];
+}

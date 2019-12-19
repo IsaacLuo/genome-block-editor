@@ -46,27 +46,6 @@ export const ProjectSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'AnnotationPart',
   }],
-  owner: {
-    type:Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  group: String,
-  permission: Number,
-  history: [Schema.Types.ObjectId],
-}, {
-  timestamps: true
-});
-
-export interface IProjectModel extends IProject, Document{}
-export const Project:Model<IProjectModel> = mongoose.model('Project', ProjectSchema, 'projects');
-
-export const SourceChromosomeSchema = new Schema({
-  name: String,
-  version: String,
-  parts: [{
-    type: Schema.Types.ObjectId,
-    ref: 'AnnotationPart',
-  }],
   len: Number,
   owner: {
     type:Schema.Types.ObjectId,
@@ -74,9 +53,26 @@ export const SourceChromosomeSchema = new Schema({
   },
   group: String,
   permission: Number,
-  createdAt: Date,
-  updatedAt: Date,
+  history: [Schema.Types.ObjectId],
+  ctype: String,
+}, {
+  timestamps: true
 });
 
-export interface ISourceChomosomeModel extends ISourceChomosome, Document{}
-export const SourceChromosome:Model<ISourceChomosomeModel> = mongoose.model('SourceChomosome', SourceChromosomeSchema, 'source_chromosomes');
+export interface IProjectModel extends IProject, Document{}
+export const Project:Model<IProjectModel> = mongoose.model('Project', ProjectSchema, 'projects');
+
+export const ProjectFolderSchema = new Schema({
+  name: String,
+  subFolders: [{
+    type: Schema.Types.ObjectId,
+    ref: 'ProjectFolder',
+  }],
+  projects: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Project',
+  }]
+})
+
+export interface IProjectFolderModel extends IProjectFolder, Document{}
+export const ProjectFolder:Model<IProjectFolderModel> = mongoose.model('ProjectFolder', ProjectFolderSchema, 'project_folders');
