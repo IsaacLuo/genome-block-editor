@@ -3,40 +3,37 @@ import re
 import json
 import os.path
 import urllib
+from fasta_db import FastaDB
 
-def read_external_fasta(file_name):
-    fasta = {}
-    with open(file_name) as fp:
-        lines = fp.read().splitlines()
-        current_fasta = ''
-        for line in lines:
-            if line[0] == '>':
-                current_fasta = line[1:]
-            elif len(line) > 5:
-                fasta[current_fasta] = line
-    return fasta
+def rc(seq):
+    d = {'a':'t', 't':'a', 'c':'g', 'g':'c', 'A':'T', 'T':'A', 'C':'G', 'G':'C', 'n':'n', 'N':'N'}
+    return ''.join([d[x] for x in list(seq[::-1])])
 
 def read_gff(gff_file_name, fasta_file_name = None):
-    fasta = {}
-    if fasta_file_name:
-        fasta = read_external_fasta(fasta_file_name)
-        external_fasta = True
-    else:
-        external_fasta = False
+    fasta_db = FastaDB()
 
-    f = open(gff_file_name)
-    fastaSection = False
-    records = []
-    contigs = []
-    
-    currentFasta = ''
-    sequence = ''
-    for line in f.readlines():
-        if not external_fasta and re.match('##FASTA', line):
-            fastaSection = True
-        if line[0] == '#':
-            continue
-        if not fastaSection:
+    if not fasta_file_name:
+        # try to find fasta in gff file
+        fasta_file_name = os.path.splitext(gff_file_name)[0] + '.fa'
+        fpw = None
+        with open(gff_file_name) as fp:
+            for line in fp:
+                if re.match('##FASTA', line):
+                    fpw = open(fasta_file_name, 'w')
+                    continue
+                if fpw:
+                    fpw.write(line)
+        if fpw == None:
+            raise Exception('can not find fasta')
+
+    fasta_db.set_file(fasta_file_name)
+
+    with open(gff_file_name) as fp:
+        for line in fp:
+            if line[0] == '#':
+                continue
+            elif re.match('##FASTA', line):
+                break
             segment = re.split('\t', line)
             attributesString = re.split('\n|;', segment[8])
             attributes = {}
@@ -44,6 +41,14 @@ def read_gff(gff_file_name, fasta_file_name = None):
                 e = s.split('=')
                 if len(e) >= 2 :
                     attributes[e[0]] = urllib.parse.unquote(e[1])
+            seq_name = segment[0]
+            start = int(segment[3])-1
+            end =  int(segment[4])
+            strand = segment[6]
+            sequence = fasta_db.find(seq_name, start, end)
+            if strand == '-':
+                sequence = rc(sequence)
+
             record = {
                 'seqName': segment[0],
                 'source': segment[1],
@@ -54,22 +59,6 @@ def read_gff(gff_file_name, fasta_file_name = None):
                 'strand': segment[6],
                 'frame': segment[7],
                 'attribute': attributes,
+                'sequence': sequence,
                 }
-            if record['feature'] == 'contig':
-                contigs.append(record)
-            else:
-                records.append(record)
-        else:
-            if re.match(r'^>', line):
-                print(line)
-                if currentFasta != '':
-                    fasta[currentFasta]=sequence
-                currentFasta = re.findall('[a-zA-Z0-9]+', line[1:])[0]
-                sequence = ''
-            else:
-                sequence += re.match(r'\S+', line).group()
-    else:
-        fasta[currentFasta]=sequence
-    f.close()
-    
-    return {'contigs': contigs, 'records': records, 'fasta': fasta}
+            yield record
