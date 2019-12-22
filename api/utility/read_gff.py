@@ -30,10 +30,10 @@ def read_gff(gff_file_name, fasta_file_name = None):
 
     with open(gff_file_name) as fp:
         for line in fp:
-            if line[0] == '#':
-                continue
-            elif re.match('##FASTA', line):
+            if re.match('##FASTA', line):
                 break
+            elif line[0] == '#':
+                continue
             segment = re.split('\t', line)
             attributesString = re.split('\n|;', segment[8])
             attributes = {}
@@ -45,9 +45,12 @@ def read_gff(gff_file_name, fasta_file_name = None):
             start = int(segment[3])-1
             end =  int(segment[4])
             strand = segment[6]
-            sequence = fasta_db.find(seq_name, start, end)
-            if strand == '-':
-                sequence = rc(sequence)
+            if end - start > 15728640: # 15MB
+                sequence = None
+            else:
+                sequence = fasta_db.find(seq_name, start, end)
+                if strand == '-':
+                    sequence = rc(sequence)
 
             record = {
                 'seqName': segment[0],
