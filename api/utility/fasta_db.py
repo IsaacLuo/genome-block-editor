@@ -5,7 +5,7 @@ class FastaDB:
     seq_index = {}
 
     def set_file(self, file_name):
-        self.file_obj = open(file_name)
+        self.file_obj = open(file_name, 'rb')
         self.cache_seq_name = None
         self.cache_seq = None
         self.build_index()
@@ -16,13 +16,14 @@ class FastaDB:
         self.file_obj.seek(0)
         it = 0
         seq_name = ''
-        for line in self.file_obj:
+        for line_raw in self.file_obj:
+            line = line_raw.decode('utf-8').strip()
             if line[0] == '>':
-                seq_name = line[1:-1].strip()
+                seq_name = line[1:]
             elif seq_name not in self.seq_index:
                 self.seq_index[seq_name] = it
                 print(seq_name, it)
-            it += len(line)
+            it += len(line_raw)
 
     def check_file_object(self):
         if self.file_obj == None:
@@ -38,13 +39,14 @@ class FastaDB:
             print('caching ', seq_name)
             # c = 0
             while True:
-                line = self.file_obj.readline()
-                if line[0] == '>' or not line:
+                line_raw = self.file_obj.readline()
+                if not line_raw:
+                    break
+                line = line_raw.decode('utf-8').strip()
+                if line[0] == '>':
                     break
                 else:
-                    seq.append(line.strip())
-                    # print('c=', c)
-                    # c+=len(line)
+                    seq.append(line)
             self.cached_seq_name = seq_name
             self.cache_seq = ''.join(seq)
             return self.cache_seq

@@ -2,6 +2,7 @@ import pymongo
 import json
 import sys
 import os
+import shutil
 import re
 from bson.objectid import ObjectId
 
@@ -28,6 +29,11 @@ def main():
     Project.delete_many({})
     print('deleting Parts')
     Parts.delete_many({})
+    print('deleting seq files')
+    sequence_dir = os.path.abspath(os.path.join(os.path.curdir,'..','public', 'sequences'))
+    if os.path.isdir(sequence_dir):
+        shutil.rmtree(sequence_dir)
+    os.mkdir(sequence_dir)
     print('done')
 
 if __name__ == "__main__":

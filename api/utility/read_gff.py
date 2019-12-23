@@ -3,35 +3,75 @@ import re
 import json
 import os.path
 import urllib
-from fasta_db import FastaDB
+# from fasta_db import FastaDB
+import uuid
 
 def rc(seq):
     d = {'a':'t', 't':'a', 'c':'g', 'g':'c', 'A':'T', 'T':'A', 'C':'G', 'G':'C', 'n':'n', 'N':'N'}
     return ''.join([d[x] for x in list(seq[::-1])])
 
 class GFFReader:
-    def __init__(self, gff_file_name, fasta_file_name = None):
+    def __init__(self, gff_file_name, fasta_file_name = None, **kwargs):
         if not fasta_file_name:
             # try to find fasta in gff file
             fasta_file_name = os.path.splitext(gff_file_name)[0] + '.fa'
-            fpw = None
             with open(gff_file_name) as fp:
-                for line in fp:
+                while True:
+                    line = fp.readline()
+                    if not line:
+                        break
                     if re.match('##FASTA', line):
-                        fpw = open(fasta_file_name, 'w')
-                        continue
-                    if fpw:
-                        fpw.write(line)
-            if fpw == None:
-                raise Exception('can not find fasta')
+                        self.file_dict = self.convert_sequence_file(fp, kwargs['sequence_dir'])
+                        break
         
+        else:
+            with open(fasta_file_name) as fp:
+                self.file_dict = self.convert_sequence_file(fp, kwargs['sequence_dir'])
+                    
         self.gff_file_name = gff_file_name
         self.fasta_file_name = fasta_file_name
-        self.fasta_db = FastaDB()
-        self.fasta_db.set_file(fasta_file_name)
+        self.used_chr = set()
+        self.dst_folder = kwargs['sequence_dir']
 
-    def get_fasta_db(self):
-        return self.fasta_db
+    def convert_sequence_file(self, file_obj, dst_folder):
+        seq_name = None
+        seq = []
+
+        file_dict = {}
+
+        print('converting fasta')
+        count = 0
+        while True:
+            line = file_obj.readline()
+            if not line:
+                if seq_name:
+                    file_name = str(uuid.uuid4())
+                    with open(os.path.join(dst_folder, file_name), 'w') as fpw:
+                        for s in seq:
+                            fpw.write(s)
+                    file_dict[seq_name] = file_name
+                    seq = []
+                break
+            if line[0] == '>':
+                if seq_name:
+                    file_name = str(uuid.uuid4())
+                    with open(os.path.join(dst_folder, file_name), 'w') as fpw:
+                        for s in seq:
+                            fpw.write(s)
+                    file_dict[seq_name] = file_name
+                    seq = []
+                seq_name = line[1:].strip()
+                count+=1
+                print('imported {} fasta records                          '.format(count), end='\r')
+            else:
+                seq.append(line)
+        
+        print('\nimported done')
+        
+        return file_dict
+
+    # def get_fasta_db(self):
+    #     return self.fasta_db
 
     def read_gff(self):
         with open(self.gff_file_name) as fp:
@@ -51,13 +91,14 @@ class GFFReader:
                 start = int(segment[3])-1
                 end =  int(segment[4])
                 strand = segment[6]
-                if end - start > 15728640: # 15MB
-                    sequence = None
-                else:
-                    sequence = self.fasta_db.find(seq_name, start, end)
-                    if strand == '-':
-                        sequence = rc(sequence)
+                # if end - start > 15728640: # 15MB
+                #     sequence = None
+                
+                # sequence = self.fasta_db.find(seq_name, start, end)
+                # if strand == '-':
+                #     sequence = rc(sequence)
 
+                self.used_chr.add(seq_name)
                 record = {
                     'seqName': segment[0],
                     'source': segment[1],
@@ -68,6 +109,11 @@ class GFFReader:
                     'strand': segment[6],
                     'frame': segment[7],
                     'attribute': attributes,
-                    'sequence': sequence,
+                    'chrFileName': self.file_dict[seq_name]
+                    # 'sequence': sequence,
                     }
                 yield record
+
+            for key in self.file_dict.keys():
+                if key not in self.used_chr:
+                    os.remove(os.path.join(self.dst_folder, key))

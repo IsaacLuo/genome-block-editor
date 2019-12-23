@@ -5,6 +5,7 @@ import os
 import re
 from bson.objectid import ObjectId
 from read_gff import GFFReader
+import shutil
 
 strand_dict={"+":1, "-":-1, ".":0}
 
@@ -22,6 +23,8 @@ db = client[mongo_db]
 ProjectFolder = db['project_folders']
 Project = db['projects']
 Parts = db['annotation_parts']
+
+sequence_dir = os.path.abspath(os.path.join(os.path.curdir,'..','public', 'sequences'))
 
 def search_folder(root_folder, root_folder_name):
     folders = []
@@ -53,8 +56,12 @@ def import_project(file_path, project_name):
     chr_count = 0
     seq_dict = {}
 
-    gff_reader = GFFReader(file_path, fasta_file_name)
+    gff_reader = GFFReader(file_path, fasta_file_name, sequence_dir=sequence_dir, db=db)
+    count = 0
     for record in gff_reader.read_gff():
+        count+=1
+        if count%100 == 0:
+            print('imported {} records                          '.format(count), end='\r')
         name = 'unknown'
         if 'ID' in record['attribute']:
             name = record['attribute']['ID']
@@ -70,6 +77,7 @@ def import_project(file_path, project_name):
                 "len": record['end'],
                 "chrId": chr_count,
                 "parts_raw": [],
+                "chrFileName": record['chrFileName'],
                 "original": True,
             }
             chr_count+=1
@@ -87,8 +95,8 @@ def import_project(file_path, project_name):
                 "end": record['end'],
                 "strand": strand_dict[record['strand']],
                 "attribute": record['attribute'],
-                "sequence": record['sequence'],
                 "name": name,
+                "chrFileName": record['chrFileName'],
                 "original": True,
             })
             if insert_result.acknowledged:
@@ -99,11 +107,24 @@ def import_project(file_path, project_name):
                     "start": record['start'],
                     "end": record['end'],
                     "name": name,
+                    "chrFileName": record['chrFileName'],
                 })
             else:
                 raise Exception('failed insert parts')
-    
-    fasta_db = gff_reader.get_fasta_db()
+
+    def build_index(self):
+        self.check_file_object()
+        self.file_obj.seek(0)
+        it = 0
+        seq_name = ''
+        for line_raw in self.file_obj:
+            line = line_raw.decode('utf-8').strip()
+            if line[0] == '>':
+                seq_name = line[1:]
+            elif seq_name not in self.seq_index:
+                self.seq_index[seq_name] = it
+                print(seq_name, it)
+            it += len(line_raw)
 
     for k in seq_dict.keys():
         project = seq_dict[k]
@@ -117,25 +138,8 @@ def import_project(file_path, project_name):
         #fill parts from parts_raw and fill empty area
         parts = []
         end_pos_of_unknown = 0
+
         for i, p in enumerate(parts_raw):
-            # if i==0 and p['start'] > 0:
-            #     insert_result = Parts.insert_one({
-            #         "featureType": 'unknown',
-            #         "chrName": p['chrName'],
-            #         "chrId": p['chrId'],
-            #         "start": 0,
-            #         "end": p['start'],
-            #         "strand": 0,
-            #         "sequence": fasta_db.find(p['chrName'], 0, p['start']),
-            #         "name": 'unknown',
-            #         "original": True,
-            #     })
-            #     end_pos_of_unknown = p['end']
-            #     if insert_result.acknowledged:
-            #         parts.append(insert_result.inserted_id)
-            #     else:
-            #         raise Exception('failed insert parts')
-                
             if p['start']> end_pos_of_unknown:
                 insert_result = Parts.insert_one({
                     "featureType": 'unknown',
@@ -144,14 +148,18 @@ def import_project(file_path, project_name):
                     "start": end_pos_of_unknown,
                     "end": p['start'],
                     "strand": 0,
-                    "sequence": fasta_db.find(p['chrName'], end_pos_of_unknown, p['start']),
                     "name": 'unknown',
+                    "chrFileName": p['chrFileName'],
                     "original": True,
                 })
                 if insert_result.acknowledged:
                     parts.append(insert_result.inserted_id)
+                    
                 else:
                     raise Exception('failed insert parts')
+                count+=1
+                if count%100 == 0:
+                    print('generated {} records                          '.format(count), end='\r')
             
             parts.append(p['_id'])
             if end_pos_of_unknown < p['end']:
@@ -166,8 +174,8 @@ def import_project(file_path, project_name):
                 "start": end_pos_of_unknown,
                 "end": project['len'],
                 "strand": 0,
-                "sequence": fasta_db.find(p['chrName'], end_pos_of_unknown, project['len']),
                 "name": 'unknown',
+                "chrFileName": p['chrFileName'],
                 "original": True,
             })
             if insert_result.acknowledged:
@@ -175,12 +183,15 @@ def import_project(file_path, project_name):
             else:
                 raise Exception('failed insert parts')
 
+        print('generated {} records                          '.format(count))
+
 
         insert_result = Project.insert_one({
             "name": project['name'],
             "version": project['version'],
             "parts": parts,
             "len": project['len'],
+            "chrFileName": project['chrFileName'],
             "ctype": "source",
         })
         print('project ', project['name'], len(parts))
