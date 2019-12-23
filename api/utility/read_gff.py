@@ -103,10 +103,10 @@ class GFFReader:
                     'seqName': segment[0],
                     'source': segment[1],
                     'feature': segment[2],
-                    'start': int(segment[3])-1,
-                    'end': int(segment[4]),
+                    'start': start,
+                    'end': end,
                     'score': segment[5],
-                    'strand': segment[6],
+                    'strand': strand,
                     'frame': segment[7],
                     'attribute': attributes,
                     'chrFileName': self.file_dict[seq_name]
@@ -116,4 +116,4 @@ class GFFReader:
 
             for key in self.file_dict.keys():
                 if key not in self.used_chr:
-                    os.remove(os.path.join(self.dst_folder, key))
+                    os.remove(os.path.join(self.dst_folder, self.file_dict[key]))

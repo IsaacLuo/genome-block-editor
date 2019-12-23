@@ -5,6 +5,9 @@ import os
 import shutil
 import re
 from bson.objectid import ObjectId
+import pathlib
+
+
 
 strand_dict={"+":1, "-":-1, ".":0}
 
@@ -33,7 +36,8 @@ def main():
     sequence_dir = os.path.abspath(os.path.join(os.path.curdir,'..','public', 'sequences'))
     if os.path.isdir(sequence_dir):
         shutil.rmtree(sequence_dir)
-    os.mkdir(sequence_dir)
+    # os.mkdir(sequence_dir)
+    pathlib.Path(sequence_dir).mkdir(parents=True, exist_ok=True)
     print('done')
 
 if __name__ == "__main__":
