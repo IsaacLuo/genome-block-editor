@@ -23,7 +23,7 @@ export const AnnotationPartSchema = new Schema({
   start: Number,
   end: Number,
   len: Number,
-  strand: String,
+  strand: Number,
   sequence: String,
   name: String,
   original: Boolean,

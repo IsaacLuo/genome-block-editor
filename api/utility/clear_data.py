@@ -4,7 +4,6 @@ import sys
 import os
 import re
 from bson.objectid import ObjectId
-from read_gff import read_gff
 
 strand_dict={"+":1, "-":-1, ".":0}
 

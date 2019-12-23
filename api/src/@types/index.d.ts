@@ -40,7 +40,7 @@ interface IAnnotationPart {
   chrName: string;
   start: number;
   end: number;
-  strand: string;
+  strand: number;
   name: string;
   original: boolean;
   origin?: string|IAnnotationPart;

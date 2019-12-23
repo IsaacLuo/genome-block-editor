@@ -22,7 +22,6 @@ project = json.loads(inp)
 blocks = project['parts']
 seq = ''
 features = []
-strand_dict = {"+":1, "-": -1, ".": 0}
 start = 0
 for block in blocks:
     seq += block['sequence']
@@ -32,7 +31,7 @@ for block in blocks:
             FeatureLocation(
                 start,
                 end,
-                strand=strand_dict[block['strand']]
+                strand=block['strand']
             ),
         type=block['featureType'],
         id=block['name'])

@@ -1,5 +1,5 @@
 import {ApolloServer, gql} from 'apollo-server-koa'
-import { SourceChromosome, Project, AnnotationPart } from '../models';
+import { Project, AnnotationPart } from '../models';
 import {runExe} from '../runExe'
 
 export function useApolloServer(app:any) {
@@ -10,7 +10,7 @@ export function useApolloServer(app:any) {
     featureType: String
     start: Int
     end: Int
-    strand: String
+    strand: Int
     name: String
     original: Boolean
     origin: OriginPart
@@ -25,7 +25,7 @@ export function useApolloServer(app:any) {
     start: Int
     end: Int
     len: Int
-    strand: String
+    strand: Int
     name: String
   }
 
@@ -43,7 +43,7 @@ export function useApolloServer(app:any) {
     featureType: String
     species: String
     len: Int
-    strand: String
+    strand: Int
     name: String
     origin: ID
   }
@@ -117,12 +117,12 @@ export function useApolloServer(app:any) {
       },
 
       sourceFiles: async () => {
-        return await SourceChromosome.find({}).select('_id name len').exec();
+        return await Project.find({ctype:'source'}).select('_id name len').sort({name:1}).exec();
       },
 
       sourceFile: async (parent:any, args:any, context: any) => {
         const {_id} = args;
-        const result = await SourceChromosome.findById(_id).populate('parts').exec();
+        const result = await Project.findById(_id).populate('parts').exec();
         return result;
       }
     },

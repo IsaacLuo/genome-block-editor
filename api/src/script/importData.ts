@@ -1,10 +1,7 @@
 /// <reference path="../@types/index.d.ts" />
-
-import conf from '../../conf' 
-import files from './files.json'
-import gff from './BY4741.json'
+import conf from '../../conf'
 import mongoose from 'mongoose';
-import {Project, AnnotationPart, SourceChromosome} from '../models';
+import {Project, AnnotationPart, IAnnotationPartModel} from '../models';
 
 declare interface IAction {
   type: string;
@@ -48,7 +45,7 @@ interface IAnnotationPart {
   chrName: string;
   start: number;
   end: number;
-  strand: string;
+  strand: number;
   original: boolean;
   origin?: string|IAnnotationPart;
   sequence: string;
@@ -100,31 +97,36 @@ async function main() {
     
   }
 
-  await AnnotationPart.deleteMany({}).exec();
-  await Project.deleteMany({}).exec();
-  await SourceChromosome.deleteMany({}).exec();
-
   console.log('start import');
-
   const allPromises:any[] = [];
-
   const now = new Date();
-  for (const chrName in files) {
-    const chrFile = files[chrName];
-    const len = gff.fasta[chrName].length;
-    if (chrFile.attribute && chrFile.attribute.Alias) {
-      chrFile.name = chrFile.attribute.Alias;
-    }
-    const parts = await AnnotationPart.create(chrFile);
-    await SourceChromosome.create({
-      name: chrName,
-      parts,
-      len,
-      group: 'all',
-      permission: 0x666,
-      createdAt: now,
-      updatedAt: now,
-    })
+  // const projects = await Project.find({ctype:'source'}).exec();
+  // for (const project of projects) {
+  //   const partListP = project.parts
+  //   .map(async (partId) => AnnotationPart.findOne({_id:partId}).select('_id start end').exec())
+  //   const partList = (await Promise.all(partListP)) as IAnnotationPartModel[];
+  //   partList.sort((a,b)=>a.start < b.start? -1: a.start > b.start? 1 : 0);
+  //   const newPartList = [];
+  //   const partListLen = partList.length;
+  //   for (const i in partList) {
+  //     if (i === '0' && partList[i].start > 0) {
+  //       AnnotationPart.create({
+  //         featureType: 'unknown',
+  //         chrId: partList[i].chrId,
+  //         chrName: partList[i].chrName,
+  //         start: 0,
+  //         end: partList[i].start,
+  //         strand: 0,
+  //         original: true,
+  //         sequence: string,
+  //       })
+  //       newPartList.push({
+          
+  //       })
+  //     }
+  //   }
+  //   project.parts = partList.map(v=>v._id)
+  //   await project.save();
   }
   console.log('finish')
 }
