@@ -9,7 +9,7 @@ export interface IProps {
   blockId: string;
   style: any;
   annotationPart: IAnnotationPart;
-  shape: string;
+  shape: number;
   onMouseMove?: (event: React.MouseEvent<any, MouseEvent>) => void;
   onMouseLeave?: (event: React.MouseEvent<any, MouseEvent>) => void;
 }
@@ -22,7 +22,7 @@ const Component = ({x,y,blockId, annotationPart, width, height, style, shape, on
   const bodyWidth = width - headLen;
   let textOffset = 2;
   switch (shape) {
-    case '+':
+    case 1:
       block = <path 
         d={`M ${x} ${y} l ${bodyWidth} 0 l ${headLen} ${height/2} l ${-headLen} ${height/2} l ${-bodyWidth} 0 Z`}
         style={style}
@@ -30,7 +30,7 @@ const Component = ({x,y,blockId, annotationPart, width, height, style, shape, on
         onMouseLeave={onMouseLeave}  
         />
       break;
-    case '-':
+    case -1:
       block = <path 
         d={`M ${x+width} ${y} l ${-bodyWidth} 0 l ${-headLen} ${height/2} l ${headLen} ${height/2} l ${bodyWidth} 0 Z`}
         style={{...style, stroke:'#00f'}}

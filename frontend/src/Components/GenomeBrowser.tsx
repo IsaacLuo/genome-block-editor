@@ -35,6 +35,7 @@ const Component = () => {
       if(zoom(features[i].start) >= rowLength[row]) {
         features[i].row = row;
         rowLength[row] = zoom(features[i].end);
+        // console.log(features[i].name, features[i].row);
         break;
       } else {
         row++
@@ -78,9 +79,9 @@ const Component = () => {
             (v,i)=><g key={i}>
               <ArrowFeature
                 x={zoom(v.start)}
-                y={v.row*33}
+                y={v.row*33 + (v.featureType === 'unknown' ? 10 : 0)}
                 width={zoom(v.end-v.start)}
-                height={30}
+                height={v.featureType === 'unknown' ? 10 : 30}
                 blockId={v._id}
                 annotationPart={v}
                 shape={v.strand}

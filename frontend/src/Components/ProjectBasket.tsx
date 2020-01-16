@@ -53,7 +53,7 @@ const Component = () => {
             panelType = "ProjectBasket"
             defaultOperation="MOVE"
           >
-            {v.strand === '+' ? '--->' : v.strand === '-' ?  '<---': '----'}
+            {v.strand === 1 ? '--->' : v.strand === -1 ?  '<---': '----'}
             <br/>
             {v.featureType}
             <br/>

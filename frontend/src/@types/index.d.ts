@@ -9,7 +9,7 @@ declare interface IBlock {
   featureType:string;
   start:number;
   end:number;
-  strand:string;
+  strand:number;
   seq:string;
 }
 
@@ -26,7 +26,7 @@ interface IAnnotationPart {
   start: number;
   end: number;
   len: number;
-  strand: string;
+  strand: number;
   name: string;
   original: boolean;
   origin?: string|IAnnotationPart;
