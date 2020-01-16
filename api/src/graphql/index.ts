@@ -118,11 +118,15 @@ export function useApolloServer(app:any) {
 
       sourceFiles: async () => {
         return await Project.find({ctype:'source'}).select('_id name len').sort({name:1}).exec();
+        // return await Project.find({ctype:'source'}).select('_id name len').exec();
       },
 
       sourceFile: async (parent:any, args:any, context: any) => {
         const {_id} = args;
+        const start = Date.now()
         const result = await Project.findById(_id).populate('parts').exec();
+        const time = Date.now() - start;
+        console.log('time = ', time);
         return result;
       }
     },
