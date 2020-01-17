@@ -98,7 +98,7 @@ export default function middleware (app:koa) {
    */
   app.use(async (ctx:koa.ParameterizedContext<any, {}>, next: ()=>Promise<any>)=> {
     if(ctx.state.user === undefined) {
-      console.debug('user is undefined set it to guest')
+      // console.debug('user is undefined set it to guest')
       ctx.state.user = {
         _id: '000000000000000000000000',
         fullName: 'guest',
@@ -115,7 +115,15 @@ export default function middleware (app:koa) {
 
   // log
   app.use( async (ctx:koa.ParameterizedContext<any, {}>, next: ()=>Promise<any>)=> {
-    logger.info(ctx.state.user.fullName, ctx.method, ctx.URL.pathname);
+    if (ctx.URL.pathname == '/graphql') {
+      if ( ctx.request.body.operationName !== 'IntrospectionQuery') {
+        logger.info(ctx.state.user.fullName, ctx.request.body.operationName);
+        logger.debug(ctx.request.body.query);
+      }
+    } else {
+      logger.info(ctx.state.user.fullName, ctx.method, ctx.URL.pathname);
+    }
+    
     await next();
   });
 

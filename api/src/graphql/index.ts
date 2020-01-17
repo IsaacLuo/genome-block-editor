@@ -73,6 +73,7 @@ export function useApolloServer(app:any) {
     sourceFiles: [SourceFile]
     sourceFile(_id: ID): SourceFile
     projectGenbank(_id:ID): String
+    parts(from:Int, to:Int): [OriginPart]
   }
 
   type Mutation {
@@ -121,14 +122,20 @@ export function useApolloServer(app:any) {
         // return await Project.find({ctype:'source'}).select('_id name len').exec();
       },
 
-      sourceFile: async (parent:any, args:any, context: any) => {
+      sourceFile: async (parent:any, args:any, context: any, info:any) => {
         const {_id} = args;
+        console.log(args);
         const start = Date.now()
         const result = await Project.findById(_id).populate('parts').exec();
         const time = Date.now() - start;
         console.log('time = ', time);
         return result;
+      },
+
+      parts: async (parent:any, args:any, context: any, info:any) => {
+        console.log(args);
       }
+
     },
     Mutation: {
       saveTestObject: (parent:any, args:any, context: any) => {
