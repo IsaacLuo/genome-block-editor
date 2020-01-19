@@ -58,7 +58,7 @@ export function useApolloServer(app:any) {
     _id: ID
     name: String
     len: Int
-    parts(from:Int, to:Int): [OriginPart]
+    parts: [OriginPart]
   }
 
   type MutationResult {
@@ -67,13 +67,17 @@ export function useApolloServer(app:any) {
     message: String!
   }
 
+  input Range {
+    from: Int
+    to: Int
+  }
+
   type Query {
     projects: [Project]
     project(_id: ID): Project
     sourceFiles: [SourceFile]
-    sourceFile(_id: ID): SourceFile
+    sourceFile(_id: ID, range: Range): SourceFile
     projectGenbank(_id:ID): String
-    parts(from:Int, to:Int): [OriginPart]
   }
 
   type Mutation {
@@ -83,18 +87,23 @@ export function useApolloServer(app:any) {
   `;
 
   const resolvers = {
+    // SourceFile: {
+    //   parts: async (parent:any, args:any, context: any, info:any) => {
+    //     console.log(parent.parts)
+    //     return [{_id:"xxx", name:"xxxname", start:0, end:1}]
+    //   },
+    // },
     Query: {
       projects: async () => {
         return await Project
           .find({})
           .select('_id name owner group permission createdAt updatedAt')
           .exec();
-        
       },
 
       project: async (parent:any, args:any, context: any) => {
         const {_id} = args;
-        return await Project.findById(_id).populate('parts').exec();
+        return await Project.findById(_id).exec();
       },
 
       projectGenbank: async (parent:any, args:any, context: any) => {
@@ -124,17 +133,30 @@ export function useApolloServer(app:any) {
 
       sourceFile: async (parent:any, args:any, context: any, info:any) => {
         const {_id} = args;
-        console.log(args);
-        const start = Date.now()
-        const result = await Project.findById(_id).populate('parts').exec();
+        let from, to;
+        if (args.range) {
+          from = args.range.from;
+          to = args.range.to;
+        }
+        if (!from) {
+          from = 0;
+        }
+        if (!to) {
+          to = Number.MAX_SAFE_INTEGER;
+        }
+        const start = Date.now();
+        const result = await Project.findById(_id)
+          .populate({
+            path:'parts', 
+            match:{
+              start:{$lte:to}, 
+              end:{$gte:from},
+            }})
+          .exec();
         const time = Date.now() - start;
         console.log('time = ', time);
         return result;
       },
-
-      parts: async (parent:any, args:any, context: any, info:any) => {
-        console.log(args);
-      }
 
     },
     Mutation: {

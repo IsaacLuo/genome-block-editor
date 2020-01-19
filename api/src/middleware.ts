@@ -61,8 +61,8 @@ export default function middleware (app:koa) {
           conf.secret.mongoDB.url,
           {
             useNewUrlParser: true,
-            user: conf.secret.mongoDB.username,
-            pass: conf.secret.mongoDB.password, 
+            // user: conf.secret.mongoDB.username,
+            // pass: conf.secret.mongoDB.password, 
           }
         );
         break;
