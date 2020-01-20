@@ -86,6 +86,12 @@ router.get('/api/user/current', async (ctx:Ctx, next:Next)=> {
 
 app.use(router.routes());
 
+router.post('/graphql', async (ctx:Ctx, next:Next)=> {
+  const start = Date.now();
+  await next();
+  const time = Date.now() - start;
+  console.log('graphql time = ', time);
+});
 
 useApolloServer(app);
 

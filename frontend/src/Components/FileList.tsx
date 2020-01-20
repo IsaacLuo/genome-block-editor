@@ -37,6 +37,7 @@ const Component = () => {
   },[]);
 
   const fetchFile = async (_id:string) => {
+    dispatch({type:'SET_GENOME_BROWSER_LOADING', data:true});
     const result = await client.query({
       query: gql`
       {
@@ -60,7 +61,7 @@ const Component = () => {
       }
       `
     })
-    console.log(result.data)
+    dispatch({type:'SET_GENOME_BROWSER_LOADING', data:false});
     const {sourceFile} = result.data;
     dispatch({type:'SET_SOURCE_FILE', data: sourceFile,});
   }

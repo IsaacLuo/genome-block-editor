@@ -1,5 +1,16 @@
 import { combineReducers } from "redux";
 
+const DEFAULT_GENOME_BROWSER_STATE ={
+      zoomLevel: 128,
+      windowWidth: 1024,
+      viewWindowStart:0,
+      viewWindowEnd: 1024*128,
+      bufferedWindowStart:0,
+      bufferedWindowEnd:0,
+      toolTipPos: {x:0,y:0, text:''},
+      loading: false,
+    }
+
 export const componentVisibleReducer = (state:IComponentVisibleState, action:IAction):IComponentVisibleState => {
   if (state === undefined) {
     console.log('state is undefined')
@@ -65,6 +76,25 @@ export const projectReducer = (state:IProject, action:IAction):IProject => {
   }
 }
 
+export const genomeBrowserReducer = (state:IGenomBrowserState, action:IAction):IGenomBrowserState => {
+  if (state === undefined) {
+      state = DEFAULT_GENOME_BROWSER_STATE;
+  }
+  switch (action.type) {
+    case 'SET_ZOOM_LEVEL': {
+      const zoomLevel = action.data;
+      const viewWindowEnd = state.viewWindowStart + state.windowWidth*zoomLevel;
+      return {...state, zoomLevel, viewWindowEnd};
+    }
+    case 'SET_GENOME_BROWSER_LOADING': {
+      return {...state, loading: action.data}
+    }
+    default:
+      return state;
+  }
+  
+}
+
 function reCombineReducers(reducers: any) {
   let fn = combineReducers<IStoreState>(reducers);
   return (state:IStoreState|undefined, action:IAction):IStoreState => {
@@ -120,6 +150,7 @@ function reCombineReducers(reducers: any) {
 export const reducer = reCombineReducers({
   componentVisible: componentVisibleReducer,
   currentProject: projectReducer,
+  genomeBrowser: genomeBrowserReducer,
 })
 
 
@@ -145,5 +176,6 @@ export const defaultStoreState : IStoreState = {
     saveFileDialogVisible: false,
     saveFileDialogNewFile: true,
     exportGenbankDialogVisible: false,
-  }
+  },
+  genomeBrowser: DEFAULT_GENOME_BROWSER_STATE,
 };

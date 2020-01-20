@@ -14,7 +14,7 @@ export interface IProps {
   onMouseLeave?: (event: React.MouseEvent<any, MouseEvent>) => void;
 }
 
-const Component = ({x,y,blockId, annotationPart, width, height, style, shape, onMouseMove, onMouseLeave}:IProps) => {
+const ArrowFeature = ({x,y,blockId, annotationPart, width, height, style, shape, onMouseMove, onMouseLeave}:IProps) => {
   const dispatch = useDispatch();
   let block;
   const maxHeadLen = height / 3;
@@ -72,4 +72,4 @@ const Component = ({x,y,blockId, annotationPart, width, height, style, shape, on
   );
 };
 
-export default Component
+export default ArrowFeature

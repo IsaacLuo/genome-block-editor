@@ -133,25 +133,27 @@ export function useApolloServer(app:any) {
 
       sourceFile: async (parent:any, args:any, context: any, info:any) => {
         const {_id} = args;
-        let from, to;
-        if (args.range) {
-          from = args.range.from;
-          to = args.range.to;
-        }
-        if (!from) {
-          from = 0;
-        }
-        if (!to) {
-          to = Number.MAX_SAFE_INTEGER;
-        }
+        // let from, to;
+        // if (args.range) {
+        //   from = args.range.from;
+        //   to = args.range.to;
+        // }
+        // if (!from) {
+        //   from = 0;
+        // }
+        // if (!to) {
+        //   to = Number.MAX_SAFE_INTEGER;
+        //   // to=128*1024*100;
+        // }
         const start = Date.now();
         const result = await Project.findById(_id)
           .populate({
             path:'parts', 
-            match:{
-              start:{$lte:to}, 
-              end:{$gte:from},
-            }})
+            // match:{
+            //   start:{$lte:to}, 
+            //   end:{$gte:from},
+            // }
+          })
           .exec();
         const time = Date.now() - start;
         console.log('time = ', time);

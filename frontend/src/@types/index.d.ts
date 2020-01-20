@@ -59,11 +59,24 @@ declare interface IComponentVisibleState {
   exportGenbankDialogVisible: boolean;
 }
 
+declare interface IGenomBrowserState {
+  zoomLevel: number;
+  windowWidth: number;    //genomebower window in piexel
+  viewWindowStart: number; //viewing bps
+  viewWindowEnd: number;
+  bufferedWindowStart: number;
+  bufferedWindowEnd: number;
+  toolTipPos: {x:number, y:number, text:any};
+  loading: boolean;
+}
+
 declare interface IStoreState {
   moveHistory: Array<{id:string, posFrom:number, posTo:number}>;
   currentProject: IProject;
   sourceFile?: ISourceFile;
   projectCorsor: number;
   componentVisible: IComponentVisibleState;
+  genomeBrowser: IGenomBrowserState;
 }
 
+declare module 'react-use-dimensions'
