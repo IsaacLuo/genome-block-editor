@@ -30,23 +30,30 @@ const GenomeBrowser = () => {
   const {
     sourceFile, 
     zoomLevel, 
+    viewWindowStart,
+    viewWindowEnd,
     bufferedWindowStart, 
     bufferedWindowEnd, 
     loading,
+    windowWidth,
     } = useMappedState((state:IStoreState)=>({
     sourceFile: state.sourceFile,
     zoomLevel: state.genomeBrowser.zoomLevel,
+    viewWindowStart: state.genomeBrowser.viewWindowStart,
+    viewWindowEnd: state.genomeBrowser.viewWindowEnd,
     bufferedWindowStart:state.genomeBrowser.bufferedWindowStart,
     bufferedWindowEnd: state.genomeBrowser.bufferedWindowEnd,
     loading: state.genomeBrowser.loading,
+    windowWidth: state.genomeBrowser.windowWidth,
   }));
 
+  const dispatch = useDispatch();
   const [ref, { x, y, width }] = useDimensions();
   useEffect(() => {
-    console.log(x,y,width)
+    if (width>0) {
+      dispatch({type:'SET_GENOME_BROWSER_WINDOW_WIDTH', data: width});
+    }
   });
-
-  const dispatch = useDispatch();
 
   const setZoomLevel = (level:number) => {
     dispatch({type:'SET_ZOOM_LEVEL',data:level})
@@ -80,14 +87,15 @@ const GenomeBrowser = () => {
     }
   }
 
-  const svgWidth = zoom(sourceFile.len);
+  // const svgWidth = zoom(sourceFile.len);
+  const svgWidth = windowWidth;
   const svgHeight = 400;
   const rulerLines = [];
   let rulerStep = 50;
   while(zoom(rulerStep) < 100) {
     rulerStep *= 2;
   }
-  for (let i=0;i<sourceFile.len;i+=rulerStep) {
+  for (let i=0;i<sourceFile.len && i<viewWindowEnd-viewWindowStart;i+=rulerStep) {
     const zi = zoom(i);
     rulerLines.push(<line key={i} x1={zi} y1="0" x2={zi} y2={svgHeight} stroke="#aaa"/>)
     rulerLines.push(<text key={`${i}_t`} x={zi} y={0} alignmentBaseline="hanging">{i/1000}k</text>)
@@ -98,14 +106,14 @@ const GenomeBrowser = () => {
       <button onClick={()=>setZoomLevel(zoomLevel*2)}>-</button>
       <button onClick={()=>setZoomLevel(Math.max(1, zoomLevel/2))}>+</button>
       <span>zoom level: 1:{zoomLevel}</span>
-      <span>  {bufferedWindowStart} {bufferedWindowEnd}</span>
+      <span> {viewWindowStart} {viewWindowEnd} {bufferedWindowStart} {bufferedWindowEnd} {Math.floor(windowWidth)}</span>
     </div>
   <div
     className="chromosome-svg-container"
     style={{
       maxHeight: svgHeight,
-      overflowY: 'scroll',
-      overflowX: 'scroll',
+      overflowY: 'hidden',
+      overflowX: 'hidden',
     }}
     ref={ref}
   >

@@ -83,16 +83,24 @@ export const genomeBrowserReducer = (state:IGenomBrowserState, action:IAction):I
   switch (action.type) {
     case 'SET_ZOOM_LEVEL': {
       const zoomLevel = action.data;
-      const viewWindowEnd = state.viewWindowStart + state.windowWidth*zoomLevel;
+      const viewWindowEnd = state.viewWindowStart + Math.floor(state.windowWidth*zoomLevel);
       return {...state, zoomLevel, viewWindowEnd};
     }
     case 'SET_GENOME_BROWSER_LOADING': {
       return {...state, loading: action.data}
     }
+    case 'SET_GENOME_BROWSER_WINDOW_WIDTH': {
+      if (action.data !== state.windowWidth) {
+        const zoomLevel = state.zoomLevel;
+        const windowWidth = action.data;
+        const viewWindowEnd = state.viewWindowStart + Math.floor(state.windowWidth*zoomLevel);
+        return {...state, windowWidth, viewWindowEnd}
+      }
+      return state;
+    }
     default:
       return state;
   }
-  
 }
 
 function reCombineReducers(reducers: any) {
