@@ -63,7 +63,7 @@ const ArrowFeature = ({x,y,blockId, annotationPart, width, height, style, shape,
           y={y+height/2} 
           alignmentBaseline="middle"
           fontFamily="Inconsolata"
-          fontSize="12"
+          fontSize={Math.min(Math.floor(height), 12)}
         >
           {annotationPart.name}
         </text>

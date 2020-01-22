@@ -68,6 +68,7 @@ declare interface IGenomBrowserState {
   bufferedWindowEnd: number;
   toolTipPos: {x:number, y:number, text:any};
   loading: boolean;
+  rulerStep: number;
 }
 
 declare interface IStoreState {

@@ -1,7 +1,7 @@
 import { combineReducers } from "redux";
 
 const DEFAULT_GENOME_BROWSER_STATE ={
-      zoomLevel: 128,
+      zoomLevel: 64,
       windowWidth: 1024,
       viewWindowStart:0,
       viewWindowEnd: 1024*128,
@@ -9,7 +9,11 @@ const DEFAULT_GENOME_BROWSER_STATE ={
       bufferedWindowEnd:0,
       toolTipPos: {x:0,y:0, text:''},
       loading: false,
+      rulerStep: 1000,
     }
+
+const rulerZoomList = [50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000];
+
 
 export const componentVisibleReducer = (state:IComponentVisibleState, action:IAction):IComponentVisibleState => {
   if (state === undefined) {
@@ -80,23 +84,65 @@ export const genomeBrowserReducer = (state:IGenomBrowserState, action:IAction):I
   if (state === undefined) {
       state = DEFAULT_GENOME_BROWSER_STATE;
   }
+
+  const calcRulerStep = (zoomLevel:number) => {
+    let rulerStopIndex = 0;
+      let rulerStep = rulerZoomList[rulerStopIndex];
+      while(rulerStep/zoomLevel < 100 && rulerStopIndex < rulerZoomList.length) {
+        rulerStopIndex++;
+        rulerStep = rulerZoomList[rulerStopIndex];
+      }
+    return rulerStep;
+  }
+
   switch (action.type) {
     case 'SET_ZOOM_LEVEL': {
       const zoomLevel = action.data;
       const viewWindowEnd = state.viewWindowStart + Math.floor(state.windowWidth*zoomLevel);
-      return {...state, zoomLevel, viewWindowEnd};
+      const rulerStep = calcRulerStep(zoomLevel);
+      return {...state, zoomLevel, viewWindowEnd, rulerStep};
     }
     case 'SET_GENOME_BROWSER_LOADING': {
-      return {...state, loading: action.data}
+      const {windowWidth} = state;
+      const zoomLevel = 64;
+      return {...state, 
+        loading: action.data, 
+        zoomLevel,
+        viewWindowStart:0,
+        viewWindowEnd: Math.floor(windowWidth*zoomLevel),
+        rulerStep: calcRulerStep(zoomLevel),
+      }
     }
     case 'SET_GENOME_BROWSER_WINDOW_WIDTH': {
       if (action.data !== state.windowWidth) {
         const zoomLevel = state.zoomLevel;
         const windowWidth = action.data;
-        const viewWindowEnd = state.viewWindowStart + Math.floor(state.windowWidth*zoomLevel);
-        return {...state, windowWidth, viewWindowEnd}
+        const viewWindowEnd = state.viewWindowStart + Math.floor(windowWidth*zoomLevel);
+        const rulerStep = calcRulerStep(zoomLevel);
+        return {...state, windowWidth, viewWindowEnd, rulerStep}
       }
       return state;
+    }
+    case 'GENOME_BROWSER_SCROLL_LEFT': {
+      const {windowWidth, rulerStep} = state;
+      let {viewWindowStart, viewWindowEnd} = state;
+      const multi = action.data || 1;
+      let scrollWidth = Math.min(viewWindowStart, rulerStep*multi);
+      viewWindowStart-=scrollWidth;
+      viewWindowEnd-=scrollWidth;
+      return {...state, windowWidth, viewWindowStart, viewWindowEnd}
+    }
+    case 'GENOME_BROWSER_SCROLL_RIGHT': {
+      const {windowWidth, rulerStep} = state;
+      let {viewWindowStart, viewWindowEnd} = state;
+      const multi = action.data || 1;
+      let scrollWidth = rulerStep*multi;
+      viewWindowStart+=scrollWidth;
+      viewWindowEnd+=scrollWidth;
+      return {...state, windowWidth, viewWindowStart, viewWindowEnd}
+    }
+    case 'SET_RULER_STEP' : {
+      return {...state, rulerStep: action.data};
     }
     default:
       return state;

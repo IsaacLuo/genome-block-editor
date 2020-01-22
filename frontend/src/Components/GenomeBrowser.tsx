@@ -26,6 +26,7 @@ export interface IProps {
 //   return width;
 // }
 
+
 const GenomeBrowser = () => {
   const {
     sourceFile, 
@@ -36,6 +37,7 @@ const GenomeBrowser = () => {
     bufferedWindowEnd, 
     loading,
     windowWidth,
+    rulerStep, 
     } = useMappedState((state:IStoreState)=>({
     sourceFile: state.sourceFile,
     zoomLevel: state.genomeBrowser.zoomLevel,
@@ -45,6 +47,7 @@ const GenomeBrowser = () => {
     bufferedWindowEnd: state.genomeBrowser.bufferedWindowEnd,
     loading: state.genomeBrowser.loading,
     windowWidth: state.genomeBrowser.windowWidth,
+    rulerStep: state.genomeBrowser.rulerStep,
   }));
 
   const dispatch = useDispatch();
@@ -65,15 +68,42 @@ const GenomeBrowser = () => {
 
   const zoom = (v:number) => v / zoomLevel;
   if(!sourceFile) {
-    return <div/>
+    return <div ref={ref}/>
   }
 
-  const features = sourceFile!.parts.slice(0, 10).map(v=>({...v, row:0}));
-  const featuresLen = Math.min(features.length, 100);
+  // filter parts
+  const features = sourceFile!.parts
+    .filter((v)=>
+      v.start <= viewWindowEnd &&
+      v.end >= viewWindowStart 
+    )
+    .map(v=>({...v, row:0}));
+  let featuresLen = features.length;
+
+  if (features.length>200) {
+    // too much elements, show warning
+    setZoomLevel(Math.max(1, zoomLevel/2))
+    return <div ref={ref}
+      style={{
+        height:400, 
+        backgroundColor:'#ffaaaa',
+        textAlign:'center',
+        }}
+      onClick={()=>setZoomLevel(Math.max(1, zoomLevel/2))}
+      >
+      too many elements ({features.length}) in the window, click here to zoom out
+    </div>
+  }
+
+  if (viewWindowStart > sourceFile.len) {
+    dispatch({type:'GENOME_BROWSER_SCROLL_LEFT', data: 1})
+  }
+  
   const rowLength:any = {}
+  let maxRow = 0;
   for (let i=0;i<featuresLen;i++) {
     let row = 0;
-    while(row<10) {
+    while(row<100) {
       if (rowLength[row] === undefined) {
         rowLength[row] = 0;
       }
@@ -83,30 +113,49 @@ const GenomeBrowser = () => {
         break;
       } else {
         row++
+        if (row>maxRow) {
+          maxRow = row;
+        }
       }
     }
   }
 
+
+
   // const svgWidth = zoom(sourceFile.len);
   const svgWidth = windowWidth;
   const svgHeight = 400;
+  const svgFeatureZoneHeight = svgHeight - 20;
   const rulerLines = [];
-  let rulerStep = 50;
-  while(zoom(rulerStep) < 100) {
-    rulerStep *= 2;
+  // dispatch({type:'SET_RULER_STEP', data:rulerStep})
+
+  let rowHeight = 30;
+  if (maxRow>10) {
+    rowHeight = svgFeatureZoneHeight/(maxRow+1);
   }
-  for (let i=0;i<sourceFile.len && i<viewWindowEnd-viewWindowStart;i+=rulerStep) {
+  const featureHeight = rowHeight-3;
+
+  for (let i=viewWindowStart;i<sourceFile.len && i<viewWindowEnd;i+=rulerStep) {
     const zi = zoom(i);
     rulerLines.push(<line key={i} x1={zi} y1="0" x2={zi} y2={svgHeight} stroke="#aaa"/>)
     rulerLines.push(<text key={`${i}_t`} x={zi} y={0} alignmentBaseline="hanging">{i/1000}k</text>)
   }
+
+  const zi = zoom(sourceFile.len);
+  rulerLines.push(<line key={sourceFile.len} x1={zi} y1="0" x2={zi} y2={svgHeight} stroke="#aaa"/>)
+  rulerLines.push(<text key={`${sourceFile.len}_t`} x={zi} y={20} alignmentBaseline="hanging">{sourceFile.len/1000}k</text>)
+
+
+  let scollDeltaY = 0;
   
   return <Spin spinning={loading}>
     <div style={{height:40}}>
       <button onClick={()=>setZoomLevel(zoomLevel*2)}>-</button>
       <button onClick={()=>setZoomLevel(Math.max(1, zoomLevel/2))}>+</button>
       <span>zoom level: 1:{zoomLevel}</span>
-      <span> {viewWindowStart} {viewWindowEnd} {bufferedWindowStart} {bufferedWindowEnd} {Math.floor(windowWidth)}</span>
+      <span> {viewWindowStart} {viewWindowEnd} / {Math.floor(windowWidth)} / {featuresLen}}</span>
+      <button onClick={()=>dispatch({type:'GENOME_BROWSER_SCROLL_LEFT', data: 3})}> left </button>
+      <button onClick={()=>dispatch({type:'GENOME_BROWSER_SCROLL_RIGHT', data: 3})}> right </button>
     </div>
   <div
     className="chromosome-svg-container"
@@ -117,27 +166,51 @@ const GenomeBrowser = () => {
     }}
     ref={ref}
   >
-    <svg height={svgHeight-40} width={svgWidth}>
+    <svg height={svgHeight} width={svgWidth}
+      onWheel={(event)=>{
+        const {deltaY} = event;
+        scollDeltaY += deltaY;
+        if (scollDeltaY <= -100) {
+          dispatch({type:'GENOME_BROWSER_SCROLL_LEFT', data: 1})
+          scollDeltaY = 0
+        } else if (scollDeltaY >= 100) {
+          dispatch({type:'GENOME_BROWSER_SCROLL_RIGHT', data: 1})
+          scollDeltaY = 0
+        }
+        return false;
+      }}
+    >
+      <g transform={`translate(${-zoom(viewWindowStart)},0)`}>
       <g>
         {rulerLines}
       </g>
       <g transform="translate(0, 20)">
         {
           features.map(
-            (v,i)=><g key={i}>
+            (v,i)=>{
+              let x = zoom(v.start);
+              let width = zoom(v.end-v.start);
+              let shape = v.strand;
+              if(x< zoom(viewWindowStart) - 1 && zoom(v.end) > zoom(viewWindowEnd) + 1) {
+                x = zoom(viewWindowStart) - 1;
+                width = windowWidth + 2;
+                shape = 0;
+              }
+              return <g key={i}>
               <ArrowFeature
-                x={zoom(v.start)}
-                y={v.row*33 + (v.featureType === 'unknown' ? 10 : 0)}
-                width={zoom(v.end-v.start)}
-                height={v.featureType === 'unknown' ? 10 : 30}
+                x={x}
+                y={v.row*(rowHeight) + (v.featureType === 'unknown' ? rowHeight/3 : 0)}
+                width={width}
+                height={v.featureType === 'unknown' ? (featureHeight)/3 : (featureHeight)}
                 blockId={v._id}
                 annotationPart={v}
-                shape={v.strand}
+                shape={shape}
                 style={{
                   fill: calcFeatureColor(v.featureType),
                   stroke: 'black',
                   strokeWidth: 1,
                 }}
+                data-memo={`${v.start} ${v.end} ${v.end-v.start}`}
                 onMouseMove={(event)=>{
                   if (event.buttons === 0) {
                     setToolTipPos(event.pageX+20, event.pageY+20, <div>
@@ -151,9 +224,10 @@ const GenomeBrowser = () => {
                 }}
                 onMouseLeave={()=>setToolTipPos(-1, -1, <div/>)}
               />
-            </g>
+            </g>}
           )
         }
+      </g>
       </g>
     </svg>
     </div>
