@@ -144,6 +144,9 @@ export const genomeBrowserReducer = (state:IGenomBrowserState, action:IAction):I
     case 'SET_RULER_STEP' : {
       return {...state, rulerStep: action.data};
     }
+    case 'SET_TOOL_TIPS' : {
+      return {...state, toolTipPos:action.data};
+    }
     default:
       return state;
   }
@@ -156,7 +159,7 @@ function reCombineReducers(reducers: any) {
       console.log('set default totla')
       state = defaultStoreState;
     }
-    console.debug('action', action.type, action.data);
+    // console.debug('action', action.type, action.data);
     switch (action.type) {
       case 'MOVE_BLOCK_TO_BLOCK': {
         const {id,posFrom,posTo, data} = action.data;

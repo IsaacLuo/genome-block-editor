@@ -5,6 +5,7 @@ import FileList from 'Components/FileList'
 import GenomeBrowser from 'Components/GenomeBrowser'
 import ResultSequence from 'Components/ResultPanel'
 import ProjectOperationPanel from 'Components/ProjectOperationPanel'
+import GenomeBrowserTooltip from 'Components/GenomeBrowserTooltip'
 
 import { ApolloProvider } from '@apollo/react-hooks';
 import ApolloClient from 'apollo-boost';
@@ -27,6 +28,7 @@ const App: React.FC = () => {
         <div className="basket-panel">
           {/* <ChromosomePanel/> */}
           <GenomeBrowser/>
+          <GenomeBrowserTooltip/>
         </div>
         <div className="project-basket">
           <div style={{flex:7}}>
