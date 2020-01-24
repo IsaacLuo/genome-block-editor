@@ -1,5 +1,5 @@
 import {ApolloServer, gql} from 'apollo-server-koa'
-import { Project, AnnotationPart } from '../models';
+import { Project, AnnotationPart, ProjectFolder } from '../models';
 import {runExe} from '../runExe'
 
 export function useApolloServer(app:any) {
@@ -67,6 +67,13 @@ export function useApolloServer(app:any) {
     message: String!
   }
 
+  type ProjectFolder {
+    _id: ID
+    name: String
+    subFolders: [ProjectFolder]
+    projects: [SourceFile]
+  }
+
   input Range {
     from: Int
     to: Int
@@ -78,6 +85,7 @@ export function useApolloServer(app:any) {
     sourceFiles: [SourceFile]
     sourceFile(_id: ID, range: Range): SourceFile
     projectGenbank(_id:ID): String
+    folder(_id: ID): [ProjectFolder]
   }
 
   type Mutation {
@@ -157,6 +165,23 @@ export function useApolloServer(app:any) {
           .exec();
         const time = Date.now() - start;
         console.log('time = ', time);
+        return result;
+      },
+
+      folder: async (parent:any, args:any, context: any, info:any) => {
+        const {_id} = args;
+        let condition;
+        if (!_id) {
+          condition = {name:'/'}
+        }else {
+          condition = {_id}
+        }
+        const result = await ProjectFolder
+          .find(condition)
+          .populate('subFolders','name')
+          .populate('projects','name')
+          .exec();
+        // console.log((result as any)[0].projects[0]);
         return result;
       },
 
