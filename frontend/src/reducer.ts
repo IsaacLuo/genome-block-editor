@@ -12,6 +12,10 @@ const DEFAULT_GENOME_BROWSER_STATE ={
       rulerStep: 1000,
     }
 
+const DEFAULT_FILE_EXPLORER_STATE = {
+  fileLists: [{_id:'000000000000000000000000'}],
+}
+
 const rulerZoomList = [50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000];
 
 
@@ -152,6 +156,18 @@ export const genomeBrowserReducer = (state:IGenomBrowserState, action:IAction):I
   }
 }
 
+
+export const fileExplorerReducer = (state:IFileExplorerState = DEFAULT_FILE_EXPLORER_STATE, action:IAction):IFileExplorerState => {
+  switch (action.type) {
+    case 'SET_FILE_LIST_LEVEL':
+      const {_id, level} = action.data;
+      const fileLists = state.fileLists.slice(0,level-1);
+      fileLists.push({_id,});
+      return {...state,fileLists};
+  }
+  return state;
+}
+
 function reCombineReducers(reducers: any) {
   let fn = combineReducers<IStoreState>(reducers);
   return (state:IStoreState|undefined, action:IAction):IStoreState => {
@@ -204,10 +220,13 @@ function reCombineReducers(reducers: any) {
   }
 }
 
+
+
 export const reducer = reCombineReducers({
   componentVisible: componentVisibleReducer,
   currentProject: projectReducer,
   genomeBrowser: genomeBrowserReducer,
+  fileExplorer: fileExplorerReducer,
 })
 
 
@@ -235,4 +254,5 @@ export const defaultStoreState : IStoreState = {
     exportGenbankDialogVisible: false,
   },
   genomeBrowser: DEFAULT_GENOME_BROWSER_STATE,
+  fileExplorer: DEFAULT_FILE_EXPLORER_STATE,
 };

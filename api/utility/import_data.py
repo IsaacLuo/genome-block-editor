@@ -211,7 +211,7 @@ def import_project(file_path, project_name):
 
 def main():
     base_dir = os.path.abspath(os.path.join(os.path.curdir,'..','..', 'gff'))
-    search_folder(base_dir, '/')
+    search_folder(base_dir, 'Source Files')
     
     print('done')
 

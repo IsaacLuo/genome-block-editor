@@ -23,7 +23,7 @@ const App: React.FC = () => {
     <div className="App">
       <div className="main-panel">
         <div className="file-panel">
-          <FileList/>
+          <FileList id={undefined} level={0}/>
         </div>
         <div className="basket-panel">
           {/* <ChromosomePanel/> */}

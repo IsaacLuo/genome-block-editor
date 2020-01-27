@@ -4,20 +4,13 @@ import axios from 'axios';
 import conf from 'conf';
 import ApolloClient from 'apollo-boost';
 import { gql } from "apollo-boost";
-import { Icon } from 'antd';
 
 const client = new ApolloClient({
   uri: `${conf.backendURL}/graphql`,
 });
 
-interface IProps {
-  id?:string,
-  level: number,
-}
-
-const FileList = (props:IProps = {id:undefined, level:0}) => {
-  const {id, level} = props;
-  const [folder, setFolder] = useState({_id:undefined, name:'', subFolders:[], projects:[]});
+const FileExplorer = () => {
+  const [files, setFiles] = useState([]);
   const dispatch = useDispatch();
 
   const requestFiles = async () => {
@@ -25,23 +18,16 @@ const FileList = (props:IProps = {id:undefined, level:0}) => {
       const result = await client.query({
         query: gql`
         {
-          folder${id?`"(_id:${id})"`:''}{
+          sourceFiles {
               _id
               name
-              subFolders {
-                _id
-                name
-              }
-              projects {
-                _id
-                name
-              }
+              len
             }
           }
         `
       })
-      const {folder} = result.data;
-      setFolder(folder);
+      const {sourceFiles} = result.data;
+      setFiles(sourceFiles);
     } catch (err) {
       console.error(err);
     }
@@ -80,29 +66,15 @@ const FileList = (props:IProps = {id:undefined, level:0}) => {
     dispatch({type:'SET_SOURCE_FILE', data: sourceFile,});
   }
 
-  const fetchFolder = async(_id:string) => {
-    dispatch({type:'SET_FILE_LIST_LEVEL', data: {_id, level}});
-  }
-
   return (
     <div>
-      {folder.subFolders.map((v:any,i:number)=>
-      <div key={i}
-        style={{cursor:'zoom-in'}}
-        onClick={event=>fetchFolder(v._id)}
-      >
-        <Icon type="folder" />
-        {v.name}
-      </div>)}
-      {folder.projects.map((v:any,i:number)=>
+      {files.map((v:any,i:number)=>
       <div key={i}
         style={{cursor:'zoom-in'}}
         onClick={event=>fetchFile(v._id)}
-      ><Icon type="file" />
-        {v.name}
-      </div>)}
+      >{v.name} ({v.len})</div>)}
     </div>
   );
 };
 
-export default FileList
+export default FileExplorer

@@ -71,6 +71,14 @@ declare interface IGenomBrowserState {
   rulerStep: number;
 }
 
+declare interface IFileListState {
+  _id: any;
+}
+
+declare interface IFileExplorerState {
+  fileLists: IFileListState[];
+}
+
 declare interface IStoreState {
   moveHistory: Array<{id:string, posFrom:number, posTo:number}>;
   currentProject: IProject;
@@ -78,6 +86,7 @@ declare interface IStoreState {
   projectCorsor: number;
   componentVisible: IComponentVisibleState;
   genomeBrowser: IGenomBrowserState;
+  fileExplorer: IFileExplorerState;
 }
 
 declare module 'react-use-dimensions'

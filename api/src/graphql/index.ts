@@ -85,7 +85,7 @@ export function useApolloServer(app:any) {
     sourceFiles: [SourceFile]
     sourceFile(_id: ID, range: Range): SourceFile
     projectGenbank(_id:ID): String
-    folder(_id: ID): [ProjectFolder]
+    folder(_id: ID): ProjectFolder
   }
 
   type Mutation {
@@ -182,7 +182,7 @@ export function useApolloServer(app:any) {
           .populate('projects','name')
           .exec();
         // console.log((result as any)[0].projects[0]);
-        return result;
+        return result[0];
       },
 
     },
