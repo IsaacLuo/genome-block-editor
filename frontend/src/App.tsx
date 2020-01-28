@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import ProjectBasket from 'Components/ProjectBasket'
-import FileList from 'Components/FileList'
+import FileExplorer from 'Components/FileExplorer'
 import GenomeBrowser from 'Components/GenomeBrowser'
 import ResultSequence from 'Components/ResultPanel'
 import ProjectOperationPanel from 'Components/ProjectOperationPanel'
@@ -22,9 +22,8 @@ const App: React.FC = () => {
     <ApolloProvider client={client}>
     <div className="App">
       <div className="main-panel">
-        <div className="file-panel">
-          <FileList id={undefined} level={0}/>
-        </div>
+        
+        <FileExplorer/>
         <div className="basket-panel">
           {/* <ChromosomePanel/> */}
           <GenomeBrowser/>

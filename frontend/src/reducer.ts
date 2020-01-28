@@ -161,7 +161,7 @@ export const fileExplorerReducer = (state:IFileExplorerState = DEFAULT_FILE_EXPL
   switch (action.type) {
     case 'SET_FILE_LIST_LEVEL':
       const {_id, level} = action.data;
-      const fileLists = state.fileLists.slice(0,level-1);
+      const fileLists = state.fileLists.slice(0,level+1);
       fileLists.push({_id,});
       return {...state,fileLists};
   }

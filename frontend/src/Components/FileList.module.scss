@@ -1,0 +1,21 @@
+.FileList {
+    display:inline-block;
+    border: solid 1px #000;
+    padding: 5px;
+    height: 200px;
+    width: 100px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    &:last-of-type {
+        width:400px;
+    }
+}
+
+.Row {
+    margin-top:3px;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    i {
+        margin-right:3px;
+    }
+}

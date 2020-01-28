@@ -5,6 +5,7 @@ import conf from 'conf';
 import ApolloClient from 'apollo-boost';
 import { gql } from "apollo-boost";
 import { Icon } from 'antd';
+import styles from "./FileList.module.scss";
 
 const client = new ApolloClient({
   uri: `${conf.backendURL}/graphql`,
@@ -25,7 +26,7 @@ const FileList = (props:IProps = {id:undefined, level:0}) => {
       const result = await client.query({
         query: gql`
         {
-          folder${id?`"(_id:${id})"`:''}{
+          folder${id?`(_id:"${id}")`:''}{
               _id
               name
               subFolders {
@@ -48,7 +49,7 @@ const FileList = (props:IProps = {id:undefined, level:0}) => {
   };
   useEffect(()=> {
     requestFiles();
-  },[]);
+  },[id]);
 
   const fetchFile = async (_id:string) => {
     dispatch({type:'SET_GENOME_BROWSER_LOADING', data:true});
@@ -85,9 +86,9 @@ const FileList = (props:IProps = {id:undefined, level:0}) => {
   }
 
   return (
-    <div>
+    <div className = {styles.FileList}>
       {folder.subFolders.map((v:any,i:number)=>
-      <div key={i}
+      <div key={i} className={styles.Row}
         style={{cursor:'zoom-in'}}
         onClick={event=>fetchFolder(v._id)}
       >
@@ -95,7 +96,7 @@ const FileList = (props:IProps = {id:undefined, level:0}) => {
         {v.name}
       </div>)}
       {folder.projects.map((v:any,i:number)=>
-      <div key={i}
+      <div key={i} className={styles.Row}
         style={{cursor:'zoom-in'}}
         onClick={event=>fetchFile(v._id)}
       ><Icon type="file" />
