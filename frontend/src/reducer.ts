@@ -130,7 +130,8 @@ export const genomeBrowserReducer = (state:IGenomBrowserState, action:IAction):I
     case 'GENOME_BROWSER_SCROLL_LEFT': {
       const {windowWidth, rulerStep} = state;
       let {viewWindowStart, viewWindowEnd} = state;
-      const multi = action.data || 1;
+      const {step} = action.data;
+      const multi = step || 1;
       let scrollWidth = Math.min(viewWindowStart, rulerStep*multi);
       viewWindowStart-=scrollWidth;
       viewWindowEnd-=scrollWidth;
@@ -139,11 +140,27 @@ export const genomeBrowserReducer = (state:IGenomBrowserState, action:IAction):I
     case 'GENOME_BROWSER_SCROLL_RIGHT': {
       const {windowWidth, rulerStep} = state;
       let {viewWindowStart, viewWindowEnd} = state;
-      const multi = action.data || 1;
+      const {step, max} = action.data;
+      const multi = step || 1;
       let scrollWidth = rulerStep*multi;
+      if(viewWindowEnd + scrollWidth > max) {
+        scrollWidth = max - viewWindowEnd;
+      }
       viewWindowStart+=scrollWidth;
       viewWindowEnd+=scrollWidth;
       return {...state, windowWidth, viewWindowStart, viewWindowEnd}
+    }
+    case 'GENOME_BROWSER_SET_CURSOR_POS': {
+      const {windowWidth} = state;
+      let {viewWindowStart, viewWindowEnd} = state;
+      const pos = action.data;
+      const viewWindowWidth = viewWindowEnd - viewWindowStart
+      viewWindowStart = pos - Math.floor(viewWindowWidth/2);
+      if (viewWindowStart < 0) {
+        viewWindowStart = 0;
+      }
+      viewWindowEnd = viewWindowStart + viewWindowWidth;
+      return {...state, viewWindowStart, viewWindowEnd};
     }
     case 'SET_RULER_STEP' : {
       return {...state, rulerStep: action.data};

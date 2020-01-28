@@ -5,6 +5,7 @@ import calcFeatureColor from '../featureColors';
 import ArrowFeature from'./ArrowFeature';
 import useDimensions from 'react-use-dimensions';
 import {Spin} from 'antd';
+import styles from './GenomeBrowser.module.scss';
 
 export interface IProps {
   children: any;
@@ -18,12 +19,10 @@ const GenomeBrowser = () => {
     sourceFile, 
     zoomLevel, 
     viewWindowStart,
-    viewWindowEnd,
-    bufferedWindowStart, 
-    bufferedWindowEnd, 
+    viewWindowEnd, 
     loading,
     windowWidth,
-    rulerStep, 
+    rulerStep,
     } = useMappedState((state:IStoreState)=>({
     sourceFile: state.sourceFile,
     zoomLevel: state.genomeBrowser.zoomLevel,
@@ -133,6 +132,9 @@ const GenomeBrowser = () => {
 
 
   let scollDeltaY = 0;
+
+  const sourceFileLen = sourceFile.len;
+  const maxAllowedScollPos = sourceFileLen+100*zoomLevel;
   
   return <Spin spinning={loading}>
     <div style={{height:40}}>
@@ -140,8 +142,8 @@ const GenomeBrowser = () => {
       <button onClick={()=>setZoomLevel(Math.max(1, zoomLevel/2))}>+</button>
       <span>zoom level: 1:{zoomLevel}</span>
       <span> {viewWindowStart} {viewWindowEnd} / {Math.floor(windowWidth)} / {featuresLen}}</span>
-      <button onClick={()=>dispatch({type:'GENOME_BROWSER_SCROLL_LEFT', data: 3})}> left </button>
-      <button onClick={()=>dispatch({type:'GENOME_BROWSER_SCROLL_RIGHT', data: 3})}> right </button>
+      <button onClick={()=>dispatch({type:'GENOME_BROWSER_SCROLL_LEFT', data: {step:3}})}> left </button>
+      <button onClick={()=>dispatch({type:'GENOME_BROWSER_SCROLL_RIGHT', data: {step:3, max:maxAllowedScollPos}})}> right </button>
     </div>
   <div
     className="chromosome-svg-container"
@@ -157,10 +159,10 @@ const GenomeBrowser = () => {
         const {deltaY} = event;
         scollDeltaY += deltaY;
         if (scollDeltaY <= -100) {
-          dispatch({type:'GENOME_BROWSER_SCROLL_LEFT', data: 1})
+          dispatch({type:'GENOME_BROWSER_SCROLL_LEFT', data: {step:1}})
           scollDeltaY = 0
         } else if (scollDeltaY >= 100) {
-          dispatch({type:'GENOME_BROWSER_SCROLL_RIGHT', data: 1})
+          dispatch({type:'GENOME_BROWSER_SCROLL_RIGHT', data: {step:1, max:maxAllowedScollPos}})
           scollDeltaY = 0
         }
         return false;
@@ -216,6 +218,27 @@ const GenomeBrowser = () => {
       </g>
       </g>
     </svg>
+    </div>
+    <div className={styles.MyScrollBar}
+      onMouseDown={(event)=>{
+        let pos = event.clientX/windowWidth*sourceFileLen;
+        const viewWindowWidth = viewWindowEnd - viewWindowStart
+        let start = pos - Math.floor(viewWindowWidth/2);
+        if (start < 0) start = 0;
+        let end = start + viewWindowWidth;
+        if (end>maxAllowedScollPos) {
+          end = maxAllowedScollPos;
+          start = end - viewWindowWidth;
+        }
+        dispatch({type:'GENOME_BROWSER_SET_CURSOR_POS', data:Math.floor((start+end)/2)});
+      }}
+    >
+        <div className={styles.ScrollBlock}
+          style={{
+            left:viewWindowStart/maxAllowedScollPos*windowWidth,
+            width:(viewWindowEnd - viewWindowStart)/maxAllowedScollPos*windowWidth}
+          }
+        />
     </div>
     </Spin>;
 };

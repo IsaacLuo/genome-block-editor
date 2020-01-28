@@ -25,7 +25,6 @@ const App: React.FC = () => {
         
         <FileExplorer/>
         <div className="basket-panel">
-          {/* <ChromosomePanel/> */}
           <GenomeBrowser/>
           <GenomeBrowserTooltip/>
         </div>
