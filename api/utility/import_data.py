@@ -211,8 +211,9 @@ def import_project(file_path, project_name):
 
 def main():
     base_dir = os.path.abspath(os.path.join(os.path.curdir,'..','..', 'gff'))
-    search_folder(base_dir, 'Source Files')
-    
+    source_file_folder_id = search_folder(base_dir, 'Source Files')
+    insert_result = ProjectFolder.insert_one({"name":'Projects', "subFolders": [], "projects": []})
+    insert_result = ProjectFolder.insert_one({"_id":ObjectId('000000000000000000000000'), "name":"/", "subFolders": [source_file_folder_id, insert_result.inserted_id, ], "projects": []})
     print('done')
 
 if __name__ == "__main__":

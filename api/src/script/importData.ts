@@ -1,134 +1,67 @@
 /// <reference path="../@types/index.d.ts" />
 import conf from '../../conf'
-import mongoose from 'mongoose';
-import {Project, AnnotationPart, IAnnotationPartModel} from '../models';
+import fs from 'fs'
 
-declare interface IAction {
-  type: string;
-  data: any;
-}
+import * as childProcess from 'child_process'
 
-declare interface IGLobalConfig {
-  maxTubeDeleteLimit: number,
-  host: string,
-  port: number,
-  publicURL?: string,
-}
+const readline = require('readline');
 
-declare interface IUserEssential {
-  _id: any,
-  email: string,
-  name: string, // user's full name
-  groups: string[], // array of group name, 'guest', 'users', 'visitors', or 'administrators'
-}
+export function runExe (
+  process:any,
+  dataIn?: any, 
+  onOutput?: (outputObj:any, stdin?:any)=>void, 
+  onStdErr?: (message: string)=>void,
+  onProcessCreated?: (instance:childProcess.ChildProcessWithoutNullStreams)=>void,
+  ) {
+  return new Promise((resolve, reject)=>{
+    const subProcess = childProcess.spawn(process.program, process.params);
+    if (onProcessCreated) {
+      onProcessCreated(subProcess);
+    }
+    const rl = readline.createInterface({
+      input: subProcess.stdout,
+    });
 
-declare interface ITokenContent extends IUserEssential{
-  iat:number,
-  exp:number,
-}
+    // const allObjects:any[] = [];
+    
+    rl.on('line', input => {
+      console.log('debug: ', input);
+      // const messageObj = JSON.parse(input.toString());
+      // if(onOutput) {
+        // onOutput(messageObj, subProcess.stdin);
+      // }
+    })
 
-declare interface IUser extends IUserEssential {
-  lastLogin?: Date,
-  lastIP?: string,
-}
+    subProcess.stderr.on('data', (data) => {
+      console.log('data:', data);
+      if (onStdErr) {
+        onStdErr(data.toString());
+      }
+    });
+    
+    subProcess.on('close', (code) => {
+      // console.debug('finish python', code);
+      if (code === 0) {
+        // resolve(allObjects);
+        resolve(0);
+      } else {
+        // reject({code, output:allObjects});
+        reject(code);
+      }
+    });
 
-declare interface ICustomState {
-  user?: ITokenContent,
-  data?: any,
-}
+    if (dataIn) {
+      subProcess.stdin.write(JSON.stringify(dataIn));
+    }
 
-interface IAnnotationPart {
-  _id: any;
-  featureType: string;
-  species: string;
-  chrId: number;
-  chrName: string;
-  start: number;
-  end: number;
-  strand: number;
-  original: boolean;
-  origin?: string|IAnnotationPart;
-  sequence: string;
-}
-
-declare interface IProject {
-  _id: any;
-  name: string,
-  version: string,
-  parts: Array<IAnnotationPart>,
-  owner: IUser,
-  group: string,
-  permission: Number,
-  createdAt: Date,
-  updatedAt: Date,
-  history: [any],
-}
-
-declare interface ISourceChomosome {
-  _id: any;
-  name: string,
-  version: string,
-  parts: Array<IAnnotationPart>,
-  len: number,
-  owner: IUser,
-  group: string,
-  permission: Number,
-  createdAt: Date,
-  updatedAt: Date,
+  });
 }
 
 async function main() {
-  try {
-    const mongooseState = mongoose.connection.readyState;
-    switch (mongooseState) {
-      case 3:
-      case 0:
-      await mongoose.connect(
-        conf.secret.mongoDB.url,
-        {
-          useNewUrlParser: true,
-          user: conf.secret.mongoDB.username,
-          pass: conf.secret.mongoDB.password, 
-        }
-      );
-      break;
-    }
-  } catch(error) {
-    
-  }
-
-  console.log('start import');
-  const allPromises:any[] = [];
-  const now = new Date();
-  // const projects = await Project.find({ctype:'source'}).exec();
-  // for (const project of projects) {
-  //   const partListP = project.parts
-  //   .map(async (partId) => AnnotationPart.findOne({_id:partId}).select('_id start end').exec())
-  //   const partList = (await Promise.all(partListP)) as IAnnotationPartModel[];
-  //   partList.sort((a,b)=>a.start < b.start? -1: a.start > b.start? 1 : 0);
-  //   const newPartList = [];
-  //   const partListLen = partList.length;
-  //   for (const i in partList) {
-  //     if (i === '0' && partList[i].start > 0) {
-  //       AnnotationPart.create({
-  //         featureType: 'unknown',
-  //         chrId: partList[i].chrId,
-  //         chrName: partList[i].chrName,
-  //         start: 0,
-  //         end: partList[i].start,
-  //         strand: 0,
-  //         original: true,
-  //         sequence: string,
-  //       })
-  //       newPartList.push({
-          
-  //       })
-  //     }
-  //   }
-  //   project.parts = partList.map(v=>v._id)
-  //   await project.save();
-  }
-  console.log('finish')
+  fs.writeFileSync('./utility/conf.json', JSON.stringify(conf,null, 4));
+  // exec('pipenv run python import_data.py');
+  await runExe({program: 'pipenv', params: ['run', 'python', 'import_data.py']})
+  console.log('done');
 }
 
 main().then(()=>process.exit());
