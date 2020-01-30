@@ -13,51 +13,20 @@ import mongoose from 'mongoose';
 // import { graphqlKoa, graphiqlKoa } from 'graphql-server-koa'
 import {useApolloServer} from './graphql';
 import serve from 'koa-static';
+import { userMust, beUser } from './userMust';
+
+type Ctx = koa.ParameterizedContext<ICustomState, {}>;
+type Next = ()=>Promise<any>;
 
 const GUEST_ID = '000000000000000000000000';
 
 const app = new koa();
 const router = new Router();
 
-type Ctx = koa.ParameterizedContext<ICustomState, {}>;
-type Next = ()=>Promise<any>;
-
-
 app.use(cors({credentials: true}));
 app.use(serve('./public'));
 app.use(koaBody());
 middleware(app);
-
-function userMust (...args: Array<(ctx:koa.ParameterizedContext<any, {}>, next:()=>Promise<any>)=>boolean>) {
-  const arg = arguments;
-  return async (ctx:koa.ParameterizedContext<any, {}>, next:Next)=> {
-    if (Array.prototype.some.call(arg, f=>f(ctx))) {
-      await next();
-    } else {
-      ctx.throw(401);
-    }
-  };
-}
-
-function beUser (ctx:Ctx, next?:Next) {
-  // console.log(ctx.state.user.groups);
-  return !!(ctx.state.user && (ctx.state.user.groups.indexOf('emma/users')>=0 || ctx.state.user.groups.indexOf('users')>=0));
-  // return ctx.state.user!== undefined;
-}
-
-function beAnyOne (ctx:Ctx, next?:Next) {
-  // console.log(ctx.state.user.groups);
-  // return ctx.state.user && (ctx.state.user.groups.indexOf('emma/users')>=0 || ctx.state.user.groups.indexOf('users')>=0);
-  return ctx.state.user!== undefined;
-}
-
-function beAdmin (ctx:Ctx, next?:Next) {
-  return ctx.state.user && (ctx.state.user.groups.indexOf('administrators')>=0 || ctx.state.user.groups.indexOf('emma/administrators')>=0);
-}
-
-function beGuest (ctx:Ctx, next?:Next) {
-  return ctx.state.user === undefined || ctx.state.user._id === '000000000000000000000000';
-}
 
 router.post('/api/session', 
 userMust(beUser),

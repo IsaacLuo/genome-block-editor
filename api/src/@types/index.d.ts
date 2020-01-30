@@ -48,6 +48,7 @@ interface IAnnotationPart {
 
 declare interface IProject {
   _id: any;
+  ctype: string;
   name: string,
   version: string,
   parts: Array<IAnnotationPart>,

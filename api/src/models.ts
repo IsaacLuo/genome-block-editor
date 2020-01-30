@@ -1,3 +1,4 @@
+/// <reference path="@types/index.d.ts" />
 import mongoose, { Model, Document } from 'mongoose'
 import {Schema} from 'mongoose'
 
