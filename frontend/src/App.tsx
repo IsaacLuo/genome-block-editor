@@ -10,6 +10,10 @@ import GenomeBrowserTooltip from 'Components/GenomeBrowserTooltip'
 import { ApolloProvider } from '@apollo/react-hooks';
 import ApolloClient from 'apollo-boost';
 import 'antd/dist/antd.css';
+import {BrowserRouter as Router, Route, Link} from "react-router-dom";
+import MainPage from './Pages/MainPage';
+import BlockEditor from './Pages/BlockEditor';
+
 import conf from 'conf';
 
 
@@ -21,23 +25,10 @@ const App: React.FC = () => {
   return (
     <ApolloProvider client={client}>
     <div className="App">
-      <div className="main-panel">
-        
-        <FileExplorer/>
-        <div className="basket-panel">
-          <GenomeBrowser/>
-          <GenomeBrowserTooltip/>
-        </div>
-        <div className="project-basket">
-          <div style={{flex:7}}>
-            <ProjectBasket/>
-          </div>
-          <div style={{flex:3, background:'#fcec72', borderWidth:1}}>
-            <ProjectOperationPanel/>
-          </div>
-        </div>
-        <ResultSequence/>
-      </div>
+      <Router>
+        <Route path='/' exact component={MainPage}/>
+        <Route path="/block_editor" component={BlockEditor}/>
+      </Router>
     </div>
     </ApolloProvider>
   );
