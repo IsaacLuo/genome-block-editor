@@ -58,6 +58,7 @@ declare interface IProject {
   createdAt: Date,
   updatedAt: Date,
   history: [any],
+  len: number
 }
 
 declare interface ISourceChomosome {

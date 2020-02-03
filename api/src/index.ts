@@ -14,6 +14,7 @@ import mongoose from 'mongoose';
 import {useApolloServer} from './graphql';
 import serve from 'koa-static';
 import { userMust, beUser } from './userMust';
+import createPromoterTerminators from './projectGlobalTasks/createPromoterTerminator'
 
 type Ctx = koa.ParameterizedContext<ICustomState, {}>;
 type Next = ()=>Promise<any>;
@@ -51,6 +52,8 @@ router.get('/api/user/current', async (ctx:Ctx, next:Next)=> {
     ctx.body.eta = eta;
   }
 });
+
+createPromoterTerminators(router);
 
 
 app.use(router.routes());
