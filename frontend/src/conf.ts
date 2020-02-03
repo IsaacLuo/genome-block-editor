@@ -1,5 +1,6 @@
 const conf = {
-  backendURL:'http://localhost:8000'
+  backendURL:'http://localhost:8000',
+  authServerURL: 'https://api.auth.cailab.org',
 }
 
 if (process.env.NODE_ENV === 'production') {

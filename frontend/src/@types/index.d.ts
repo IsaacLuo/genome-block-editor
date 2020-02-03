@@ -17,7 +17,7 @@ declare interface IFeature extends IBlock{
   row: number;
 }
 
-interface IAnnotationPart {
+declare interface IAnnotationPart {
   _id: any;
   featureType: string;
   species: string;
@@ -79,7 +79,18 @@ declare interface IFileExplorerState {
   fileLists: IFileListState[];
 }
 
+declare interface IUserInfo {
+  _id: string;
+  fullName: string;
+  groups: string[];
+}
+
+declare interface IAppState {
+  currentUser: IUserInfo;
+}
+
 declare interface IStoreState {
+  app: IAppState;
   moveHistory: Array<{id:string, posFrom:number, posTo:number}>;
   currentProject: IProject;
   sourceFile?: ISourceFile;

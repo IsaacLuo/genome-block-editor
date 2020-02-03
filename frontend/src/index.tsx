@@ -4,15 +4,33 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import {StoreContext} from 'redux-react-hook';
-import {createStore} from 'redux';
+import {createStore, applyMiddleware} from 'redux';
 import {reducer} from './reducer';
+import saga from './saga';
+import createSagaMiddleware from 'redux-saga';
 
 // const store = createStore(reducer);
 /* eslint-disable no-underscore-dangle */
+// const store = createStore(
+//   reducer, /* preloadedState, */
+//   (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__()
+// );
+const sagaMiddleware = createSagaMiddleware();
+let middleWare: any;
+if (process.env.NODE_ENV === 'development') {
+  const composeEnhancers = ((window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ &&
+  (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ trace: true, traceLimit: 25 })) || ((f: any) => f);
+  middleWare = composeEnhancers(applyMiddleware(sagaMiddleware));
+} else {
+  middleWare = applyMiddleware(sagaMiddleware);
+}
+
 const store = createStore(
-  reducer, /* preloadedState, */
-  (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__()
-);
+    reducer,
+    middleWare,
+  );
+sagaMiddleware.run(saga);
+
 /* eslint-enable */
 
 ReactDOM.render(

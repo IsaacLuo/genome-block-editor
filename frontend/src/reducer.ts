@@ -1,6 +1,14 @@
 import { combineReducers } from "redux";
 
-const DEFAULT_GENOME_BROWSER_STATE ={
+const DEFAULT_APP_STATE:IAppState = {
+  currentUser: {
+    _id: '',
+    fullName: 'guest',
+    groups:[],
+  }
+};
+
+const DEFAULT_GENOME_BROWSER_STATE:IGenomBrowserState ={
       zoomLevel: 64,
       windowWidth: 1024,
       viewWindowStart:0,
@@ -12,11 +20,50 @@ const DEFAULT_GENOME_BROWSER_STATE ={
       rulerStep: 1000,
     }
 
-const DEFAULT_FILE_EXPLORER_STATE = {
+const DEFAULT_FILE_EXPLORER_STATE:IFileExplorerState = {
   fileLists: [{_id:'000000000000000000000000'}],
 }
 
+const DEFAULT_STORE_STATE:IStoreState = {
+  app: DEFAULT_APP_STATE,
+  moveHistory: [],
+  currentProject: {
+    _id: undefined,
+    name: 'undefined project',
+    version: '0.1',
+    parts: [],
+    owner: undefined,
+    group: 'all',
+    permission: 0x666,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    history: [],
+  },
+  // chromosomeBlocks: [],
+  sourceFile: undefined,
+  projectCorsor: 0,
+  componentVisible: {
+    openFileDialogVisible: false,
+    saveFileDialogVisible: false,
+    saveFileDialogNewFile: true,
+    exportGenbankDialogVisible: false,
+  },
+  genomeBrowser: DEFAULT_GENOME_BROWSER_STATE,
+  fileExplorer: DEFAULT_FILE_EXPLORER_STATE,
+};
+
 const rulerZoomList = [50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000];
+
+export const appReducer = (state:IAppState, action:IAction):IAppState => {
+  if (state === undefined) {
+    state = DEFAULT_APP_STATE;
+  }
+  switch(action.type) {
+    case 'SET_CURRENT_USER':
+      return {...state, currentUser:action.data};
+  }
+  return state;
+}
 
 
 export const componentVisibleReducer = (state:IComponentVisibleState, action:IAction):IComponentVisibleState => {
@@ -240,6 +287,7 @@ function reCombineReducers(reducers: any) {
 
 
 export const reducer = reCombineReducers({
+  app: appReducer,
   componentVisible: componentVisibleReducer,
   currentProject: projectReducer,
   genomeBrowser: genomeBrowserReducer,
@@ -247,29 +295,4 @@ export const reducer = reCombineReducers({
 })
 
 
-export const defaultStoreState : IStoreState = {
-  moveHistory: [],
-  currentProject: {
-    _id: undefined,
-    name: 'undefined project',
-    version: '0.1',
-    parts: [],
-    owner: undefined,
-    group: 'all',
-    permission: 0x666,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    history: [],
-  },
-  // chromosomeBlocks: [],
-  sourceFile: undefined,
-  projectCorsor: 0,
-  componentVisible: {
-    openFileDialogVisible: false,
-    saveFileDialogVisible: false,
-    saveFileDialogNewFile: true,
-    exportGenbankDialogVisible: false,
-  },
-  genomeBrowser: DEFAULT_GENOME_BROWSER_STATE,
-  fileExplorer: DEFAULT_FILE_EXPLORER_STATE,
-};
+export const defaultStoreState : IStoreState = DEFAULT_STORE_STATE;
