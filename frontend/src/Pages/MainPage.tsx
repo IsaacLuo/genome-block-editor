@@ -52,8 +52,7 @@ const MainPage = () => {
   const onLogginWindowClosed = (messageEvent: MessageEvent) => {
     const {data} = messageEvent;
     if (data.event === 'closed' && data.success === true) {
-      console.log('login');
-      // this.props.cailabInstanceLogin();
+      dispatch({type:'GET_CURRENT_USER'})
     }
     window.removeEventListener('message', onLogginWindowClosed);
   }
@@ -74,14 +73,16 @@ const MainPage = () => {
   }
 
   if (currentUser._id) {
-    return <div>
+    return <Panel>
+      <RectDiaglog>
       <div>
       <Button type="primary" size="large"><Link to="/genome_functions">genome functions</Link></Button>
       </div>
       <div>
       <Button type="primary" size="large"><Link to="/block_editor">block editor</Link></Button>
       </div>
-    </div>
+      </RectDiaglog>
+    </Panel>
   }
   else {
       return <Panel>

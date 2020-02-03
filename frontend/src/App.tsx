@@ -13,6 +13,7 @@ import 'antd/dist/antd.css';
 import {BrowserRouter as Router, Route, Link} from "react-router-dom";
 import MainPage from './Pages/MainPage';
 import BlockEditor from './Pages/BlockEditor';
+import GenomeFunctions from './Pages/GenomeFunctions';
 
 import conf from 'conf';
 
@@ -28,6 +29,7 @@ const App: React.FC = () => {
       <Router>
         <Route path='/' exact component={MainPage}/>
         <Route path="/block_editor" component={BlockEditor}/>
+        <Route path="/genome_functions" component={GenomeFunctions}/>
       </Router>
     </div>
     </ApolloProvider>
