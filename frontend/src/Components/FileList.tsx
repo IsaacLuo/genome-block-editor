@@ -72,6 +72,7 @@ const FileList = (props:IProps = {id:undefined, level:0}) => {
             len
             strand
           }
+          ctype
         }
       }
       `

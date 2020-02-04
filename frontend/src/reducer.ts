@@ -24,11 +24,9 @@ const DEFAULT_FILE_EXPLORER_STATE:IFileExplorerState = {
   fileLists: [{_id:'000000000000000000000000'}],
 }
 
-const DEFAULT_STORE_STATE:IStoreState = {
-  app: DEFAULT_APP_STATE,
-  moveHistory: [],
-  currentProject: {
+const DEFAULT_PROJECT_STATE:IProject = {
     _id: undefined,
+    ctype: 'unknwon',
     name: 'undefined project',
     version: '0.1',
     parts: [],
@@ -38,7 +36,12 @@ const DEFAULT_STORE_STATE:IStoreState = {
     createdAt: new Date(),
     updatedAt: new Date(),
     history: [],
-  },
+  }
+
+const DEFAULT_STORE_STATE:IStoreState = {
+  app: DEFAULT_APP_STATE,
+  moveHistory: [],
+  currentProject: DEFAULT_PROJECT_STATE,
   // chromosomeBlocks: [],
   sourceFile: undefined,
   projectCorsor: 0,
@@ -103,18 +106,7 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
 
 export const projectReducer = (state:IProject, action:IAction):IProject => {
   if (state === undefined) {
-    state = {
-      _id: undefined,
-      name: 'undefined project',
-      version: '0.1',
-      parts: [],
-      owner: undefined,
-      group: 'all',
-      permission: 0x666,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      history: [],
-    }
+    state = DEFAULT_PROJECT_STATE
   }
   switch (action.type) {
     case 'COPY_BLOCK_TO_BASKET': {

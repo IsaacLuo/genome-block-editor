@@ -59,6 +59,7 @@ export function useApolloServer(app:any) {
     name: String
     len: Int
     parts: [OriginPart]
+    ctype: String
   }
 
   type MutationResult {

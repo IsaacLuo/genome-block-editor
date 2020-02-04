@@ -2,3 +2,8 @@
 /api/src/script/BY4741.json
 /api/logs
 /api/secret.ts
+/gff
+/api/utility/conf.json
+/.vscode
+/api/utility/.vscode
+/api/utility/__pycache__

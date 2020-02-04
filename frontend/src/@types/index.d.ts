@@ -34,13 +34,20 @@ declare interface IAnnotationPart {
 
 declare interface ISourceFile {
   _id: string;
+  ctype: string;
   name: string;
   parts: IAnnotationPart[];
   len: number;
+  owner?: IUser,
+  group: string,
+  permission: Number,
+  createdAt: Date,
+  updatedAt: Date,
 }
 
 declare interface IProject {
   _id: any;
+  ctype: string;
   name?: string,
   version?: string,
   parts: IAnnotationPart[],

@@ -42,8 +42,23 @@ export function* watchUsers() {
   yield takeLatest('GET_CURRENT_USER', getCurrentUser);
 }
 
+export function* forkProject(action: IAction) {
+  try {
+    yield call(axios.post, `${conf.authServerURL}/api/project/forkedFrom/${action.data}`, {withCredentials: true});
+
+    yield put({type: 'SET_SOURCE_FILE', data:});
+  } catch (error) {
+    console.warn('unable to logout');
+  }
+}
+
+export function* watchGenomeOperations() {
+  yield takeLatest('FORK_PROJECT', forkProject);
+}
+
 export default function* rootSaga() {
   yield all([
     fork(watchUsers),
+    fork(watchGenomeOperations),
   ]);
 }

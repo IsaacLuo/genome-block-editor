@@ -52,7 +52,7 @@ export const ProjectSchema = new Schema({
     type:Schema.Types.ObjectId,
     ref: 'User'
   },
-  group: String,
+  group: [String],
   permission: Number,
   history: [Schema.Types.ObjectId],
   ctype: String,

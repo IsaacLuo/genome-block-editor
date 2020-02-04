@@ -19,7 +19,7 @@ const FileExplorer = () => {
       {fileLists.map((v,i)=>({v,i}))
         .filter(v=>v.i >= fileLists.length - historyNumber || v.i === fileLists.length - 1)
         .map(({v,i})=>
-        <FileList id={v._id} level={i}/>
+        <FileList key={i} id={v._id} level={i}/>
       )}
     </div>
   );

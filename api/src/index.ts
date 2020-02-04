@@ -16,7 +16,7 @@ import serve from 'koa-static';
 import { userMust, beUser } from './userMust';
 import createPromoterTerminators from './projectGlobalTasks/createPromoterTerminator'
 
-type Ctx = koa.ParameterizedContext<ICustomState, {}>;
+type Ctx = koa.ParameterizedContext<ICustomState>;
 type Next = ()=>Promise<any>;
 
 const GUEST_ID = '000000000000000000000000';
@@ -51,6 +51,20 @@ router.get('/api/user/current', async (ctx:Ctx, next:Next)=> {
     const eta = user.exp - now;
     ctx.body.eta = eta;
   }
+});
+
+// fork project
+router.post('/api/project/forkedFrom/:id', async (ctx:Ctx, next:Next)=> {
+  const user = ctx.state.user;
+  const {id} = ctx.params.id;
+
+  const project = await Project.findById(id).exec();
+  project.ctype = 'project';
+  project.owner = user._id;
+  project.group = user.groups;
+  project.permission = 0x600;
+  project.updatedAt = new Date();
+  
 });
 
 createPromoterTerminators(router);

@@ -53,7 +53,7 @@ declare interface IProject {
   version: string,
   parts: Array<IAnnotationPart>,
   owner: IUser,
-  group: string,
+  group: string[],
   permission: Number,
   createdAt: Date,
   updatedAt: Date,
