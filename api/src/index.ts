@@ -56,14 +56,18 @@ router.get('/api/user/current', async (ctx:Ctx, next:Next)=> {
 // fork project
 router.post('/api/project/forkedFrom/:id', async (ctx:Ctx, next:Next)=> {
   const user = ctx.state.user;
-  const {id} = ctx.params.id;
-
-  const project = await Project.findById(id).exec();
+  const {id} = ctx.params;
+  const project = await (await Project.findById(id).exec()).toObject();
   project.ctype = 'project';
   project.owner = user._id;
   project.group = user.groups;
   project.permission = 0x600;
   project.updatedAt = new Date();
+  project._id = undefined;
+  delete project._id;
+  const result = await Project.create(project);
+  console.log(result);
+  ctx.body = result;
   
 });
 

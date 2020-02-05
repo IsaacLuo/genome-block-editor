@@ -46,7 +46,7 @@ export function* forkProject(action: IAction) {
   try {
     yield call(axios.post, `${conf.authServerURL}/api/project/forkedFrom/${action.data}`, {withCredentials: true});
 
-    yield put({type: 'SET_SOURCE_FILE', data:});
+    // yield put({type: 'SET_SOURCE_FILE', data:});
   } catch (error) {
     console.warn('unable to logout');
   }
