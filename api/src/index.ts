@@ -66,9 +66,7 @@ router.post('/api/project/forkedFrom/:id', async (ctx:Ctx, next:Next)=> {
   project._id = undefined;
   delete project._id;
   const result = await Project.create(project);
-  console.log(result);
-  ctx.body = result;
-  
+  ctx.body = {_id:result._id};
 });
 
 createPromoterTerminators(router);

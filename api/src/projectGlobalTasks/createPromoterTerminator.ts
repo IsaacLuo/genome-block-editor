@@ -15,6 +15,8 @@ export default (router) => {
   async (ctx:Ctx, next:Next)=> {
     const _id = ctx.params.id;
     const clientToken = ctx.cookies.get('token');
+    let startTime = Date.now();
+    console.log('query project');
     // first get project genes and generate gff json
     const project = await Project
       .findById(_id)
@@ -31,7 +33,7 @@ export default (router) => {
       },
       records: project.toObject().parts.map(part=>({...part, seqName: project.name})),
     }
-    console.log('project found', project.len);
+    console.log('project found', project.len, Date.now() - startTime);
     // ctx.body = gffJson;
 
     // call webexe
@@ -49,6 +51,7 @@ export default (router) => {
       });
     const gffJsonFilePath = result.data.filePath;
     // call webexe again to start mission
+    console.log('file uploaded', project.len, Date.now() - startTime);
     const result2 = await axios.post(`${conf.secret.webexe.url}/api/task/generate_promoter_terminator`,
     {
       params: {
@@ -62,7 +65,8 @@ export default (router) => {
         'Cookie': `token=${clientToken}`,
       }
     });
-    ctx.body = {fileId: result.data, reuslt2: result2.data,};
+    console.log('task created', project.len, Date.now() - startTime);
+    ctx.body = {debugData: result.data, taskInfo: result2.data,};
   } catch (err) {
     console.error(err);
   }
