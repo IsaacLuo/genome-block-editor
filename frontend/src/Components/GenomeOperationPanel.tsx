@@ -29,7 +29,7 @@ const GenomeOperationPanel: React.FC = () => {
       name: 'create promoter terminator',
       visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'singleLayerProject'),
       onClick: ()=>{
-        dispatch({type:'CREATE_PROMOTER_TERMINATOR'})
+        dispatch({type:'SHOW_CREATE_PROMOTER_TERMINATOR_DIALOG'})
       }
     },
   ]

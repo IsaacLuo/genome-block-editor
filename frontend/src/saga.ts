@@ -2,9 +2,12 @@
 // redux saga
 import {call, all, fork, put, takeLatest, select} from 'redux-saga/effects';
 
+import watchWebExe from './sagas/webexe';
+
 // other libs
 import axios from 'axios';
 import conf from './conf';
+import { notification } from 'antd';
 
 export function* cailabInstanceLogin(action: IAction) {
   try {
@@ -52,13 +55,29 @@ export function* forkProject(action: IAction) {
   }
 }
 
+export function* createPromoterTerminator(aciton:IAction) {
+  // 1. call api to start webexe process at back-end
+  try {
+    const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
+    const result = yield call(axios.put, `${conf.backendURL}/api/mapping_project/gen_pro_ter/from/${id}`, {}, {withCredentials: true});
+    const {taskInfo} = result.data;
+    console.log('ws url = ', taskInfo.serverURL);
+    // 2. start webexe task at ws
+    yield put({type: 'ATTACH_TASK', data:{taskUrl:taskInfo.serverURL}});
+  } catch (error) {
+    notification.error({message:error});
+  }
+}
+
 export function* watchGenomeOperations() {
   yield takeLatest('FORK_PROJECT', forkProject);
+  yield takeLatest('CREATE_PROMOTER_TERMINATOR', createPromoterTerminator);
 }
 
 export default function* rootSaga() {
   yield all([
     fork(watchUsers),
     fork(watchGenomeOperations),
+    fork(watchWebExe),
   ]);
 }

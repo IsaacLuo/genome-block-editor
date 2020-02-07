@@ -38,19 +38,36 @@ const DEFAULT_PROJECT_STATE:IProject = {
     history: [],
   }
 
+const DEFAULT_GENERAL_TASK_STATE:IGeneralTaskState = {
+  message: '',
+  progress: 0,
+  taskStatus: 'init',
+  showProgressBar: false,
+  ws: undefined,
+  clientId: '',
+  processId: undefined,
+  signalLog: [],
+  outputLog: [],
+  result: undefined,
+}
+
+const DEFAULT_COMPONENT_VISIBLE_STATE:IComponentVisibleState = {
+  openFileDialogVisible: false,
+  saveFileDialogVisible: false,
+  saveFileDialogNewFile: true,
+  exportGenbankDialogVisible: false,
+  generatePromoterTerminatorDialogVisible: false,
+}
+
 const DEFAULT_STORE_STATE:IStoreState = {
   app: DEFAULT_APP_STATE,
+  generalTask: DEFAULT_GENERAL_TASK_STATE,
   moveHistory: [],
   currentProject: DEFAULT_PROJECT_STATE,
   // chromosomeBlocks: [],
   sourceFile: undefined,
   projectCorsor: 0,
-  componentVisible: {
-    openFileDialogVisible: false,
-    saveFileDialogVisible: false,
-    saveFileDialogNewFile: true,
-    exportGenbankDialogVisible: false,
-  },
+  componentVisible: DEFAULT_COMPONENT_VISIBLE_STATE,
   genomeBrowser: DEFAULT_GENOME_BROWSER_STATE,
   fileExplorer: DEFAULT_FILE_EXPLORER_STATE,
 };
@@ -72,12 +89,7 @@ export const appReducer = (state:IAppState, action:IAction):IAppState => {
 export const componentVisibleReducer = (state:IComponentVisibleState, action:IAction):IComponentVisibleState => {
   if (state === undefined) {
     console.log('state is undefined')
-    state = {
-      openFileDialogVisible: false,
-      saveFileDialogVisible: false,
-      saveFileDialogNewFile: true,
-      exportGenbankDialogVisible: false,
-    }
+    state = DEFAULT_COMPONENT_VISIBLE_STATE;
   }
   
   switch (action.type) {
@@ -98,6 +110,12 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
     }
     case 'HIDE_EXPORT_GENBANK_DIALOG': {
       return {...state, exportGenbankDialogVisible: false};
+    }
+    case 'SHOW_CREATE_PROMOTER_TERMINATOR_DIALOG': {
+      return {...state, generatePromoterTerminatorDialogVisible: true};
+    }
+    case 'HIDE_CREATE_PROMOTER_TERMINATOR_DIALOG': {
+      return {...state, generatePromoterTerminatorDialogVisible: false};
     }
     default:
       return state;
@@ -276,10 +294,16 @@ function reCombineReducers(reducers: any) {
   }
 }
 
-
+export const generalTaskReducer = (state:IGeneralTaskState) => {
+  if (state === undefined) {
+    state = DEFAULT_GENERAL_TASK_STATE;
+  }
+  return state;
+}
 
 export const reducer = reCombineReducers({
   app: appReducer,
+  generalTask: generalTaskReducer,
   componentVisible: componentVisibleReducer,
   currentProject: projectReducer,
   genomeBrowser: genomeBrowserReducer,

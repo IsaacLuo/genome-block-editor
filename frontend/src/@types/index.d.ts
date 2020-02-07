@@ -64,6 +64,7 @@ declare interface IComponentVisibleState {
   saveFileDialogVisible: boolean;
   saveFileDialogNewFile: boolean;
   exportGenbankDialogVisible: boolean;
+  generatePromoterTerminatorDialogVisible: boolean;
 }
 
 declare interface IGenomBrowserState {
@@ -96,8 +97,23 @@ declare interface IAppState {
   currentUser: IUserInfo;
 }
 
+interface IGeneralTaskState {
+  message: string,
+  progress: 0,
+  taskStatus: TaskStatus,
+  showProgressBar: boolean,
+  ws?: WebSocket,
+  clientId: string,
+
+  processId?: string;
+  signalLog: IServerLog[];
+  outputLog: IServerLog[];
+  result: any;
+}
+
 declare interface IStoreState {
   app: IAppState;
+  generalTask: IGeneralTaskState;
   moveHistory: Array<{id:string, posFrom:number, posTo:number}>;
   currentProject: IProject;
   sourceFile?: ISourceFile;

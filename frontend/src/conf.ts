@@ -1,5 +1,5 @@
 const conf = {
-  backendURL:'http://localhost:8000',
+  backendURL:'http://local.cailab.org:8000',
   authServerURL: 'https://api.auth.cailab.org',
 }
 
