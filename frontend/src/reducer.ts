@@ -299,9 +299,13 @@ export const generalTaskReducer = (state:IGeneralTaskState, action:IAction) => {
     state = DEFAULT_GENERAL_TASK_STATE;
   }
   switch (action.type) {
-    case 'PROGRESS':
+    case 'PROGRESS':{
       const {message, progress} = action.data;
       return {...state, message, progress};
+    }
+    case 'SERVER_RESULT': {
+      return {...state, progress:100,};
+    }
   }
   return state;
 }
