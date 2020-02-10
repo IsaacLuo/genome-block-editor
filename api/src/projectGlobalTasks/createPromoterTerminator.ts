@@ -15,6 +15,7 @@ export default (router) => {
   async (ctx:Ctx, next:Next)=> {
     const _id = ctx.params.id;
     const clientToken = ctx.cookies.get('token');
+    const {promoterLength, terminatorLength} = ctx.request.body;
     let startTime = Date.now();
     console.log('query project');
     // first get project genes and generate gff json
@@ -56,8 +57,8 @@ export default (router) => {
     {
       params: {
         srcFileName:[gffJsonFilePath],
-        promoterLength: 500,
-        terminatorLength: 200,
+        promoterLength,
+        terminatorLength,
       },
     },
     {

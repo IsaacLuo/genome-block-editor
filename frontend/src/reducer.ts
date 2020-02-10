@@ -294,9 +294,14 @@ function reCombineReducers(reducers: any) {
   }
 }
 
-export const generalTaskReducer = (state:IGeneralTaskState) => {
+export const generalTaskReducer = (state:IGeneralTaskState, action:IAction) => {
   if (state === undefined) {
     state = DEFAULT_GENERAL_TASK_STATE;
+  }
+  switch (action.type) {
+    case 'PROGRESS':
+      const {message, progress} = action.data;
+      return {...state, message, progress};
   }
   return state;
 }

@@ -59,7 +59,14 @@ export function* createPromoterTerminator(aciton:IAction) {
   // 1. call api to start webexe process at back-end
   try {
     const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
-    const result = yield call(axios.put, `${conf.backendURL}/api/mapping_project/gen_pro_ter/from/${id}`, {}, {withCredentials: true});
+    const {promoterLength, terminatorLength} = aciton.data;
+    const result = yield call(
+      axios.put, 
+      `${conf.backendURL}/api/mapping_project/gen_pro_ter/from/${id}`, 
+      {
+        promoterLength, 
+        terminatorLength,
+      }, {withCredentials: true});
     const {taskInfo} = result.data;
     console.log('ws url = ', taskInfo.serverURL);
     // 2. start webexe task at ws
