@@ -43,6 +43,7 @@ export function* logout(action: IAction) {
 export function* watchUsers() {
   yield takeLatest('CAILAB_INSTANCE_LOGIN', cailabInstanceLogin);
   yield takeLatest('GET_CURRENT_USER', getCurrentUser);
+  yield takeLatest('LOGOUT', logout);
 }
 
 export function* forkProject(action: IAction) {

@@ -3,7 +3,7 @@ import { combineReducers } from "redux";
 const DEFAULT_APP_STATE:IAppState = {
   currentUser: {
     _id: '',
-    fullName: 'guest',
+    fullName: '',
     groups:[],
   }
 };
@@ -81,6 +81,8 @@ export const appReducer = (state:IAppState, action:IAction):IAppState => {
   switch(action.type) {
     case 'SET_CURRENT_USER':
       return {...state, currentUser:action.data};
+    case 'LOGOUT_DONE':
+      return DEFAULT_APP_STATE;
   }
   return state;
 }
