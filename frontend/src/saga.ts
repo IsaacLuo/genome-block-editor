@@ -11,7 +11,7 @@ import { notification } from 'antd';
 
 export function* cailabInstanceLogin(action: IAction) {
   try {
-    const res = yield call(axios.post, conf.backendURL + '/api/session', {}, {withCredentials: true});
+    yield call(axios.post, conf.backendURL + '/api/session', {}, {withCredentials: true});
     yield put({type: 'GET_CURRENT_USER', data: undefined});
   } catch (error) {
   }
@@ -48,7 +48,7 @@ export function* watchUsers() {
 
 export function* forkProject(action: IAction) {
   try {
-    yield call(axios.post, `${conf.authServerURL}/api/project/forkedFrom/${action.data}`, {withCredentials: true});
+    yield call(axios.post, `${conf.backendURL}/api/project/forkedFrom/${action.data}`, {withCredentials: true});
 
     // yield put({type: 'SET_SOURCE_FILE', data:});
   } catch (error) {

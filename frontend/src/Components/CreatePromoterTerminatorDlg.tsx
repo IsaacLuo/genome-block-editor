@@ -12,8 +12,18 @@ const LogList = styled.div`
 `
 
 const CreatePromoterTermiatorDlg = () => {
-  const {showDialog} = useMappedState((state:IStoreState)=>({
+  const {
+    showDialog,
+    taskStatus,
+    message,
+    progress,
+    outputLog,
+  } = useMappedState((state:IStoreState)=>({
     showDialog: state.componentVisible.generatePromoterTerminatorDialogVisible,
+    taskStatus: state.generalTask.taskStatus,
+    message: state.generalTask.message,
+    progress: state.generalTask.progress,
+    outputLog: state.generalTask.outputLog,
   }));
   const [promoterLength, setPromoterLen] = useState<number>(500);
   const [terminatorLength, setTerminatorLen] = useState<number>(200);
@@ -31,8 +41,10 @@ const CreatePromoterTermiatorDlg = () => {
     promoter length <InputNumber min={0} defaultValue={promoterLength} onChange={(value)=>setPromoterLen(value?value:promoterLength)} />
     terminator length <InputNumber min={0} defaultValue={terminatorLength} onChange={(value)=>setTerminatorLen(value?value:terminatorLength)} />
     <p>test</p>
-    <Progress percent={30} />
-    <LogList>123</LogList>
+    <Progress percent={progress} />
+    <div>{taskStatus}</div>
+    <div>{message}</div>
+  <LogList>{outputLog}</LogList>
     <Button type="primary" onClick={()=>dispatch({type:'CREATE_PROMOTER_TERMINATOR', data:{promoterLength, terminatorLength}})}>start</Button>
   </Modal>
 }

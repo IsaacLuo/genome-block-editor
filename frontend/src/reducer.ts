@@ -249,7 +249,7 @@ function reCombineReducers(reducers: any) {
   return (state:IStoreState|undefined, action:IAction):IStoreState => {
     if (!state) {
       console.log('set default totla')
-      state = defaultStoreState;
+      state = DEFAULT_STORE_STATE;
     }
     // console.debug('action', action.type, action.data);
     switch (action.type) {
@@ -300,6 +300,7 @@ export const generalTaskReducer = (state:IGeneralTaskState, action:IAction) => {
   if (state === undefined) {
     state = DEFAULT_GENERAL_TASK_STATE;
   }
+  console.log(action);
   switch (action.type) {
     case 'PROGRESS':{
       const {message, progress} = action.data;
@@ -307,6 +308,12 @@ export const generalTaskReducer = (state:IGeneralTaskState, action:IAction) => {
     }
     case 'SERVER_RESULT': {
       return {...state, progress:100,};
+    }
+    // case 'SET_PROCESS_SIGNAL': {
+      
+    // }
+    case 'SET_PROCESS_LOG': {
+      return {...state, outputLog: [...state.outputLog, action.data]}
     }
   }
   return state;
@@ -320,6 +327,3 @@ export const reducer = reCombineReducers({
   genomeBrowser: genomeBrowserReducer,
   fileExplorer: fileExplorerReducer,
 })
-
-
-export const defaultStoreState : IStoreState = DEFAULT_STORE_STATE;
