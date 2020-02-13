@@ -35,7 +35,6 @@ declare interface ICustomState {
 interface IAnnotationPart {
   _id: any;
   featureType: string;
-  species: string;
   chrId: number;
   chrName: string;
   start: number;

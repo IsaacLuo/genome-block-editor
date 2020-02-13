@@ -56,7 +56,7 @@ const ArrowFeature = ({x,y,blockId, annotationPart, width, height, style, shape,
       onDoubleClick={()=>dispatch({type:'ADD_NEW_BLOCK', data: annotationPart})}
     >
       {block}
-      {width > annotationPart.name.length*8 && 
+      {annotationPart.name && width > annotationPart.name.length*8 && 
         annotationPart.name !== 'unknown' && 
         <text 
           x={x+textOffset} 

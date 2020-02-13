@@ -59,6 +59,7 @@ export function* forkProject(action: IAction) {
 export function* createPromoterTerminator(aciton:IAction) {
   // 1. call api to start webexe process at back-end
   try {
+    console.log('createPromoterTerminator')
     const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
     const {promoterLength, terminatorLength} = aciton.data;
     const result = yield call(
@@ -73,7 +74,7 @@ export function* createPromoterTerminator(aciton:IAction) {
     // 2. start webexe task at ws
     yield put({type: 'ATTACH_TASK', data:{taskUrl:taskInfo.serverURL}});
   } catch (error) {
-    notification.error({message:error});
+    yield call(notification.error, {message:error});
   }
 }
 

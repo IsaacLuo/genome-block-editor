@@ -114,7 +114,11 @@ function* startTask(action:IAction) {
           });
           break;
         
-
+        case 'abort':
+          yield put({
+            type: 'ABORT_TASK',
+          });
+          break;
         case 'finish':
           yield put({
             type: 'FINISH_TASK',
@@ -250,6 +254,11 @@ function* rejectTask(action:IAction) {
   yield(console.error, action.data.message);
 }
 
+function* handleServerResult(action:IAction) {
+  // got server results send to backend
+  const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
+  const newTaskContent = yield call(Axios.put, `${conf.backendURL}/api/project/${id}/fromFileUrl`, {fileUrl:action.data.files[0]}, {withCredentials: true});
+}
 
 export default function* watchWebExe() {
   yield takeEvery('START_TASK', startTask);
@@ -258,5 +267,6 @@ export default function* watchWebExe() {
   yield takeEvery('ABORT_TASK', abortTask);
   yield takeLatest('WS_DISCONNECTED', onWebsocketDisconnected);
   yield takeEvery('HEARTBEAT', heartBeat);
+  yield takeEvery('SERVER_RESULT', handleServerResult);
   
 }

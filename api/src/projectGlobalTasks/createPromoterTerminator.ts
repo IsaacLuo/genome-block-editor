@@ -1,6 +1,6 @@
 /// <reference path="../@types/index.d.ts" />
 import { userMust, beUser } from '../userMust'
-import {User, Project} from '../models'
+import {User, Project, AnnotationPart} from '../models'
 import koa from 'koa';
 import axios from 'axios';
 import conf from '../../conf';
@@ -72,4 +72,41 @@ export default (router) => {
     console.error(err);
   }
   })   
+
+  router.put('/api/project/:id/fromFileUrl',
+  userMust(beUser),
+  async (ctx:Ctx, next:Next)=> {
+    const project = await Project.findById(ctx.params.id).exec();
+    if (!project) {
+      ctx.throw(404);
+    }
+    const fileUrl = ctx.request.body.fileUrl;
+    // get file from webexe server
+    const clientToken = ctx.cookies.get('token');
+    console.log(`${conf.secret.webexe.url}/api/resultFile/${fileUrl.url}/as/${fileUrl.name}`);
+    const result = await axios.get(`${conf.secret.webexe.url}/api/resultFile/${fileUrl.url}/as/${fileUrl.name}`,
+    {
+      headers: {
+        'Cookie': `token=${clientToken}`,
+      }
+    });
+    const gffObj = result.data;
+    // read new data from the file
+    const originalParts = project.parts;
+    const newParts = [];
+    for(const record of gffObj.records) {
+    
+      if (record._id === undefined) {
+        // create new feature
+        const newAnnotation = await AnnotationPart.create({
+          ...record,
+          original: false,
+        });
+        newParts.push(newAnnotation._id);
+      }
+    }
+    const updateResult = await Project.findByIdAndUpdate(ctx.params.id, {parts: [...originalParts, ...newParts]})
+    console.log(updateResult);
+    ctx.body={message:'OK', newParts}
+  })
 }

@@ -18,7 +18,6 @@ export const User:Model<IUserModel> = mongoose.model('User', UserSchema, 'users'
 
 export const AnnotationPartSchema = new Schema({
   featureType: String,
-  species: String,
   chrId: Number,
   chrName: String,
   start: Number,
