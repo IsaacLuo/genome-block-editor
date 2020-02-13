@@ -7,3 +7,5 @@
 /.vscode
 /api/utility/.vscode
 /api/utility/__pycache__
+/api/conf.json
+/frontend/conf.json
