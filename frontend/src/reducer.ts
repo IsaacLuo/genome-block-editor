@@ -1,5 +1,5 @@
 import { combineReducers } from "redux";
-import conf from "conf";
+import conf from "./conf.json";
 
 const DEFAULT_APP_STATE:IAppState = {
   currentUser: conf.localMode ? {

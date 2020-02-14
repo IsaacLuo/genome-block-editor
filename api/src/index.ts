@@ -5,7 +5,7 @@ import koaBody from 'koa-body';
 import middleware from './middleware'
 import Router from 'koa-router';
 import log4js from 'log4js';
-import conf from '../conf';
+import conf from './conf.json';
 import {Project, User} from './models';
 import jwt from 'jsonwebtoken';
 import cors from 'koa-cors';
@@ -105,5 +105,5 @@ useApolloServer(app);
 // -----------------------------------------------------------------------------------------------
 
 
-app.listen(8000, '0.0.0.0');
-log4js.getLogger().info('start listening at 8000');
+app.listen(conf.port, '0.0.0.0');
+log4js.getLogger().info(`start listening at ${conf.port}`);

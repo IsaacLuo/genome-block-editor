@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from "redux-react-hook";
 import axios from 'axios';
-import conf from 'conf';
+import conf from 'conf.json';
 import ApolloClient from 'apollo-boost';
 import { gql } from "apollo-boost";
 import { Icon } from 'antd';

@@ -6,7 +6,7 @@ import watchWebExe from './sagas/webexe';
 
 // other libs
 import axios from 'axios';
-import conf from './conf';
+import conf from './conf.json';
 import { notification } from 'antd';
 
 export function* cailabInstanceLogin(action: IAction) {

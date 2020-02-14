@@ -3,7 +3,7 @@ import { userMust, beUser } from '../userMust'
 import {User, Project, AnnotationPart} from '../models'
 import koa from 'koa';
 import axios from 'axios';
-import conf from '../../conf';
+import conf from '../conf.json';
 import FormData from 'form-data';
 type Ctx = koa.ParameterizedContext<ICustomState>;
 type Next = ()=>Promise<any>;
@@ -42,7 +42,7 @@ export default (router) => {
     try {
     const formData = new FormData();
     formData.append('file', Buffer.from(JSON.stringify(gffJson), 'utf-8'), 'gene.gff.json');
-    const result = await axios.post(`${conf.secret.webexe.url}/api/fileParam/`,
+    const result = await axios.post(`${conf.webexe.url}/api/fileParam/`,
       formData.getBuffer(),
       {
         headers: {
@@ -53,7 +53,7 @@ export default (router) => {
     const gffJsonFilePath = result.data.filePath;
     // call webexe again to start mission
     console.log('file uploaded', project.len, Date.now() - startTime);
-    const result2 = await axios.post(`${conf.secret.webexe.url}/api/task/generate_promoter_terminator`,
+    const result2 = await axios.post(`${conf.webexe.url}/api/task/generate_promoter_terminator`,
     {
       params: {
         srcFileName:[gffJsonFilePath],
@@ -67,7 +67,7 @@ export default (router) => {
       }
     });
     console.log('task created', project.len, Date.now() - startTime);
-    ctx.body = {debugData: result.data, taskInfo: {...result2.data, serverURL: conf.secret.webexe.processWsUrl + result2.data.processId},};
+    ctx.body = {debugData: result.data, taskInfo: {...result2.data, serverURL: conf.webexe.processWsUrl + result2.data.processId},};
   } catch (err) {
     console.error(err);
   }
@@ -83,8 +83,8 @@ export default (router) => {
     const fileUrl = ctx.request.body.fileUrl;
     // get file from webexe server
     const clientToken = ctx.cookies.get('token');
-    console.log(`${conf.secret.webexe.url}/api/resultFile/${fileUrl.url}/as/${fileUrl.name}`);
-    const result = await axios.get(`${conf.secret.webexe.url}/api/resultFile/${fileUrl.url}/as/${fileUrl.name}`,
+    console.log(`${conf.webexe.url}/api/resultFile/${fileUrl.url}/as/${fileUrl.name}`);
+    const result = await axios.get(`${conf.webexe.url}/api/resultFile/${fileUrl.url}/as/${fileUrl.name}`,
     {
       headers: {
         'Cookie': `token=${clientToken}`,

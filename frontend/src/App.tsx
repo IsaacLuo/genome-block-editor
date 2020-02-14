@@ -15,7 +15,7 @@ import MainPage from './Pages/MainPage';
 import BlockEditor from './Pages/BlockEditor';
 import GenomeFunctions from './Pages/GenomeFunctions';
 
-import conf from 'conf';
+import conf from 'conf.json';
 import { useMappedState, useDispatch } from 'redux-react-hook';
 import UserBar from 'Components/UserBar';
 

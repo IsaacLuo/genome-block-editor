@@ -5,7 +5,7 @@ import { Modal, InputNumber, Progress, Button} from 'antd';
 import styled from 'styled-components'
 import { RouteComponentProps, Link } from 'react-router-dom';
 import { Menu } from 'antd';
-import conf from 'conf';
+import conf from 'conf.json';
 // const GUEST_ID = '000000000000000000000000';
 const UserBarContainer = styled.div`
   background-color: #e9ecef;

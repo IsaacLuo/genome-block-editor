@@ -1,7 +1,7 @@
 import koa from 'koa';
 import log4js, {Appender, LogLevelFilterAppender} from 'log4js';
 import mongoose from 'mongoose';
-import conf from '../conf';
+import conf from './conf.json';
 import koaJwt from 'koa-jwt';
 import jwt from 'jsonwebtoken';
 

@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Button } from 'antd';
 import styled from 'styled-components';
 import { useMappedState, useDispatch } from 'redux-react-hook';
-import conf from 'conf';
+import conf from 'conf.json';
 
 const Panel = styled.div`
   display:flex;

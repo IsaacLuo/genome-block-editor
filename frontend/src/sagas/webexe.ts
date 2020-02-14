@@ -1,5 +1,5 @@
 import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-saga/effects'
-import conf from '../conf'
+import conf from '../conf.json'
 import { eventChannel } from 'redux-saga'
 import {delay} from 'redux-saga/effects'
 

@@ -1,5 +1,5 @@
 /// <reference path="../@types/index.d.ts" />
-import conf from '../../conf'
+import conf from '../../conf.json'
 import fs from 'fs'
 
 import * as childProcess from 'child_process'

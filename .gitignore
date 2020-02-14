@@ -9,3 +9,5 @@
 /api/utility/__pycache__
 /api/conf.json
 /frontend/conf.json
+/api/src/conf.json
+/frontend/src/conf.json
