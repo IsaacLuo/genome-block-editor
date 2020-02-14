@@ -1,2 +1,2 @@
-import conf from '../conf.json'
+import conf from 'local/conf.json'
 export default conf;

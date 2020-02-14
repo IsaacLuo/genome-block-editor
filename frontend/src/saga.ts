@@ -19,6 +19,9 @@ export function* cailabInstanceLogin(action: IAction) {
 
 export function* getCurrentUser(action: IAction) {
   try {
+    if (conf.localMode) {
+      return;
+    }
     const res = yield call(axios.get, conf.authServerURL + '/api/user/current', {withCredentials: true});
     const currentUser: IUserInfo = yield select((state: IStoreState) => state.app.currentUser);
     yield put({type: 'SET_CURRENT_USER', data: res.data.user});

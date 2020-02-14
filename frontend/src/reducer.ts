@@ -1,7 +1,13 @@
 import { combineReducers } from "redux";
+import conf from "conf";
 
 const DEFAULT_APP_STATE:IAppState = {
-  currentUser: {
+  currentUser: conf.localMode ? {
+    _id: '000000000000000000000000',
+    fullName: 'user',
+    groups: ['users']
+  }
+  :{
     _id: '',
     fullName: '',
     groups:[],

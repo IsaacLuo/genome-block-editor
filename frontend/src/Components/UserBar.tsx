@@ -54,6 +54,19 @@ const UserBar = () => {
     );
   }
 
+  if(conf.localMode) {
+    return <UserBarContainer>
+      <Menu
+        theme="dark"
+        mode="horizontal"
+        defaultSelectedKeys={['1']}
+        style={{ lineHeight: '66px' }}
+      >
+        <Menu.Item key="1"><Link to="/">Cailab-GBE</Link></Menu.Item>
+        <span>local mode</span>
+      </Menu>
+    </UserBarContainer>
+  }
 
 
   return (
@@ -83,7 +96,6 @@ const UserBar = () => {
         <Menu.Item key="1"><Link to="/">Cailab-GBE</Link></Menu.Item>
         <Menu.SubMenu style={{float: 'right'}} title={<span>{currentUser.fullName}<PortraitImg src='https://api.auth.cailab.org/api/user/current/portrait/s/profile.jpg'/></span>}>
           <Menu.Item key="2" onClick={onClickLogout}>logout</Menu.Item>
-          
         </Menu.SubMenu>
     </Menu>
         

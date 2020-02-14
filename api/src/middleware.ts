@@ -117,11 +117,11 @@ export default function middleware (app:koa) {
   app.use( async (ctx:koa.ParameterizedContext<any, {}>, next: ()=>Promise<any>)=> {
     if (ctx.URL.pathname == '/graphql') {
       if ( ctx.request.body.operationName !== 'IntrospectionQuery') {
-        logger.info(ctx.state.user.fullName, ctx.request.body.operationName);
+        logger.info(ctx.request.ip, ctx.state.user.fullName, ctx.request.body.operationName);
         logger.debug(ctx.request.body.query);
       }
     } else {
-      logger.info(ctx.state.user.fullName, ctx.method, ctx.URL.pathname);
+      logger.info(ctx.request.ip, ctx.state.user.fullName, ctx.method, ctx.URL.pathname);
     }
     
     await next();
