@@ -16,6 +16,10 @@ import serve from 'koa-static';
 import { userMust, beUser } from './userMust';
 import createPromoterTerminators from './projectGlobalTasks/createPromoterTerminator'
 
+import http from 'http';
+import socket from 'socket.io';
+
+
 type Ctx = koa.ParameterizedContext<ICustomState>;
 type Next = ()=>Promise<any>;
 
@@ -84,26 +88,14 @@ router.post('/graphql', async (ctx:Ctx, next:Next)=> {
 useApolloServer(app);
 
 
-// -----------------------------------------------------------------------------------------------
-// router.get('/graphql',
-// async (ctx:Ctx, next:Next)=> {
-//   await graphqlKoa({schema: GraphqlSchema})(ctx, next);
-// });
-// router.post('/graphql',
-// async (ctx:Ctx, next:Next)=> {
-//   await graphqlKoa({schema: GraphqlSchema})(ctx, next);
-// });
-
-// router.get('/graphiql', 
-// async (ctx:Ctx, next:Next)=> {
-//   await graphiqlKoa({endpointURL: '/graphql'})(ctx)
-// }
-// );
-
+// ----------------------------------socket.io part----------------------------------------------
+const server = http.createServer(app.callback());
+const io = socket(server);
 
 
 // -----------------------------------------------------------------------------------------------
+app.use(router.routes());
+// app.listen(conf.port, '0.0.0.0');
+server.listen(conf.port);
 
-
-app.listen(conf.port, '0.0.0.0');
 log4js.getLogger().info(`start listening at ${conf.port}`);
