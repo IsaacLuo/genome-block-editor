@@ -67,7 +67,7 @@ export default (router) => {
       }
     });
     console.log('task created', project.len, Date.now() - startTime);
-    ctx.body = {debugData: result.data, taskInfo: {...result2.data, serverURL: conf.webexe.processWsUrl + result2.data.processId},};
+    ctx.body = {debugData: result.data, taskInfo: {...result2.data, serverURL: conf.webexe.url, processId: result2.data.processId},};
   } catch (err) {
     console.error(err);
   }

@@ -1,3 +1,4 @@
+import  conf from './conf.json';
 import koa from 'koa';
 type Ctx = koa.ParameterizedContext<ICustomState, {}>;
 type Next = ()=>Promise<any>;
@@ -15,7 +16,7 @@ export function userMust (...args: Array<(ctx:koa.ParameterizedContext<any, {}>,
 
 export function beUser (ctx:Ctx, next?:Next) {
   // console.log(ctx.state.user.groups);
-  return !!(ctx.state.user && (ctx.state.user.groups.indexOf('emma/users')>=0 || ctx.state.user.groups.indexOf('users')>=0));
+  return conf.localMode || !!(ctx.state.user && (ctx.state.user.groups.indexOf('emma/users')>=0 || ctx.state.user.groups.indexOf('users')>=0));
   // return ctx.state.user!== undefined;
 }
 

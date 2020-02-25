@@ -20,6 +20,7 @@ import { useMappedState, useDispatch } from 'redux-react-hook';
 import UserBar from 'Components/UserBar';
 
 
+
 const client = new ApolloClient({
   uri: `${conf.backendURL}/graphql`,
 });
@@ -48,6 +49,7 @@ const App: React.FC = () => {
         <Route path='/' exact component={MainPage}/>
         <Route path="/block_editor" component={BlockEditor}/>
         <Route path="/genome_functions" component={GenomeFunctions}/>
+        
       </Router>
     </div>
     </ApolloProvider>
