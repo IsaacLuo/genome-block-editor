@@ -1,6 +1,7 @@
 
 // redux saga
-import {call, all, fork, put, takeLatest, select} from 'redux-saga/effects';
+import { eventChannel } from 'redux-saga'
+import {call, all, fork, put, take, takeLatest, select, actionChannel, takeEvery} from 'redux-saga/effects';
 
 import watchWebExe from './sagas/webexe';
 
@@ -8,6 +9,7 @@ import watchWebExe from './sagas/webexe';
 import axios from 'axios';
 import conf from './conf.json';
 import { notification } from 'antd';
+import io from 'socket.io-client';
 
 export function* cailabInstanceLogin(action: IAction) {
   try {
@@ -59,6 +61,22 @@ export function* forkProject(action: IAction) {
   }
 }
 
+const sockets:any = {};
+
+function monitorSocket(socket:SocketIOClient.Socket) {
+  return eventChannel( emitter => {
+    const types = ['message', 'progress', 'state', 'result', 'stderr', 'abort'];
+    types.forEach(type=>{
+      socket.on(type,(data:any)=>{
+        emitter({type, data});
+      })
+    })
+    return () => {
+      console.log('Socket off')
+    }
+  });
+}
+
 export function* createPromoterTerminator(aciton:IAction) {
   // 1. call api to start webexe process at back-end
   try {
@@ -73,23 +91,90 @@ export function* createPromoterTerminator(aciton:IAction) {
         terminatorLength,
       }, {withCredentials: true});
     const {taskInfo} = result.data;
-    console.log('ws url = ', taskInfo.serverURL);
-    // 2. start webexe task at ws
-    yield put({type: 'ATTACH_TASK', data:{taskUrl:taskInfo.serverURL}});
+    console.log(taskInfo);
+    const {processId, serverURL} = taskInfo;
+
+    // console.log('ws url = ', taskInfo.serverURL);
+    // // 2. start webexe task at ws
+    // yield put({type: 'ATTACH_TASK', data:{taskUrl:taskInfo.serverURL}});
+
+    // 2. start webexe task using socket.io
+    // 2. use socket.io
+    const socket = io(serverURL);
+    sockets[processId] = socket;
+    const channel = yield call(monitorSocket, socket);
+
+    socket.emit('startTask',processId, ()=>{})
+
+    while (true) {
+      const serverAction = yield take(channel)
+      // console.debug('messageType', serverAction.type)
+      console.log(serverAction);
+      switch (serverAction.type) {
+        case 'message':
+            yield put({
+              type: 'SERVER_MESSAGE',
+              data: serverAction.data,
+            });
+            break;
+        case 'progress':
+            yield put({
+              type: 'PROGRESS',
+              data: serverAction.data,
+            });
+            break;
+        case 'state':
+          yield put({
+            type: 'SET_PROCESS_STATE',
+            data: serverAction.data,
+          })
+          break;
+        case 'result':
+          yield put({
+            type: 'SERVER_RESULT',
+            data: serverAction.data,
+          })
+          break;
+        case 'stderr':
+          yield put({
+            type: 'SERVER_LOG',
+            data: serverAction.data
+          })
+          break;
+        case 'abort':
+          yield put({
+            type: 'ABORT_TASK',
+            data: serverAction.data,
+          })
+          break;
+      }
+
+      if (serverAction.type === 'result') {
+        break;
+      }
+      
+    }
   } catch (error) {
     yield call(notification.error, {message:error});
   }
 }
 
+function* handleServerResult(action:IAction) {
+  // got server results send to backend
+  const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
+  const newTaskContent = yield call(axios.put, `${conf.backendURL}/api/project/${id}/fromFileUrl`, {fileUrl:action.data.files[0]}, {withCredentials: true});
+}
+
 export function* watchGenomeOperations() {
   yield takeLatest('FORK_PROJECT', forkProject);
   yield takeLatest('CREATE_PROMOTER_TERMINATOR', createPromoterTerminator);
+  yield takeEvery('SERVER_RESULT', handleServerResult);
 }
 
 export default function* rootSaga() {
   yield all([
     fork(watchUsers),
     fork(watchGenomeOperations),
-    fork(watchWebExe),
+    // fork(watchWebExe),
   ]);
 }

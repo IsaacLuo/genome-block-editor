@@ -1,5 +1,6 @@
 /// <reference path="@types/index.d.ts" />
 
+
 import koa from 'koa';
 import koaBody from 'koa-body';
 import middleware from './middleware'
@@ -19,6 +20,8 @@ import createPromoterTerminators from './projectGlobalTasks/createPromoterTermin
 import http from 'http';
 import socket from 'socket.io';
 
+
+require('custom-env').env()
 
 type Ctx = koa.ParameterizedContext<ICustomState>;
 type Next = ()=>Promise<any>;
@@ -96,6 +99,6 @@ const io = socket(server);
 // -----------------------------------------------------------------------------------------------
 app.use(router.routes());
 // app.listen(conf.port, '0.0.0.0');
-server.listen(conf.port);
+server.listen(process.env.PORT);
 
-log4js.getLogger().info(`start listening at ${conf.port}`);
+log4js.getLogger().info(`start listening at ${process.env.PORT}`);

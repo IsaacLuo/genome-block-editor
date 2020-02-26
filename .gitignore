@@ -12,3 +12,6 @@
 /api/src/conf.json
 /frontend/src/conf.json
 */.vscode/*
+/.env
+/api/.env
+/frontend/.env
