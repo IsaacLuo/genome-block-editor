@@ -1,6 +1,11 @@
 import {ApolloServer, gql} from 'apollo-server-koa'
 import { Project, AnnotationPart, ProjectFolder } from '../models';
 import {runExe} from '../runExe'
+import fs from 'fs';
+const { promisify } = require('util');
+const fs_exists = promisify(fs.exists);
+const fs_writeFile = promisify(fs.writeFile);
+const fs_readFile = promisify(fs.readFile);
 
 export function useApolloServer(app:any) {
   const typeDefs = gql`
@@ -155,7 +160,21 @@ export function useApolloServer(app:any) {
         //   // to=128*1024*100;
         // }
         const start = Date.now();
-        const result = await Project.findById(_id)
+        let result = await Project.findById(_id).exec();
+
+        let cacheFileName = './public/sourceFileCaches/'+_id;
+        if (result.ctype !== 'source') {
+          cacheFileName+= result.updatedAt.getTime();
+        }
+        cacheFileName+='.'
+        cacheFileName+=result.ctype
+        console.log(cacheFileName)
+        if(await fs_exists(cacheFileName)) {
+          console.log('cache file exists')
+          return JSON.parse(await fs_readFile(cacheFileName));
+        } else {
+          console.log('cache file not exists')
+          result = await Project.findById(_id)
           .populate({
             path:'parts', 
             // match:{
@@ -164,9 +183,12 @@ export function useApolloServer(app:any) {
             // }
           })
           .exec();
-        const time = Date.now() - start;
-        console.log('time = ', time);
-        return result;
+          const time = Date.now() - start;
+          console.log('time = ', time);
+          const resultStr = JSON.stringify(result);
+          fs_writeFile(cacheFileName, resultStr);
+          return result;
+        }
       },
 
       folder: async (parent:any, args:any, context: any, info:any) => {

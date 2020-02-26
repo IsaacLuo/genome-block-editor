@@ -3,6 +3,7 @@
 
 import koa from 'koa';
 import koaBody from 'koa-body';
+import send from 'koa-send';
 import middleware from './middleware'
 import Router from 'koa-router';
 import log4js from 'log4js';
@@ -19,9 +20,14 @@ import createPromoterTerminators from './projectGlobalTasks/createPromoterTermin
 
 import http from 'http';
 import socket from 'socket.io';
-
+import fs from 'fs';
 
 require('custom-env').env()
+
+const { promisify } = require('util');
+const fs_exists = promisify(fs.exists);
+const fs_writeFile = promisify(fs.writeFile);
+const fs_readFile = promisify(fs.readFile);
 
 type Ctx = koa.ParameterizedContext<ICustomState>;
 type Next = ()=>Promise<any>;
@@ -61,7 +67,9 @@ router.get('/api/user/current', async (ctx:Ctx, next:Next)=> {
 });
 
 // fork project
-router.post('/api/project/forkedFrom/:id', async (ctx:Ctx, next:Next)=> {
+router.post('/api/project/forkedFrom/:id',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
   const user = ctx.state.user;
   const {id} = ctx.params;
   const project = await (await Project.findById(id).exec()).toObject();
@@ -75,6 +83,49 @@ router.post('/api/project/forkedFrom/:id', async (ctx:Ctx, next:Next)=> {
   const result = await Project.create(project);
   ctx.body = {_id:result._id};
 });
+
+// source file
+router.get('/api/sourceFile/:id',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const start = Date.now();
+  await next();
+  const time = Date.now() - start;
+  console.log('normal query time = ', time);
+},
+async (ctx:Ctx, next:Next)=> {
+  // load everything except sequence
+  const {id} = ctx.params;
+  const start = Date.now();
+  let result;
+  
+  result = await Project.findById(id)
+    .exec();
+  let cacheFileName = './public/sourceFileCaches/'+id;
+  if (result.ctype !== 'source') {
+    cacheFileName+= result.updatedAt.getTime();
+  }
+  cacheFileName+='.'
+  cacheFileName+=result.ctype
+  console.log(cacheFileName)
+  if(await fs_exists(cacheFileName)) {
+    console.log('cache file exists')
+    await send(ctx,cacheFileName);
+  } else {
+    console.log('cache file not exists')
+    // console.log(result.updatedAt);
+    result = await Project.findById(id)
+      .populate({
+        path:'parts',
+      })
+      .exec();
+    const time = Date.now() - start;
+    const resultStr = JSON.stringify(result);
+    fs_writeFile(cacheFileName, resultStr);
+    console.log('time = ', time);
+    ctx.body = result;
+  }
+})
 
 createPromoterTerminators(router);
 
