@@ -15,3 +15,5 @@
 /.env
 /api/.env
 /frontend/.env
+/api/public/sourceFileCaches/*
+
