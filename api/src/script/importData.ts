@@ -1,5 +1,5 @@
 /// <reference path="../@types/index.d.ts" />
-import conf from '../../conf.json'
+import conf from '../conf.json'
 import fs from 'fs'
 
 import * as childProcess from 'child_process'
@@ -60,6 +60,7 @@ export function runExe (
 async function main() {
   fs.writeFileSync('./utility/conf.json', JSON.stringify(conf,null, 4));
   // exec('pipenv run python import_data.py');
+  await runExe({program: 'pipenv', params: ['install']})
   await runExe({program: 'pipenv', params: ['run', 'python', 'import_data.py']})
   console.log('done');
 }

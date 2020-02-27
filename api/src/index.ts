@@ -17,12 +17,13 @@ import {useApolloServer} from './graphql';
 import serve from 'koa-static';
 import { userMust, beUser } from './userMust';
 import createPromoterTerminators from './projectGlobalTasks/createPromoterTerminator'
+import removeGeneratedFeatures from './projectGlobalTasks/removeGeneratedFeatures'
 
 import http from 'http';
 import socket from 'socket.io';
 import fs from 'fs';
 
-require('custom-env').env()
+require('dotenv').config()
 
 const { promisify } = require('util');
 const fs_exists = promisify(fs.exists);
@@ -128,6 +129,7 @@ async (ctx:Ctx, next:Next)=> {
 })
 
 createPromoterTerminators(router);
+removeGeneratedFeatures(router);
 
 
 app.use(router.routes());

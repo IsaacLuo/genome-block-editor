@@ -63,6 +63,7 @@ const DEFAULT_COMPONENT_VISIBLE_STATE:IComponentVisibleState = {
   saveFileDialogNewFile: true,
   exportGenbankDialogVisible: false,
   generatePromoterTerminatorDialogVisible: false,
+  removeCreatedFeaturesDialogVisible: false,
 }
 
 const DEFAULT_STORE_STATE:IStoreState = {
@@ -124,6 +125,12 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
     }
     case 'HIDE_CREATE_PROMOTER_TERMINATOR_DIALOG': {
       return {...state, generatePromoterTerminatorDialogVisible: false};
+    }
+    case 'SHOW_REMOVE_CREATED_FEATURES_DIALOG': {
+      return {...state, removeCreatedFeaturesDialogVisible: true};
+    }
+    case 'HIDE_REMOVE_CREATED_FEATURES_DIALOG': {
+      return {...state, removeCreatedFeaturesDialogVisible: false};
     }
     default:
       return state;
@@ -321,6 +328,10 @@ export const generalTaskReducer = (state:IGeneralTaskState, action:IAction) => {
     case 'SET_PROCESS_LOG': {
       return {...state, outputLog: [...state.outputLog, action.data]}
     }
+
+    case 'SHOW_CREATE_PROMOTER_TERMINATOR_DIALOG':
+    case 'SHOW_REMOVE_CREATED_FEATURES_DIALOG':
+      return DEFAULT_GENERAL_TASK_STATE;
   }
   return state;
 }

@@ -32,15 +32,14 @@ const GenomeOperationPanel: React.FC = () => {
         dispatch({type:'SHOW_CREATE_PROMOTER_TERMINATOR_DIALOG'})
       }
     },
+    {
+      name: 'remove created features',
+      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'singleLayerProject'),
+      onClick: ()=>{
+        dispatch({type:'SHOW_REMOVE_CREATED_FEATURES_DIALOG'})
+      }
+    },
   ]
-
-  const onClickCreatePromoterTerminator = () => {
-
-  }
-
-  const onClickForkProject = () => {
-    
-  }
 
   return (
       <div>

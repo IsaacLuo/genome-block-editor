@@ -65,6 +65,7 @@ declare interface IComponentVisibleState {
   saveFileDialogNewFile: boolean;
   exportGenbankDialogVisible: boolean;
   generatePromoterTerminatorDialogVisible: boolean;
+  removeCreatedFeaturesDialogVisible: boolean;
 }
 
 declare interface IGenomBrowserState {

@@ -1,8 +1,8 @@
 Arguments: 
-  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js add @types/custom-env
+  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js add @types/worker_threads
 
 PATH: 
-  C:\Program Files (x86)\Microsoft\Edge\Application;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\Program Files\TortoiseGit\bin;C:\Program Files\nodejs\;C:\Program Files (x86)\Yarn\bin\;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Users\luoyi\AppData\Local\Programs\Python\Python38\Scripts\;C:\Users\luoyi\AppData\Local\Programs\Python\Python38\;C:\Users\luoyi\AppData\Local\Microsoft\WindowsApps;C:\Users\luoyi\AppData\Roaming\npm;C:\Users\luoyi\AppData\Local\Yarn\bin
+  C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\Program Files\TortoiseGit\bin;C:\Program Files\nodejs\;C:\Program Files (x86)\Yarn\bin\;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Users\luoyi\AppData\Local\Programs\Python\Python38\Scripts\;C:\Users\luoyi\AppData\Local\Programs\Python\Python38\;C:\Users\luoyi\AppData\Local\Microsoft\WindowsApps;C:\Users\luoyi\AppData\Roaming\npm;C:\Users\luoyi\AppData\Local\Yarn\bin;C:\Users\luoyi\AppData\Local\GitHubDesktop\bin
 
 Yarn version: 
   1.21.1
@@ -14,7 +14,7 @@ Platform:
   win32 x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/@types%2fcustom-env: Not found
+  Error: https://registry.yarnpkg.com/@types%2fworker_threads: Not found
       at Request.params.callback [as _callback] (C:\Program Files (x86)\Yarn\lib\cli.js:66056:18)
       at Request.self.callback (C:\Program Files (x86)\Yarn\lib\cli.js:140665:22)
       at Request.emit (events.js:223:5)
@@ -36,12 +36,13 @@ npm manifest:
       "@types/koa": "^2.11.0",
       "@types/koa-cors": "^0.0.0",
       "@types/koa-router": "^7.0.42",
+      "@types/koa-send": "^4.1.2",
       "@types/mongoose": "^5.5.18",
       "@types/socket.io": "^2.1.4",
       "apollo-server-koa": "^2.9.12",
       "axios": "^0.19.2",
       "cross-env": "^6.0.0",
-      "custom-env": "^2.0.1",
+      "dotenv": "^8.2.0",
       "form-data": "^3.0.0",
       "graphql": "^14.5.8",
       "jsonwebtoken": "^8.5.1",
@@ -50,6 +51,7 @@ npm manifest:
       "koa-cors": "^0.0.16",
       "koa-jwt": "^3.6.0",
       "koa-router": "^7.4.0",
+      "koa-send": "^5.0.0",
       "koa-static": "^5.0.0",
       "log4js": "^5.3.0",
       "mongoose": "^5.7.1",
@@ -306,6 +308,13 @@ Lockfile:
     version "7.0.42"
     resolved "https://registry.yarnpkg.com/@types/koa-router/-/koa-router-7.0.42.tgz#0e5c01d4d0a2873d402d432114f08372d7c50eb1"
     integrity sha512-mggrNY7Ywwjt7QjaMAlbb1ixE+v7AFskOeyKdmZT/NvPVEAo48gYUxIcF8ILlMc3eg1bo6SxNoUcbxhTv7edrA==
+    dependencies:
+      "@types/koa" "*"
+  
+  "@types/koa-send@^4.1.2":
+    version "4.1.2"
+    resolved "https://registry.yarnpkg.com/@types/koa-send/-/koa-send-4.1.2.tgz#978f8267ad116d12ac6a18fecd8f34c5657e09ad"
+    integrity sha512-rfqKIv9bFds39Jxvsp8o3YJLnEQVPVriYA14AuO2OY65IHh/4UX4U/iMs5L0wATpcRmm1bbe0BNk23TRwx3VQQ==
     dependencies:
       "@types/koa" "*"
   
@@ -1107,14 +1116,6 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-1.0.0.tgz#a230f64f568310e1498009940790ec99545bca7e"
     integrity sha1-ojD2T1aDEOFJgAmUB5DsmVRbyn4=
   
-  custom-env@^2.0.1:
-    version "2.0.1"
-    resolved "https://registry.yarnpkg.com/custom-env/-/custom-env-2.0.1.tgz#30afaf5200f43aa86731f81576387f5d2af2c51b"
-    integrity sha512-gVv19DBDuTQ8MM/WPlf8025Aa46Aqmfrr/kDxyDfXWe5t7C3+OgBsuhrsXTKQ4hGo+z1OuuaOQnhgTWIpvrz+w==
-    dependencies:
-      dotenv "*"
-      dotenv-expand "^5.0.0"
-  
   date-format@^2.1.0:
     version "2.1.0"
     resolved "https://registry.yarnpkg.com/date-format/-/date-format-2.1.0.tgz#31d5b5ea211cf5fd764cd38baf9d033df7e125cf"
@@ -1246,12 +1247,7 @@ Lockfile:
     dependencies:
       is-obj "^1.0.0"
   
-  dotenv-expand@^5.0.0:
-    version "5.1.0"
-    resolved "https://registry.yarnpkg.com/dotenv-expand/-/dotenv-expand-5.1.0.tgz#3fbaf020bfd794884072ea26b1e9791d45a629f0"
-    integrity sha512-YXQl1DSa4/PQyRfgrv6aoNjhasp/p4qs9FjJ4q4cQk+8m4r6k4ZSiEyytKG8f8W9gi8WsQtIObNmKd+tMzNTmA==
-  
-  dotenv@*:
+  dotenv@^8.2.0:
     version "8.2.0"
     resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
     integrity sha512-8sJ78ElpbDJBHNeBzUbUVLsqKdccaa/BXF1uPTw3GrvQTBgrQrtObr2mUrE38vzYd8cEv+m/JBfDLioYcfXoaw==

@@ -77,7 +77,90 @@ function monitorSocket(socket:SocketIOClient.Socket) {
   });
 }
 
+function generateSocketAction(serverAction:IAction):IAction {
+  switch (serverAction.type) {
+    case 'message':
+        return {
+          type: 'SERVER_MESSAGE',
+          data: serverAction.data,
+        };
+    case 'progress':
+        return{
+          type: 'PROGRESS',
+          data: serverAction.data,
+        };
+    case 'state':
+      return {
+        type: 'SET_PROCESS_STATE',
+        data: serverAction.data,
+      };
+    case 'result':
+      return {
+        type: 'SERVER_RESULT',
+        data: serverAction.data,
+      };
+    case 'stderr':
+      return {
+        type: 'SERVER_LOG',
+        data: serverAction.data
+      };
+    case 'abort':
+      return {
+        type: 'ABORT_TASK',
+        data: serverAction.data,
+      };
+    default:
+      return {
+        type: 'UNKOWN_SOCKET_ACTION',
+        data: serverAction.data,
+      }
+  }
+}
+
 export function* createPromoterTerminator(aciton:IAction) {
+  // 1. call api to start webexe process at back-end
+  try {
+    const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
+    const result = yield call(
+      axios.put, 
+      `${conf.backendURL}/api/globalTasks/removeGeneratedFeatures/${id}`, 
+      {}, 
+      {withCredentials: true});
+    const {taskInfo} = result.data;
+    console.log(taskInfo);
+    const {processId, serverURL} = taskInfo;
+
+    // 2. use socket.io
+    const socket = io(serverURL);
+    sockets[processId] = socket;
+    const channel = yield call(monitorSocket, socket);
+
+    socket.emit('startTask',processId, ()=>{})
+
+    while (true) {
+      const serverAction = yield take(channel)
+      // console.debug('messageType', serverAction.type)
+      console.log(serverAction);
+      const reduxAction = generateSocketAction(serverAction);
+      yield put(reduxAction);
+      if (serverAction.type === 'result') {
+        break;
+      }
+    }
+  } catch (error) {
+    yield call(notification.error, {message:error});
+  }
+}
+
+function* handleServerResult(action:IAction) {
+  // got server results send to backend
+  const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
+  const newTaskContent = yield call(axios.put, `${conf.backendURL}/api/project/${id}/fromFileUrl`, {fileUrl:action.data.files[0]}, {withCredentials: true});
+}
+
+
+
+export function* removeCreatedFeatures(aciton:IAction) {
   // 1. call api to start webexe process at back-end
   try {
     console.log('createPromoterTerminator')
@@ -94,61 +177,19 @@ export function* createPromoterTerminator(aciton:IAction) {
     console.log(taskInfo);
     const {processId, serverURL} = taskInfo;
 
-    // console.log('ws url = ', taskInfo.serverURL);
-    // // 2. start webexe task at ws
-    // yield put({type: 'ATTACH_TASK', data:{taskUrl:taskInfo.serverURL}});
-
-    // 2. start webexe task using socket.io
     // 2. use socket.io
     const socket = io(serverURL);
     sockets[processId] = socket;
     const channel = yield call(monitorSocket, socket);
 
-    socket.emit('startTask',processId, ()=>{})
+    socket.emit('startTask', processId, ()=>{})
 
     while (true) {
       const serverAction = yield take(channel)
       // console.debug('messageType', serverAction.type)
       console.log(serverAction);
-      switch (serverAction.type) {
-        case 'message':
-            yield put({
-              type: 'SERVER_MESSAGE',
-              data: serverAction.data,
-            });
-            break;
-        case 'progress':
-            yield put({
-              type: 'PROGRESS',
-              data: serverAction.data,
-            });
-            break;
-        case 'state':
-          yield put({
-            type: 'SET_PROCESS_STATE',
-            data: serverAction.data,
-          })
-          break;
-        case 'result':
-          yield put({
-            type: 'SERVER_RESULT',
-            data: serverAction.data,
-          })
-          break;
-        case 'stderr':
-          yield put({
-            type: 'SERVER_LOG',
-            data: serverAction.data
-          })
-          break;
-        case 'abort':
-          yield put({
-            type: 'ABORT_TASK',
-            data: serverAction.data,
-          })
-          break;
-      }
-
+      const reduxAction = generateSocketAction(serverAction);
+      yield put(reduxAction);
       if (serverAction.type === 'result') {
         break;
       }
@@ -159,16 +200,11 @@ export function* createPromoterTerminator(aciton:IAction) {
   }
 }
 
-function* handleServerResult(action:IAction) {
-  // got server results send to backend
-  const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
-  const newTaskContent = yield call(axios.put, `${conf.backendURL}/api/project/${id}/fromFileUrl`, {fileUrl:action.data.files[0]}, {withCredentials: true});
-}
-
 export function* watchGenomeOperations() {
   yield takeLatest('FORK_PROJECT', forkProject);
   yield takeLatest('CREATE_PROMOTER_TERMINATOR', createPromoterTerminator);
   yield takeEvery('SERVER_RESULT', handleServerResult);
+  yield takeLatest('REMOVE_CREATED_FEATURES', removeCreatedFeatures);
 }
 
 export default function* rootSaga() {
