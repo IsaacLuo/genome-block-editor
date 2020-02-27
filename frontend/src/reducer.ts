@@ -64,6 +64,7 @@ const DEFAULT_COMPONENT_VISIBLE_STATE:IComponentVisibleState = {
   exportGenbankDialogVisible: false,
   generatePromoterTerminatorDialogVisible: false,
   removeCreatedFeaturesDialogVisible: false,
+  forkProjectDialogVisible: false,
 }
 
 const DEFAULT_STORE_STATE:IStoreState = {
@@ -97,7 +98,7 @@ export const appReducer = (state:IAppState, action:IAction):IAppState => {
 
 export const componentVisibleReducer = (state:IComponentVisibleState, action:IAction):IComponentVisibleState => {
   if (state === undefined) {
-    console.log('state is undefined')
+    // console.log('state is undefined')
     state = DEFAULT_COMPONENT_VISIBLE_STATE;
   }
   
@@ -132,6 +133,14 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
     case 'HIDE_REMOVE_CREATED_FEATURES_DIALOG': {
       return {...state, removeCreatedFeaturesDialogVisible: false};
     }
+    case 'SHOW_FORK_PROJECT_DIALOG': {
+      return {...state, forkProjectDialogVisible: true};
+    }
+    case 'HIDE_FORK_PROJECT_DIALOG': {
+      return {...state, forkProjectDialogVisible: false};
+    }
+    case 'HIDE_FORK_ALL_DIALOG':
+      return DEFAULT_COMPONENT_VISIBLE_STATE;
     default:
       return state;
   }
@@ -313,7 +322,7 @@ export const generalTaskReducer = (state:IGeneralTaskState, action:IAction) => {
   if (state === undefined) {
     state = DEFAULT_GENERAL_TASK_STATE;
   }
-  console.log(action);
+  // console.log(action);
   switch (action.type) {
     case 'PROGRESS':{
       const {message, progress} = action.data;

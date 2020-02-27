@@ -51,11 +51,22 @@ export function* watchUsers() {
   yield takeLatest('LOGOUT', logout);
 }
 
+export function* loadSourceFile(action:IAction) {
+  try {
+    const result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/${action.data}`, {withCredentials: true});
+    yield put({type: 'SET_SOURCE_FILE', data:result.data});
+    yield put({type: 'HIDE_FORK_ALL_DIALOG', data:result.data});
+  } catch (error) {
+    console.warn('unable to logout');
+  }
+}
+
 export function* forkProject(action: IAction) {
   try {
-    yield call(axios.post, `${conf.backendURL}/api/project/forkedFrom/${action.data}`, {withCredentials: true});
-
-    // yield put({type: 'SET_SOURCE_FILE', data:});
+    const {id, name} = action.data;
+    const result = yield call(axios.post, `${conf.backendURL}/api/project/forkedFrom/${id}?name=${name}`, {}, {withCredentials: true});
+    const {_id} = result.data;
+    yield put({type: 'LOAD_SOURCE_FILE', data:_id});
   } catch (error) {
     console.warn('unable to logout');
   }
@@ -117,7 +128,7 @@ function generateSocketAction(serverAction:IAction):IAction {
   }
 }
 
-export function* createPromoterTerminator(aciton:IAction) {
+export function* removeCreatedFeatures (aciton:IAction) {
   // 1. call api to start webexe process at back-end
   try {
     const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
@@ -148,7 +159,7 @@ export function* createPromoterTerminator(aciton:IAction) {
       }
     }
   } catch (error) {
-    yield call(notification.error, {message:error});
+    yield call(notification.error, {message:error.toString()});
   }
 }
 
@@ -160,7 +171,7 @@ function* handleServerResult(action:IAction) {
 
 
 
-export function* removeCreatedFeatures(aciton:IAction) {
+export function* createPromoterTerminator(aciton:IAction) {
   // 1. call api to start webexe process at back-end
   try {
     console.log('createPromoterTerminator')
@@ -201,6 +212,7 @@ export function* removeCreatedFeatures(aciton:IAction) {
 }
 
 export function* watchGenomeOperations() {
+  yield takeLatest('LOAD_SOURCE_FILE', loadSourceFile);
   yield takeLatest('FORK_PROJECT', forkProject);
   yield takeLatest('CREATE_PROMOTER_TERMINATOR', createPromoterTerminator);
   yield takeEvery('SERVER_RESULT', handleServerResult);

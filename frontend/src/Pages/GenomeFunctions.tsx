@@ -8,6 +8,7 @@ import GenomeOperationPanel from 'Components/GenomeOperationPanel'
 import GenomeBrowserTooltip from 'Components/GenomeBrowserTooltip'
 import CreatePromoterTermiatorDlg from 'Components/dialogs/CreatePromoterTerminatorDlg'
 import RemoveCreatedFeatureDlg from 'Components/dialogs/RemoveCreatedFeatureDlg'
+import ForkProjectDlg from 'Components/dialogs/ForkProjectDlg';
 
 const ProjectFunctions: React.FC = () => {
   return (
@@ -22,6 +23,7 @@ const ProjectFunctions: React.FC = () => {
         </div>
         <CreatePromoterTermiatorDlg/>
         <RemoveCreatedFeatureDlg/>
+        <ForkProjectDlg/>
 
       </div>
   );

@@ -1,8 +1,11 @@
 import React from 'react';
 import { Button } from 'antd';
 import { useMappedState, useDispatch } from 'redux-react-hook';
+import styled from 'styled-components';
 
-
+const ButtonZone = styled.div`
+margin-top: 20px;
+`
 
 const GenomeOperationPanel: React.FC = () => {
 
@@ -19,7 +22,7 @@ const GenomeOperationPanel: React.FC = () => {
       visible: (state:any) => state.sourceFile !== undefined ,
       onClick: ()=>{
         if (state.sourceFile) {
-          dispatch({type:'FORK_PROJECT', data:state.sourceFile._id});
+          dispatch({type:'SHOW_FORK_PROJECT_DIALOG'});
         } else {
           console.error('FORK_PROJECT');
         }
@@ -27,28 +30,35 @@ const GenomeOperationPanel: React.FC = () => {
     },
     {
       name: 'create promoter terminator',
-      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'singleLayerProject'),
+      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),
       onClick: ()=>{
         dispatch({type:'SHOW_CREATE_PROMOTER_TERMINATOR_DIALOG'})
       }
     },
     {
       name: 'remove created features',
-      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'singleLayerProject'),
+      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),
       onClick: ()=>{
         dispatch({type:'SHOW_REMOVE_CREATED_FEATURES_DIALOG'})
+      }
+    },
+    {
+      name: 'delete (hide) project',
+      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),
+      onClick: ()=>{
+        dispatch({type:'DELETE_PROJECT'})
       }
     },
   ]
 
   return (
-      <div>
+      <ButtonZone>
         {operations
           .filter(v=>v.visible(state))
           .map((operation, i)=>
             <Button key={i} onClick={operation.onClick}>{operation.name}</Button>
           )}
-      </div>
+      </ButtonZone>
   );
 }
 

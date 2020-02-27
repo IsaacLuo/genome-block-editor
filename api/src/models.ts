@@ -41,6 +41,7 @@ export const AnnotationPart:Model<IAnnotationPartModel> = mongoose.model('Annota
 
 export const ProjectSchema = new Schema({
   name: String,
+  projectId: Schema.Types.ObjectId,
   version: String,
   parts: [{
     type: Schema.Types.ObjectId,

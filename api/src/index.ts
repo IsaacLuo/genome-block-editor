@@ -73,16 +73,38 @@ userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
   const user = ctx.state.user;
   const {id} = ctx.params;
+  const {name} = ctx.request.query;
   const project = await (await Project.findById(id).exec()).toObject();
+  if (name) {
+    project.name = name;
+  } else {
+    const now = new Date();
+    project.name += `[${now.toLocaleDateString()} ${now.toLocaleTimeString()}]`
+  }
+  project.projectId = new mongoose.Types.ObjectId();
   project.ctype = 'project';
   project.owner = user._id;
   project.group = user.groups;
   project.permission = 0x600;
-  project.updatedAt = new Date();
+  project.history = [project._id, ...project.history];
   project._id = undefined;
   delete project._id;
   const result = await Project.create(project);
   ctx.body = {_id:result._id};
+});
+
+// delete project
+router.delete('/api/project/:id',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const user = ctx.state.user;
+  const {id} = ctx.params;
+  const project = await Project.findById(id).exec();
+  if (project.ctype === 'project' || project.ctype === 'flatProject') {
+    await Project.update({_id:id}, {ctype:'deletedProject'});
+  } else {
+    ctx.throw(401);
+  }
 });
 
 // source file

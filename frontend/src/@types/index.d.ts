@@ -66,6 +66,7 @@ declare interface IComponentVisibleState {
   exportGenbankDialogVisible: boolean;
   generatePromoterTerminatorDialogVisible: boolean;
   removeCreatedFeaturesDialogVisible: boolean;
+  forkProjectDialogVisible: boolean;
 }
 
 declare interface IGenomBrowserState {

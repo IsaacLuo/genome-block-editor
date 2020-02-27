@@ -6,6 +6,12 @@ import ArrowFeature from'./ArrowFeature';
 import useDimensions from 'react-use-dimensions';
 import {Spin} from 'antd';
 import styles from './GenomeBrowser.module.scss';
+import styled from 'styled-components';
+
+const SourceFileTitle = styled.span`
+margin-right:20px;
+font-weight:bold;
+`
 
 export interface IProps {
   children: any;
@@ -138,6 +144,7 @@ const GenomeBrowser = () => {
   
   return <Spin spinning={loading}>
     <div style={{height:40}}>
+      {sourceFile && <SourceFileTitle>{sourceFile.name} ({sourceFile.len}bp)</SourceFileTitle>}
       <button onClick={()=>setZoomLevel(zoomLevel*2)}>-</button>
       <button onClick={()=>setZoomLevel(Math.max(1, zoomLevel/2))}>+</button>
       <span>zoom level: 1:{zoomLevel}</span>
