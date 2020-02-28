@@ -71,6 +71,16 @@ export function* forkProject(action: IAction) {
     console.warn('unable to logout');
   }
 }
+export function* deleteProject(action: IAction) {
+  try {
+    const id = action.data;
+    const result = yield call(axios.delete, `${conf.backendURL}/api/project/${action.data}`, {withCredentials: true});
+    const {_id} = result.data;
+    yield put({type: 'LOAD_SOURCE_FILE', data:_id});
+  } catch (error) {
+    console.warn('unable to logout');
+  }
+}
 
 const sockets:any = {};
 
@@ -217,6 +227,7 @@ export function* watchGenomeOperations() {
   yield takeLatest('CREATE_PROMOTER_TERMINATOR', createPromoterTerminator);
   yield takeEvery('SERVER_RESULT', handleServerResult);
   yield takeLatest('REMOVE_CREATED_FEATURES', removeCreatedFeatures);
+  yield takeLatest('DELETE_PROJECT', deleteProject);
 }
 
 export default function* rootSaga() {
