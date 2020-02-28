@@ -137,27 +137,35 @@ export function* removeCreatedFeatures (aciton:IAction) {
       `${conf.backendURL}/api/globalTasks/removeGeneratedFeatures/${id}`, 
       {}, 
       {withCredentials: true});
-    const {taskInfo} = result.data;
-    console.log(taskInfo);
-    const {processId, serverURL} = taskInfo;
 
-    // 2. use socket.io
-    const socket = io(serverURL);
-    sockets[processId] = socket;
-    const channel = yield call(monitorSocket, socket);
+    const {newProjectId} = result.data;
 
-    socket.emit('startTask',processId, ()=>{})
+    yield put({type:'LOAD_SOURCE_FILE', data: newProjectId});
 
-    while (true) {
-      const serverAction = yield take(channel)
-      // console.debug('messageType', serverAction.type)
-      console.log(serverAction);
-      const reduxAction = generateSocketAction(serverAction);
-      yield put(reduxAction);
-      if (serverAction.type === 'result') {
-        break;
-      }
-    }
+    // const {taskInfo} = result.data;
+    // console.log(taskInfo);
+    // const {processId, serverURL} = taskInfo;
+
+    // // 2. use socket.io
+    // const socket = io(serverURL);
+    // sockets[processId] = socket;
+    // const channel = yield call(monitorSocket, socket);
+
+    // socket.emit('startTask',processId, ()=>{})
+
+    // while (true) {
+    //   const serverAction = yield take(channel)
+    //   // console.debug('messageType', serverAction.type)
+    //   console.log(serverAction);
+    //   const reduxAction = generateSocketAction(serverAction);
+    //   yield put(reduxAction);
+    //   if (serverAction.type === 'result') {
+    //     break;
+    //   }
+    // }
+
+    
+
   } catch (error) {
     yield call(notification.error, {message:error.toString()});
   }
@@ -211,12 +219,28 @@ export function* createPromoterTerminator(aciton:IAction) {
   }
 }
 
+export function* deleteProject(action:IAction) {
+  try {
+    const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
+    const result = yield call(
+      axios.delete, 
+      `${conf.backendURL}/api/project/${id}`, 
+      {withCredentials: true});
+    
+    yield put({type:'CLEAR_SOURCE_FILE'});
+
+  } catch (error) {
+    yield call(notification.error, {message:error});
+  }
+}
+
 export function* watchGenomeOperations() {
   yield takeLatest('LOAD_SOURCE_FILE', loadSourceFile);
   yield takeLatest('FORK_PROJECT', forkProject);
   yield takeLatest('CREATE_PROMOTER_TERMINATOR', createPromoterTerminator);
   yield takeEvery('SERVER_RESULT', handleServerResult);
   yield takeLatest('REMOVE_CREATED_FEATURES', removeCreatedFeatures);
+  yield takeLatest('DELETE_PROJECT', deleteProject);
 }
 
 export default function* rootSaga() {

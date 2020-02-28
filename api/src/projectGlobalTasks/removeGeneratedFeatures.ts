@@ -14,12 +14,18 @@ export default (router) => {
   router.put('/api/globalTasks/removeGeneratedFeatures/:id', 
   userMust(beUser),
   async (ctx:Ctx, next:Next)=> {
-    const {id} = ctx.params;
-    const worker = workerTs(`${__dirname}/removeGeneratedFeatures_worker`, {});
-    worker.on("message", resp => {
-      // ...
-      console.log('from worker: ', resp);
-    });
-    worker.postMessage({type:'startTask', data:id});
+    await (new Promise((resolve, reject)=>{
+      const {id} = ctx.params;
+      const worker = workerTs(`${__dirname}/removeGeneratedFeatures_worker`, {});
+      worker.on("message", ({type, data}) => {
+        switch(type) {
+          case 'result':
+            ctx.body = {message:'OK', newProjectId: data};
+            resolve();
+            break;
+        }
+      });
+      worker.postMessage({type:'startTask', data:id});
+    }))
   });
 }
