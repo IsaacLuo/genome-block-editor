@@ -300,6 +300,14 @@ function reCombineReducers(reducers: any) {
           sourceFile: action.data,
         }
       }
+
+      case 'CLEAR_SOURCE_FILE': {
+        return {
+          ...state,
+          sourceFile: undefined,
+        }
+      }
+
       case 'ADD_NEW_BLOCK': {
         const data = action.data;
         const project = {...state.currentProject};

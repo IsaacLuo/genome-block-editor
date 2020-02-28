@@ -102,6 +102,7 @@ async (ctx:Ctx, next:Next)=> {
   const project = await Project.findById(id).exec();
   if (project.ctype === 'project' || project.ctype === 'flatProject') {
     await Project.update({_id:id}, {ctype:'deletedProject'});
+    ctx.body = {message:'OK'}
   } else {
     ctx.throw(401);
   }

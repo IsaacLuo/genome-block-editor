@@ -55,8 +55,7 @@ async function main() {
           delete newObj.updatedAt;
           delete newObj._id;
           const newItem = await Project.create(newObj);
-          console.log(newItem);
-          parentPort.postMessage({type:'result', data: 'OK'});
+          parentPort.postMessage({type:'result', data: newItem._id.toString()});
         }
       } catch (err) {
         console.error(err);
