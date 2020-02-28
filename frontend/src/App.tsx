@@ -18,6 +18,7 @@ import GenomeFunctions from './Pages/GenomeFunctions';
 import conf from 'conf.json';
 import { useMappedState, useDispatch } from 'redux-react-hook';
 import UserBar from 'Components/UserBar';
+import DebugPanel from 'Components/DebugPanel';
 
 
 
@@ -49,8 +50,8 @@ const App: React.FC = () => {
         <Route path='/' exact component={MainPage}/>
         <Route path="/block_editor" component={BlockEditor}/>
         <Route path="/genome_functions" component={GenomeFunctions}/>
-        
       </Router>
+      {process.env.NODE_ENV === 'development' && <DebugPanel/>}
     </div>
     </ApolloProvider>
   );

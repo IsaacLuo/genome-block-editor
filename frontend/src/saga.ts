@@ -3,7 +3,7 @@
 import { eventChannel } from 'redux-saga'
 import {call, all, fork, put, take, takeLatest, select, actionChannel, takeEvery} from 'redux-saga/effects';
 
-import watchWebExe from './sagas/webexe';
+import watchFolders from './sagas/folders';
 
 // other libs
 import axios from 'axios';
@@ -65,16 +65,6 @@ export function* forkProject(action: IAction) {
   try {
     const {id, name} = action.data;
     const result = yield call(axios.post, `${conf.backendURL}/api/project/forkedFrom/${id}?name=${name}`, {}, {withCredentials: true});
-    const {_id} = result.data;
-    yield put({type: 'LOAD_SOURCE_FILE', data:_id});
-  } catch (error) {
-    console.warn('unable to logout');
-  }
-}
-export function* deleteProject(action: IAction) {
-  try {
-    const id = action.data;
-    const result = yield call(axios.delete, `${conf.backendURL}/api/project/${action.data}`, {withCredentials: true});
     const {_id} = result.data;
     yield put({type: 'LOAD_SOURCE_FILE', data:_id});
   } catch (error) {
@@ -152,30 +142,6 @@ export function* removeCreatedFeatures (aciton:IAction) {
 
     yield put({type:'LOAD_SOURCE_FILE', data: newProjectId});
 
-    // const {taskInfo} = result.data;
-    // console.log(taskInfo);
-    // const {processId, serverURL} = taskInfo;
-
-    // // 2. use socket.io
-    // const socket = io(serverURL);
-    // sockets[processId] = socket;
-    // const channel = yield call(monitorSocket, socket);
-
-    // socket.emit('startTask',processId, ()=>{})
-
-    // while (true) {
-    //   const serverAction = yield take(channel)
-    //   // console.debug('messageType', serverAction.type)
-    //   console.log(serverAction);
-    //   const reduxAction = generateSocketAction(serverAction);
-    //   yield put(reduxAction);
-    //   if (serverAction.type === 'result') {
-    //     break;
-    //   }
-    // }
-
-    
-
   } catch (error) {
     yield call(notification.error, {message:error.toString()});
   }
@@ -186,8 +152,6 @@ function* handleServerResult(action:IAction) {
   const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
   const newTaskContent = yield call(axios.put, `${conf.backendURL}/api/project/${id}/fromFileUrl`, {fileUrl:action.data.files[0]}, {withCredentials: true});
 }
-
-
 
 export function* createPromoterTerminator(aciton:IAction) {
   // 1. call api to start webexe process at back-end
@@ -256,6 +220,7 @@ export function* watchGenomeOperations() {
 export default function* rootSaga() {
   yield all([
     fork(watchUsers),
+    fork(watchFolders),
     fork(watchGenomeOperations),
     // fork(watchWebExe),
   ]);

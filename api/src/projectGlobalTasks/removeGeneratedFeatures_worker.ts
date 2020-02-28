@@ -56,6 +56,8 @@ async function main() {
           delete newObj._id;
           const newItem = await Project.create(newObj);
           parentPort.postMessage({type:'result', data: newItem._id.toString()});
+          // old project become history
+          await Project.update({_id:id}, {ctype:'history'})
         }
       } catch (err) {
         console.error(err);

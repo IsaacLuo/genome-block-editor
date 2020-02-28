@@ -58,6 +58,12 @@ export const ProjectSchema = new Schema({
   ctype: String,
 }, {
   timestamps: true
+})
+.pre<IProjectModel>('save', function (next){
+  if (this.isModified) {
+    this.updatedAt = new Date();
+  }
+  next();
 });
 
 export interface IProjectModel extends IProject, Document{}

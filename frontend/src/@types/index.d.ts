@@ -85,8 +85,28 @@ declare interface IFileListState {
   _id: any;
 }
 
+declare interface IFolderTitle {
+  _id: any;
+  name: string;
+}
+
+declare interface IProjectTitle {
+  _id: any;
+  name: string;
+}
+
+declare interface IFolder extends IFolderTitle {
+  subFolders: IFolderTitle[];
+  projects: IProjectTitle[];
+}
+
+declare interface IFolderContentDict {
+  [key:string]: IFolderContent
+}
+
 declare interface IFileExplorerState {
   fileLists: IFileListState[];
+  folderContent: IFolderContentDict;
 }
 
 declare interface IUserInfo {

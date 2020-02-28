@@ -67,6 +67,7 @@ router.get('/api/user/current', async (ctx:Ctx, next:Next)=> {
   }
 });
 
+
 // fork project
 router.post('/api/project/forkedFrom/:id',
 userMust(beUser),
@@ -90,7 +91,7 @@ async (ctx:Ctx, next:Next)=> {
   project._id = undefined;
   delete project._id;
   const result = await Project.create(project);
-  ctx.body = {_id:result._id};
+  ctx.body = {_id:result._id, projectId:result.projectId};
 });
 
 // delete project
@@ -101,10 +102,14 @@ async (ctx:Ctx, next:Next)=> {
   const {id} = ctx.params;
   const project = await Project.findById(id).exec();
   if (project.ctype === 'project' || project.ctype === 'flatProject') {
-    await Project.update({_id:id}, {ctype:'deletedProject'});
+    await Project.update({_id:id}, {ctype:'deletedProject', updatedAt: new Date()});
     ctx.body = {message:'OK'}
-  } else {
-    ctx.throw(401);
+  } else if (project.ctype === 'deletedProject') {
+    console.log(project);
+    ctx.body = {message:'OK but nothing changed'}
+  }
+  else {
+    ctx.throw(401, `project type is ${project.ctype}`);
   }
 });
 

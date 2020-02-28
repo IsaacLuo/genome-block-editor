@@ -13,6 +13,11 @@ const FileExplorer = () => {
   }));
 
   const [ref, {width }] = useDimensions();
+  const dispatch = useDispatch();
+  useEffect(()=>{
+    dispatch({type:'SET_FILE_LIST_LEVEL', data:{_id:'000000000000000000000000', level:-1}});
+  }, [])
+
   // const myFileLists = fileLists.length>3?fileLists.slice(fileLists.length-3,fileLists.length):fileLists;
   const historyNumber = Math.floor((width - 400)/100)
   return (<div className={styles.FileExplorer} ref={ref}>

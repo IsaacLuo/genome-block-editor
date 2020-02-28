@@ -28,6 +28,7 @@ const DEFAULT_GENOME_BROWSER_STATE:IGenomBrowserState ={
 
 const DEFAULT_FILE_EXPLORER_STATE:IFileExplorerState = {
   fileLists: [{_id:'000000000000000000000000'}],
+  folderContent:{}
 }
 
 const DEFAULT_PROJECT_STATE:IProject = {
@@ -257,11 +258,17 @@ export const genomeBrowserReducer = (state:IGenomBrowserState, action:IAction):I
 
 export const fileExplorerReducer = (state:IFileExplorerState = DEFAULT_FILE_EXPLORER_STATE, action:IAction):IFileExplorerState => {
   switch (action.type) {
-    case 'SET_FILE_LIST_LEVEL':
+    case 'SET_FILE_LIST_LEVEL': {
       const {_id, level} = action.data;
       const fileLists = state.fileLists.slice(0,level+1);
       fileLists.push({_id,});
-      return {...state,fileLists};
+      return {...state, fileLists};
+    }
+
+    case 'SET_FOLDER_CONTENT': {
+      const {_id} = action.data;
+      return {...state, folderContent: {...state.folderContent, [_id]:action.data}}
+    }
   }
   return state;
 }

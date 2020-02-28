@@ -65,6 +65,8 @@ export function useApolloServer(app:any) {
     len: Int
     parts: [OriginPart]
     ctype: String
+    createdAt: String
+    updatedAt: String
   }
 
   type MutationResult {
@@ -202,12 +204,18 @@ export function useApolloServer(app:any) {
         const result = await ProjectFolder
           .find(condition)
           .populate('subFolders','name')
-          .populate('projects','name')
+          .populate({
+            path:'projects',
+            select:'name',
+          })
           .exec();
+        console.log(result);
         // console.log((result as any)[0].projects[0]);
         if (result[0].name === 'Project Files') {
           const list = result[0];
-          list.projects = await Project.find({ctype:'project'}).select('_id name').exec();
+          list.projects = await Project.find({
+            ctype:{$in:['project', 'flatProject']}
+          }).select('_id name updatedAt').exec();
           return list;
         } else {
           return result[0];

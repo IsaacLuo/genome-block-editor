@@ -1,0 +1,58 @@
+import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-saga/effects'
+import conf from '../conf.json'
+import { eventChannel } from 'redux-saga'
+import {delay} from 'redux-saga/effects'
+import axios from 'axios';
+import ApolloClient from 'apollo-boost';
+import { gql } from "apollo-boost";
+import { InMemoryCache } from 'apollo-cache-inmemory';
+
+const client = new ApolloClient({
+  uri: `${conf.backendURL}/graphql`,
+  cache: new InMemoryCache(),
+});
+
+function* fetchFolderContent(action:IAction) {
+  try {
+    console.log(action);
+    const id = action.data;
+    const result = yield call(client.query, {
+      fetchPolicy:'network-only',
+      query: gql`
+      {
+        folder${id!=='000000000000000000000000'?`(_id:"${id}")`:''}{
+            _id
+            name
+            subFolders {
+              _id
+              name
+            }
+            projects {
+              _id
+              name
+              updatedAt
+            }
+          }
+        }
+      `
+    })
+    const {folder} = result.data;
+    yield put({type:'SET_FOLDER_CONTENT', data:folder})
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// new File list level set, fetch(refresh) content of that folder
+function* setFileListLevel(action:IAction) {
+  try {
+    yield put({type:'FETCH_FOLDER_CONTENT', data:action.data._id});
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+export default function* watchFolders() {
+  yield takeEvery('FETCH_FOLDER_CONTENT', fetchFolderContent);
+  yield takeLatest('SET_FILE_LIST_LEVEL', setFileListLevel);
+}
