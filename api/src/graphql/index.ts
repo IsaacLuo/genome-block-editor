@@ -94,6 +94,7 @@ export function useApolloServer(app:any) {
     sourceFile(_id: ID, range: Range): SourceFile
     projectGenbank(_id:ID): String
     folder(_id: ID): ProjectFolder
+    projectFolder: ProjectFolder
   }
 
   type Mutation {
@@ -221,6 +222,23 @@ export function useApolloServer(app:any) {
           return result[0];
         }
       },
+
+      projectFolder: async (parent:any, args:any, context: any, info:any) => {
+        const result = await ProjectFolder
+          .findOne({name:'Project Files'})
+          .populate('subFolders','name')
+          .populate({
+            path:'projects',
+            select:'name',
+          })
+          .exec();
+        const list = result;
+        list.projects = await Project.find({
+          ctype:{$in:['project', 'flatProject']}
+        }).select('_id name updatedAt').exec();
+        return list;
+      },
+
 
     },
     Mutation: {

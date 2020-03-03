@@ -53,7 +53,9 @@ export function* watchUsers() {
 
 export function* loadSourceFile(action:IAction) {
   try {
+    yield put({type:'SET_GENOME_BROWSER_LOADING', data:true});
     const result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/${action.data}`, {withCredentials: true});
+    yield put({type:'SET_GENOME_BROWSER_LOADING', data:false});
     yield put({type: 'SET_SOURCE_FILE', data:result.data});
     yield put({type: 'HIDE_FORK_ALL_DIALOG', data:result.data});
   } catch (error) {
@@ -67,6 +69,7 @@ export function* forkProject(action: IAction) {
     const result = yield call(axios.post, `${conf.backendURL}/api/project/forkedFrom/${id}?name=${name}`, {}, {withCredentials: true});
     const {_id} = result.data;
     yield put({type: 'LOAD_SOURCE_FILE', data:_id});
+    yield put({type: 'GOTO_AND_FETCH_PROJECT_FILES'});
   } catch (error) {
     console.warn('unable to logout');
   }
@@ -141,6 +144,7 @@ export function* removeCreatedFeatures (aciton:IAction) {
     const {newProjectId} = result.data;
 
     yield put({type:'LOAD_SOURCE_FILE', data: newProjectId});
+    yield put({type: 'GOTO_AND_FETCH_PROJECT_FILES'});
 
   } catch (error) {
     yield call(notification.error, {message:error.toString()});
@@ -186,8 +190,9 @@ export function* createPromoterTerminator(aciton:IAction) {
       if (serverAction.type === 'result') {
         break;
       }
-      
     }
+    yield put({type: 'GOTO_AND_FETCH_PROJECT_FILES'});
+
   } catch (error) {
     yield call(notification.error, {message:error});
   }
@@ -202,6 +207,7 @@ export function* deleteProject(action:IAction) {
       {withCredentials: true});
     
     yield put({type:'CLEAR_SOURCE_FILE'});
+    yield put({type: 'GOTO_AND_FETCH_PROJECT_FILES'});
 
   } catch (error) {
     yield call(notification.error, {message:error});

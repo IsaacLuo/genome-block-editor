@@ -28,36 +28,39 @@ const FileList = (props:IProps = {id:'000000000000000000000000', level:0}) => {
   const dispatch = useDispatch();
 
   const fetchFile = async (_id:string) => {
-    dispatch({type:'SET_GENOME_BROWSER_LOADING', data:true});
-    const result = await client.query({
-      query: gql`
-      {
-        sourceFile(_id:"${_id}") {
-          _id
-          name
-          len
-          parts {
-            _id
-            name
-            featureType
-            species
-            chrId
-            chrName
-            start
-            end
-            len
-            strand
-          }
-          ctype
-          createdAt
-          updatedAt
-        }
-      }
-      `
-    })
-    dispatch({type:'SET_GENOME_BROWSER_LOADING', data:false});
-    const {sourceFile} = result.data;
-    dispatch({type:'SET_SOURCE_FILE', data: sourceFile,});
+  //   dispatch({type:'SET_GENOME_BROWSER_LOADING', data:true});
+  //   // const result = await client.query({
+  //   //   query: gql`
+  //   //   {
+  //   //     sourceFile(_id:"${_id}") {
+  //   //       _id
+  //   //       name
+  //   //       len
+  //   //       parts {
+  //   //         _id
+  //   //         name
+  //   //         featureType
+  //   //         species
+  //   //         chrId
+  //   //         chrName
+  //   //         start
+  //   //         end
+  //   //         len
+  //   //         strand
+  //   //       }
+  //   //       ctype
+  //   //       createdAt
+  //   //       updatedAt
+  //   //     }
+  //   //   }
+  //   //   `
+  //   // })
+    
+  //   dispatch({type:'SET_GENOME_BROWSER_LOADING', data:false});
+  //   const {sourceFile} = result.data;
+  //   dispatch({type:'SET_SOURCE_FILE', data: sourceFile,});
+
+  dispatch({type:'LOAD_SOURCE_FILE', data: _id});
   }
 
   const fetchFolder = async(_id:string) => {

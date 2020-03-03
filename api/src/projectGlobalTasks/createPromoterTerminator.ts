@@ -42,7 +42,7 @@ export default (router) => {
     try {
     const formData = new FormData();
     formData.append('file', Buffer.from(JSON.stringify(gffJson), 'utf-8'), 'gene.gff.json');
-    const result = await axios.post(`${conf.webexe.url}/api/fileParam/`,
+    const result = await axios.post(`${conf.webexe.internalUrl}/api/fileParam/`,
       formData.getBuffer(),
       {
         headers: {
@@ -53,7 +53,7 @@ export default (router) => {
     const gffJsonFilePath = result.data.filePath;
     // call webexe again to start mission
     console.log('file uploaded', project.len, Date.now() - startTime);
-    const result2 = await axios.post(`${conf.webexe.url}/api/task/generate_promoter_terminator`,
+    const result2 = await axios.post(`${conf.webexe.internalUrl}/api/task/generate_promoter_terminator`,
     {
       params: {
         srcFileName:[gffJsonFilePath],
@@ -83,8 +83,8 @@ export default (router) => {
     const fileUrl = ctx.request.body.fileUrl;
     // get file from webexe server
     const clientToken = ctx.cookies.get('token');
-    console.log(`${conf.webexe.url}/api/resultFile/${fileUrl.url}/as/${fileUrl.name}`);
-    const result = await axios.get(`${conf.webexe.url}/api/resultFile/${fileUrl.url}/as/${fileUrl.name}`,
+    console.log(`${conf.webexe.internalUrl}/api/resultFile/${fileUrl.url}/as/${fileUrl.name}`);
+    const result = await axios.get(`${conf.webexe.internalUrl}/api/resultFile/${fileUrl.url}/as/${fileUrl.name}`,
     {
       headers: {
         'Cookie': `token=${clientToken}`,

@@ -52,7 +52,41 @@ function* setFileListLevel(action:IAction) {
   }
 }
 
+function* gotoAndFetchProjectFiles(action:IAction) {
+  try {
+    const result = yield call(client.query, {
+      fetchPolicy:'network-only',
+      query: gql`
+      {
+        projectFolder {
+            _id
+            name
+            subFolders {
+              _id
+              name
+            }
+            projects {
+              _id
+              name
+              updatedAt
+            }
+          }
+        }
+      `
+    })
+    const {projectFolder} = result.data;
+    yield put({type:'SET_FOLDER_CONTENT', data:projectFolder})
+    yield put({type:'SET_FILE_LIST_LEVEL', data:{
+      _id: projectFolder._id,
+      level: 0,
+    }})
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 export default function* watchFolders() {
   yield takeEvery('FETCH_FOLDER_CONTENT', fetchFolderContent);
   yield takeLatest('SET_FILE_LIST_LEVEL', setFileListLevel);
+  yield takeLatest('GOTO_AND_FETCH_PROJECT_FILES', gotoAndFetchProjectFiles);
 }

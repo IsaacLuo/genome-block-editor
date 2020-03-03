@@ -1,6 +1,5 @@
 FROM isaacluo/ubuntu
 WORKDIR /app
-EXPOSE 8000
 ADD ./package.json .
 ADD ./yarn.lock .
 RUN yarn install

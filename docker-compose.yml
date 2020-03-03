@@ -3,9 +3,11 @@ services:
   api:
     container_name: gbe-api
     ports:
-      - "8000:8000"
+      - "${API_PORT}:${API_PORT}"
     build: ./api
     working_dir: /app
+    external_links:
+      - "webexe_api_1:webexe"
     # command: ['pipenv', 'run', 'python', 'src/run.py']
     # environment:
     #   - GUNICORN_CMD_ARGS="--chdir=src"
@@ -19,7 +21,7 @@ services:
     build: ./frontend
     restart: always
     ports:
-      - "10080:80"
+      - "${FRONTEND_PORT}:80"
     links:
       - api
     depends_on:

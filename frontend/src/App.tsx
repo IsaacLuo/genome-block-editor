@@ -51,7 +51,7 @@ const App: React.FC = () => {
         <Route path="/block_editor" component={BlockEditor}/>
         <Route path="/genome_functions" component={GenomeFunctions}/>
       </Router>
-      {process.env.NODE_ENV === 'development' && <DebugPanel/>}
+      {/* {process.env.NODE_ENV === 'development' && <DebugPanel/>} */}
     </div>
     </ApolloProvider>
   );
