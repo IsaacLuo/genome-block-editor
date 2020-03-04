@@ -1,44 +1,54 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## genome-block-editor
 
-## Available Scripts
+This is a developing project for building a chromsome on webpages by dragging and dropping features blocks.
 
-In the project directory, you can run:
+## sub projects
 
-### `yarn start`
+the frontend folder is a react redux saga axios antd project website.
+the api folder is a nodejs koa2 apollo-server socket.io mongoose project wich provides REST/GraphQL/websocket services.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## other dependencies
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+this service uses cailab-auth as the SSO authtication, unless the "lcoal mode" is set
+this service uses cailab-conf project(private) to generate conf.json and .env files, however handwriting conf.json is also OK according conf.default.json
 
-### `yarn test`
+## Run projects by Docker
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### `docker-compose up --build -d`
 
-### `yarn build`
+when all container starts successfully, goto the address you set in conf.json (http://localhost:10301 by default) to access the website
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Run projects indivisually in production
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+### frontend
+```
+cd frontend
+yarn install
+yarn run build
+```
+html and javascript files are built and generated in build folder, then use nginx or other software to deploy it.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### api
+```
+cd api
+yarn install
+yarn run production
+```
 
-### `yarn eject`
+the node.js server will listen on the port (default 10302), is OK to use nginx as reverse proxy if SSL is required.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## debug projects
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### frontend
+```
+cd frontend
+yarn install
+yarn start
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+### api
+```
+cd api
+yarn install
+yarn run dev
+```
