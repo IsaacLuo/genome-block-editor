@@ -11,6 +11,7 @@ the api folder is a nodejs koa2 apollo-server socket.io mongoose project wich pr
 
 this service uses cailab-auth as the SSO authtication, unless the "lcoal mode" is set
 this service uses cailab-conf project(private) to generate conf.json and .env files, however handwriting conf.json is also OK according conf.default.json
+it links to webexe project for executing long time process written by other languages.
 
 ## Run projects by Docker
 
