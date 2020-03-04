@@ -33,8 +33,10 @@ const ForkProjectDlg = () => {
 
   useEffect(()=>{
     setFileName((sourceFile && sourceFile.name && sourceFile.name.replace(/\s*\[.*\]$/,'')) + ` [${new Date().toLocaleString()}]`)
-
-  }, [sourceFile])
+    if (!showDialog) {
+      setConfirming(false);
+    }
+  }, [sourceFile, showDialog])
 
   return <Modal
     title="Title"
@@ -49,7 +51,7 @@ const ForkProjectDlg = () => {
       dispatch({type:'HIDE_FORK_PROJECT_DIALOG'})
       }}
   >
-    <p>test</p>
+    <p>clone project</p>
     <Input value={fileName} onChange={(event)=>setFileName(event.target.value)} />
     <Progress percent={progress} />
     <div>{message}</div>

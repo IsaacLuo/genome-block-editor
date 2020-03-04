@@ -25,17 +25,30 @@ const CreatePromoterTermiatorDlg = () => {
   }));
   const [confirming, setConfirming] = useState<boolean>(false);
   const dispatch = useDispatch();
+
+  useEffect(()=>{
+    if (!showDialog) {
+      setConfirming(false);
+    }
+  }, [showDialog])
+
   return <Modal
-    title="Title"
+    title="remove non-gene annotations"
     visible={showDialog}
-    onOk={()=>{}}
+    onOk={()=>{
+      setConfirming(true);
+      dispatch({type:'REMOVE_CREATED_FEATURES'})
+    }}
     confirmLoading={confirming}
-    onCancel={()=>dispatch({type:'HIDE_REMOVE_CREATED_FEATURES_DIALOG'})}
+    onCancel={()=>{
+      setConfirming(false);
+      dispatch({type:'HIDE_REMOVE_CREATED_FEATURES_DIALOG'})}
+    }
   >
-    <p>test</p>
+    <p>remove non-gene annotations, will not change the sequence</p>
     <Progress percent={progress} />
     <div>{message}</div>
-    <Button type="primary" onClick={()=>dispatch({type:'REMOVE_CREATED_FEATURES'})}>start</Button>
+    {/* <Button type="primary" onClick={()=>dispatch({type:'REMOVE_CREATED_FEATURES'})}>start</Button> */}
   </Modal>
 }
 

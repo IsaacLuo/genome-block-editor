@@ -76,7 +76,8 @@ export default (router) => {
   router.put('/api/project/:id/fromFileUrl',
   userMust(beUser),
   async (ctx:Ctx, next:Next)=> {
-    const project = await Project.findById(ctx.params.id).exec();
+    const {id} = ctx.params;
+    const project = await Project.findById(id).exec();
     if (!project) {
       ctx.throw(404);
     }
@@ -105,8 +106,17 @@ export default (router) => {
         newParts.push(newAnnotation._id);
       }
     }
-    const updateResult = await Project.findByIdAndUpdate(ctx.params.id, {parts: [...originalParts, ...newParts]})
-    console.log(updateResult);
-    ctx.body={message:'OK', newParts}
+    // create new project, save current one as history
+    const newObj = project.toObject();
+    newObj.history = [newObj._id, ...newObj.history];
+    newObj.parts = [...newObj.parts, ...newParts];
+    delete newObj.updatedAt;
+    delete newObj._id;
+    const newItem = await Project.create(newObj);
+    // old project become history
+    await Project.update({_id:id}, {ctype:'history'});
+    // const updateResult = await Project.findByIdAndUpdate(ctx.params.id, {parts: [...originalParts, ...newParts]})
+    // console.log(updateResult);
+    ctx.body={message:'OK', newProjectId:newItem._id}
   })
 }

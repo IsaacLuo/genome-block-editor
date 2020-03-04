@@ -1,3 +1,4 @@
+import { HIDE_ALL_DIALOG } from './../actions';
 import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-saga/effects'
 import conf from '../conf.json'
 import { eventChannel } from 'redux-saga'
@@ -75,6 +76,7 @@ function* gotoAndFetchProjectFiles(action:IAction) {
       `
     })
     const {projectFolder} = result.data;
+    yield put({type:HIDE_ALL_DIALOG, data:projectFolder})
     yield put({type:'SET_FOLDER_CONTENT', data:projectFolder})
     yield put({type:'SET_FILE_LIST_LEVEL', data:{
       _id: projectFolder._id,

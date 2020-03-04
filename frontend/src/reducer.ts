@@ -140,7 +140,7 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
     case 'HIDE_FORK_PROJECT_DIALOG': {
       return {...state, forkProjectDialogVisible: false};
     }
-    case 'HIDE_FORK_ALL_DIALOG':
+    case 'HIDE_ALL_DIALOG':
       return DEFAULT_COMPONENT_VISIBLE_STATE;
     default:
       return state;

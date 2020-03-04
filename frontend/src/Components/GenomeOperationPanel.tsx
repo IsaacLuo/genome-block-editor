@@ -36,7 +36,7 @@ const GenomeOperationPanel: React.FC = () => {
       }
     },
     {
-      name: 'remove non-gene features',
+      name: 'remove non-gene annotations',
       visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),
       onClick: ()=>{
         dispatch({type:'SHOW_REMOVE_CREATED_FEATURES_DIALOG'})

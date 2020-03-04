@@ -13,9 +13,7 @@ export const SET_SOURCE_FILE = 'SET_SOURCE_FILE';
 
 export const LOAD_SOURCE_FILE = 'LOAD_SOURCE_FILE';
 
-
-
-export const HIDE_FORK_ALL_DIALOG = 'HIDE_FORK_ALL_DIALOG';
+export const HIDE_ALL_DIALOG = 'HIDE_ALL_DIALOG';
 
 
 export const ADD_NEW_BLOCK = 'ADD_NEW_BLOCK';
