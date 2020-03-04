@@ -7,7 +7,7 @@ services:
     build: ./api
     working_dir: /app
     external_links:
-      - "webexe_api_1:webexe"
+      - "webexe-api:webexe"
     # command: ['pipenv', 'run', 'python', 'src/run.py']
     # environment:
     #   - GUNICORN_CMD_ARGS="--chdir=src"
