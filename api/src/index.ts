@@ -18,10 +18,13 @@ import serve from 'koa-static';
 import { userMust, beUser } from './userMust';
 import createPromoterTerminators from './projectGlobalTasks/createPromoterTerminator'
 import removeGeneratedFeatures from './projectGlobalTasks/removeGeneratedFeatures'
+import redis from 'redis'
 
 import http from 'http';
 import socket from 'socket.io';
 import fs from 'fs';
+import { saveProject, deleteProject, loadProjectStr, saveProjectStr } from './redisCache';
+import workerTs from './workerTs';
 
 require('dotenv').config()
 
@@ -35,8 +38,29 @@ type Next = ()=>Promise<any>;
 
 const GUEST_ID = '000000000000000000000000';
 
+function sleep(ms:number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const app = new koa();
 const router = new Router();
+
+declare global {
+  namespace NodeJS {
+    interface Global {
+      redisClient?: redis.RedisClient
+    }
+  }
+}
+
+if (conf.redis.useRedis) {
+  global.redisClient = redis.createClient(conf.secret.redis.port, conf.secret.redis.host);
+  global.redisClient.on('error', function (err) {
+    console.error('redis-error: ' + err);
+  });
+  const worker = workerTs(`${__dirname}/script/preloadRedis`, {});
+}
+
 
 app.use(cors({credentials: true}));
 app.use(serve('./public'));
@@ -92,6 +116,9 @@ async (ctx:Ctx, next:Next)=> {
   delete project._id;
   const result = await Project.create(project);
   ctx.body = {_id:result._id, projectId:result.projectId};
+
+  // save to redis
+  saveProject(result);
 });
 
 // delete project
@@ -103,6 +130,10 @@ async (ctx:Ctx, next:Next)=> {
   const project = await Project.findById(id).exec();
   if (project.ctype === 'project' || project.ctype === 'flatProject') {
     await Project.update({_id:id}, {ctype:'deletedProject', updatedAt: new Date()});
+    
+    // save to redis
+    deleteProject(id);
+
     ctx.body = {message:'OK'}
   } else if (project.ctype === 'deletedProject') {
     console.log(project);
@@ -113,48 +144,80 @@ async (ctx:Ctx, next:Next)=> {
   }
 });
 
-// source file
+router.get('/api/test',
+async (ctx:Ctx, next:Next)=> {
+  console.log('1');
+  ctx.body = 'hello world';
+},
+
+async (ctx:Ctx, next:Next)=> {
+  await sleep(3000);
+  console.log('inside');
+  console.log('2');
+  ctx.body = 'hello again';
+  console.log('3');
+},
+
+)
+
+// load source file
 router.get('/api/sourceFile/:id',
 userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
   const start = Date.now();
   await next();
   const time = Date.now() - start;
-  console.log('normal query time = ', time);
+  console.debug('normal query time = ', time);
 },
 async (ctx:Ctx, next:Next)=> {
   // load everything except sequence
   const {id} = ctx.params;
   const start = Date.now();
   let result;
-  
-  result = await Project.findById(id)
-    .exec();
-  let cacheFileName = './public/sourceFileCaches/'+id;
-  if (result.ctype !== 'source') {
-    cacheFileName+= result.updatedAt.getTime();
-  }
-  cacheFileName+='.'
-  cacheFileName+=result.ctype
-  console.log(cacheFileName)
-  if(await fs_exists(cacheFileName)) {
-    console.log('cache file exists')
-    await send(ctx,cacheFileName);
-  } else {
-    console.log('cache file not exists')
-    // console.log(result.updatedAt);
-    result = await Project.findById(id)
-      .populate({
-        path:'parts',
-      })
-      .exec();
-    const time = Date.now() - start;
-    const resultStr = JSON.stringify(result);
-    fs_writeFile(cacheFileName, resultStr);
-    console.log('time = ', time);
+
+  // try to load from redis
+  result = await loadProjectStr(id);
+  if (result) {
+    console.debug('loaded from redis')
     ctx.body = result;
+  } else {
+    result = await Project.findById(id)
+      .exec();
+    let cacheFileName = './public/sourceFileCaches/'+id;
+    if (result.ctype !== 'source') {
+      cacheFileName+= result.updatedAt.getTime();
+    }
+    cacheFileName+='.'
+    cacheFileName+=result.ctype
+    console.debug(cacheFileName)
+    if(await fs_exists(cacheFileName)) {
+      console.debug('cache file exists')
+      await send(ctx,cacheFileName);
+      fs.readFile(cacheFileName, 'utf8', (err, data)=>{
+        saveProjectStr(id, data);
+      })
+    } else {
+      console.debug('cache file not exists')
+      // console.log(result.updatedAt);
+      result = await Project.findById(id)
+        .populate({
+          path:'parts',
+        })
+        .exec();
+      const time = Date.now() - start;
+      console.debug('time = ', time);
+      ctx.body = result;
+      ctx.state.cacheFileName = cacheFileName;
+      next(); // do not use await
+    }
   }
-})
+},
+async (ctx:Ctx, next:Next)=> {
+  const resultStr = JSON.stringify(ctx.body);
+  saveProjectStr(ctx.body._id, resultStr);
+  fs.promises.writeFile(ctx.state.cacheFileName, resultStr);
+}
+)
 
 createPromoterTerminators(router);
 removeGeneratedFeatures(router);

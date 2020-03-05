@@ -28,8 +28,9 @@ declare interface IUser extends IUserEssential {
 }
 
 declare interface ICustomState {
-  user?: ITokenContent,
-  data?: any,
+  user?: ITokenContent;
+  data?: any;
+  cacheFileName?: string;
 }
 
 interface IAnnotationPart {
