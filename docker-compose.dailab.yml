@@ -1,0 +1,33 @@
+version: '3.0'
+services:
+  api:
+    container_name: gbe-api
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    build: ./api
+    working_dir: /app
+    external_links:
+      - "webexe-api:webexe"
+      - "mongo"
+      - "redis-lru"
+    # command: ['pipenv', 'run', 'python', 'src/run.py']
+    # environment:
+    #   - GUNICORN_CMD_ARGS="--chdir=src"
+    # command: ['gunicorn', '-b 0.0.0.0:5000','src.run:app']
+    command: ['yarn', 'run', 'production']
+    restart: always
+    network_mode: bridge
+
+  frontend:
+    container_name: gbe-frontend
+    build: ./frontend
+    restart: always
+    ports:
+      - "${FRONTEND_PORT}:80"
+    links:
+      - api
+    depends_on:
+      - api
+    network_mode: bridge
+    command: ['nginx', '-g', 'daemon off;']
+

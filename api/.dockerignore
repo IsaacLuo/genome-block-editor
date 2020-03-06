@@ -1,3 +1,7 @@
 logs
 build
 node_modules
+public/sourceFileCaches/*.project
+public/sourceFileCaches/*.source
+public/sequences/*
+public/genbank/*

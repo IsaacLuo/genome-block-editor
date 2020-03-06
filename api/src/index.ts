@@ -58,7 +58,10 @@ if (conf.redis.useRedis) {
   global.redisClient.on('error', function (err) {
     console.error('redis-error: ' + err);
   });
-  const worker = workerTs(`${__dirname}/script/preloadRedis`, {});
+  if (process.env.NODE_ENV === 'production') {
+    workerTs(`${__dirname}/script/preloadRedis`, {});
+    workerTs(`${__dirname}/script/clearIsolatedParts`, {});
+  }
 }
 
 
@@ -221,6 +224,8 @@ async (ctx:Ctx, next:Next)=> {
 
 createPromoterTerminators(router);
 removeGeneratedFeatures(router);
+
+// router.get('/api/admin/clearIsolatedParts', clearIsolatedParts);
 
 
 app.use(router.routes());
