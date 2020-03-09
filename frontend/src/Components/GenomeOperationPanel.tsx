@@ -49,6 +49,13 @@ const GenomeOperationPanel: React.FC = () => {
         dispatch({type:'DELETE_PROJECT'})
       }
     },
+    {
+      name: 'history versions',
+      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype !== 'source'),
+      onClick: ()=>{
+        dispatch({type:'SHOW_HIDE_HISTORY_VERSIONS'})
+      }
+    },
   ]
 
   return (

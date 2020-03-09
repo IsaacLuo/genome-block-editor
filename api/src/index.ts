@@ -23,7 +23,7 @@ import redis from 'redis'
 import http from 'http';
 import socket from 'socket.io';
 import fs from 'fs';
-import { saveProject, deleteProject, loadProjectStr, saveProjectStr } from './redisCache';
+import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProjectIdStr, saveProjectIdStr } from './redisCache';
 import workerTs from './workerTs';
 
 require('dotenv').config()
@@ -122,6 +122,7 @@ async (ctx:Ctx, next:Next)=> {
 
   // save to redis
   saveProject(result);
+  saveProjectIdStr(result.projectId.toString(), result._id.toString());
 });
 
 // delete project
@@ -162,7 +163,25 @@ async (ctx:Ctx, next:Next)=> {
 },
 
 )
-
+// load source file by projectId
+router.get('/api/sourceFile/byProjectId/:pid',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {pid} = ctx.params;
+  const _id = await loadProjectIdStr(pid);
+  if (_id) {
+    ctx.redirect(`/api/sourceFile/${_id}`);
+  } else {
+    const result = await Project.findOne({projectId:pid, $or:[{ctype:'project'}, {ctype:'flatProject'}]}).exec();
+    if(result) {
+      saveProjectIdStr(result.projectId.toString(), result._id.toString());
+      ctx.redirect(`/api/sourceFile/${result._id}`);
+    } else {
+      ctx.throw(404);
+    }
+  }
+}
+);
 // load source file
 router.get('/api/sourceFile/:id',
 userMust(beUser),
@@ -221,6 +240,18 @@ async (ctx:Ctx, next:Next)=> {
   fs.promises.writeFile(ctx.state.cacheFileName, resultStr);
 }
 )
+
+// load source file history
+router.get('/api/sourceFile/:id/history',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {id} = ctx.params;
+  const result = await Project.findById(id)
+    .select('history name')
+    .populate('history', 'name updatedAt ctype')
+    .exec()
+  ctx.body = result;
+});
 
 createPromoterTerminators(router);
 removeGeneratedFeatures(router);

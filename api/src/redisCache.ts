@@ -66,3 +66,35 @@ export async function deleteProject(id:string) {
     });
   }
 }
+
+export async function saveProjectIdStr(projectId:string, id:string) {
+  if (global.redisClient) {
+    return new Promise((resolve, reject)=>{
+      global.redisClient.set(
+        `GBE::PROJID::${projectId}`,
+        id,
+        (err, val)=> {
+          if(err) {
+            reject(err);
+          } else {
+            resolve(val);
+          }
+        }
+      )
+    });
+  }
+}
+
+export async function loadProjectIdStr(projectId:string) {
+  if (global.redisClient) {
+    return new Promise((resolve, reject)=>{
+      global.redisClient.get( `GBE::PROJID::${projectId}`, (err, val)=> {
+        if(err) {
+          reject(err);
+        } else {
+          resolve(val);
+        }
+      })
+    });
+  }
+}

@@ -66,6 +66,12 @@ const DEFAULT_COMPONENT_VISIBLE_STATE:IComponentVisibleState = {
   generatePromoterTerminatorDialogVisible: false,
   removeCreatedFeaturesDialogVisible: false,
   forkProjectDialogVisible: false,
+  historyBrowserVisible: false,
+}
+
+const DEFAULT_HISTORY_STATE:IHistoryState = {
+  historyFile: undefined,
+  availableHistory: [],
 }
 
 const DEFAULT_STORE_STATE:IStoreState = {
@@ -79,7 +85,10 @@ const DEFAULT_STORE_STATE:IStoreState = {
   componentVisible: DEFAULT_COMPONENT_VISIBLE_STATE,
   genomeBrowser: DEFAULT_GENOME_BROWSER_STATE,
   fileExplorer: DEFAULT_FILE_EXPLORER_STATE,
+  history: DEFAULT_HISTORY_STATE,
 };
+
+
 
 const rulerZoomList = [50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000];
 
@@ -142,6 +151,8 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
     }
     case 'HIDE_ALL_DIALOG':
       return DEFAULT_COMPONENT_VISIBLE_STATE;
+    case 'SHOW_HIDE_HISTORY_VERSIONS':
+      return {...state, historyBrowserVisible: !state.historyBrowserVisible}
     default:
       return state;
   }
@@ -360,6 +371,19 @@ export const generalTaskReducer = (state:IGeneralTaskState, action:IAction) => {
   return state;
 }
 
+export const historyReducer = (state:IHistoryState, action:IAction) => {
+  if (state === undefined) {
+    state = DEFAULT_HISTORY_STATE;
+  }
+  switch(action.type) {
+    case 'SET_HISTORY_FILE':
+      return {...state, historyFile:action.data};
+    case 'SET_AVAILABLE_HISTORY':
+      return {...state, availableHistory: action.data};
+  }
+  return state;
+}
+
 export const reducer = reCombineReducers({
   app: appReducer,
   generalTask: generalTaskReducer,
@@ -367,4 +391,5 @@ export const reducer = reCombineReducers({
   currentProject: projectReducer,
   genomeBrowser: genomeBrowserReducer,
   fileExplorer: fileExplorerReducer,
+  history:historyReducer,
 })

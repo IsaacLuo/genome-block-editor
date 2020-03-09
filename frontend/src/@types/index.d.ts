@@ -43,6 +43,7 @@ declare interface ISourceFile {
   permission: Number,
   createdAt: Date,
   updatedAt: Date,
+  projectId?: string;
 }
 
 declare interface IProject {
@@ -67,6 +68,7 @@ declare interface IComponentVisibleState {
   generatePromoterTerminatorDialogVisible: boolean;
   removeCreatedFeaturesDialogVisible: boolean;
   forkProjectDialogVisible: boolean;
+  historyBrowserVisible: boolean;
 }
 
 declare interface IGenomBrowserState {
@@ -133,6 +135,17 @@ interface IGeneralTaskState {
   result: any;
 }
 
+interface IHistoryIndex {
+  _id:string;
+  name: string;
+  updatedAt: Date;
+}
+
+interface IHistoryState {
+  historyFile?: ISourceFile;
+  availableHistory: IHistoryIndex[];
+}
+
 declare interface IStoreState {
   app: IAppState;
   generalTask: IGeneralTaskState;
@@ -143,6 +156,7 @@ declare interface IStoreState {
   componentVisible: IComponentVisibleState;
   genomeBrowser: IGenomBrowserState;
   fileExplorer: IFileExplorerState;
+  history: IHistoryState;
 }
 
 declare module 'react-use-dimensions'

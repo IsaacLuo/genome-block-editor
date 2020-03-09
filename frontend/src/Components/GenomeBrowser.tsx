@@ -13,14 +13,7 @@ margin-right:20px;
 font-weight:bold;
 `
 
-export interface IProps {
-  children: any;
-  blockId: string;
-  pos: number;
-}
-
-
-const GenomeBrowser = () => {
+const GenomeBrowser = (mode:string|undefined|any) => {
   const {
     sourceFile, 
     zoomLevel, 

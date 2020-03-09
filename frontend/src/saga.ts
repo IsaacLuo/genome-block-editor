@@ -1,3 +1,4 @@
+import { LOAD_SOURCE_FILE_BY_PROJECT_ID } from './actions';
 
 // redux saga
 import { eventChannel } from 'redux-saga'
@@ -10,6 +11,10 @@ import axios from 'axios';
 import conf from './conf.json';
 import { notification } from 'antd';
 import io from 'socket.io-client';
+
+function getFuncName() {
+   return getFuncName.caller.name
+}
 
 export function* cailabInstanceLogin(action: IAction) {
   try {
@@ -41,7 +46,7 @@ export function* logout(action: IAction) {
     yield call(axios.delete, conf.authServerURL + '/api/session', {withCredentials: true});
     yield put({type: 'LOGOUT_DONE'});
   } catch (error) {
-    console.warn('unable to logout');
+    console.warn(`failed in ${getFuncName()}`);
   }
 }
 
@@ -59,7 +64,19 @@ export function* loadSourceFile(action:IAction) {
     yield put({type: 'SET_SOURCE_FILE', data:result.data});
     yield put({type: 'HIDE_ALL_DIALOG', data:result.data});
   } catch (error) {
-    console.warn('unable to logout');
+    console.warn('failed in loadSourceFile');
+  }
+}
+
+export function* loadSourceFileByProjectId(action:IAction) {
+  try {
+    yield put({type:'SET_GENOME_BROWSER_LOADING', data:true});
+    const result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/byProjectId/${action.data}`, {withCredentials: true});
+    yield put({type:'SET_GENOME_BROWSER_LOADING', data:false});
+    yield put({type: 'SET_SOURCE_FILE', data:result.data});
+    yield put({type: 'HIDE_ALL_DIALOG', data:result.data});
+  } catch (error) {
+    console.warn(`failed in ${getFuncName()}`);
   }
 }
 
@@ -71,7 +88,7 @@ export function* forkProject(action: IAction) {
     yield put({type: 'LOAD_SOURCE_FILE', data:_id});
     yield put({type: 'GOTO_AND_FETCH_PROJECT_FILES'});
   } catch (error) {
-    console.warn('unable to logout');
+    console.warn(`failed in ${getFuncName()}`);
   }
 }
 
@@ -217,6 +234,7 @@ export function* deleteProject(action:IAction) {
 
 export function* watchGenomeOperations() {
   yield takeLatest('LOAD_SOURCE_FILE', loadSourceFile);
+  yield takeLatest(LOAD_SOURCE_FILE_BY_PROJECT_ID, loadSourceFileByProjectId);
   yield takeLatest('FORK_PROJECT', forkProject);
   yield takeLatest('CREATE_PROMOTER_TERMINATOR', createPromoterTerminator);
   yield takeEvery('SERVER_RESULT', handleServerResult);
@@ -224,11 +242,30 @@ export function* watchGenomeOperations() {
   yield takeLatest('DELETE_PROJECT', deleteProject);
 }
 
+
+export function* fetchAvailableHistory(action:IAction) {
+  try {
+    const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
+    const result = yield call(
+      axios.get, 
+      `${conf.backendURL}/api/sourceFile/${id}/history`, 
+      {withCredentials: true});
+    yield put({type: 'SET_AVAILABLE_HISTORY', data:result.data.history});
+  } catch (error) {
+    yield call(notification.error, {message:error});
+  }
+}
+
+export function* watchHistories() {
+  yield takeLatest('FETCH_AVAILABLE_HISTORY', fetchAvailableHistory);
+}
+
 export default function* rootSaga() {
   yield all([
     fork(watchUsers),
     fork(watchFolders),
     fork(watchGenomeOperations),
+    fork(watchHistories),
     // fork(watchWebExe),
   ]);
 }
