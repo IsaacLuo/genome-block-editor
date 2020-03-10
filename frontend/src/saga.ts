@@ -256,8 +256,42 @@ export function* fetchAvailableHistory(action:IAction) {
   }
 }
 
+export function* fetchHistorySourceFile(action:IAction) {
+  // same as load source file, but load in history
+  try {
+    yield put({type:'SET_HISTORY_GENOME_BROWSER_LOADING', data:true});
+    const result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/${action.data}`, {withCredentials: true});
+    yield put({type:'SET_HISTORY_GENOME_BROWSER_LOADING', data:false});
+    // calculate difference between source file and history file
+    const {sourceFile}:{sourceFile:ISourceFile} = yield select((state:IStoreState)=>({sourceFile:state.sourceFile}));
+    const historyFile:ISourceFile = result.data;
+    if (sourceFile && historyFile) {
+      const sourcePartsSet = new Set<string>(sourceFile.parts.map(v=>v._id));
+      const historyPartSet = new Set<string>(historyFile.parts.map(v=>v._id));
+      const diffSetHistory = new Set<string>();
+      const diffSetSource = new Set<string>();
+      yield put({type: 'SET_HISTORY_DIFF', data: {diffSetHistory, diffSetSource}});
+      for(const p of historyPartSet as any) {
+        if(!sourcePartsSet.has(p)) {
+          diffSetHistory.add(p);
+        }
+      }
+      for(const p of sourcePartsSet as any) {
+        if(!historyPartSet.has(p)) {
+          diffSetSource.add(p);
+        }
+      }
+      yield put({type: 'SET_HISTORY_DIFF', data: {diffSetHistory, diffSetSource}});
+    }
+    yield put({type: 'SET_HISTORY_SOURCE_FILE', data:result.data});
+  } catch (error) {
+    console.warn('failed in loadSourceFile');
+  }
+}
+
 export function* watchHistories() {
   yield takeLatest('FETCH_AVAILABLE_HISTORY', fetchAvailableHistory);
+  yield takeLatest('FETCH_HISTORY_SOURCE_FILE', fetchHistorySourceFile);
 }
 
 export default function* rootSaga() {

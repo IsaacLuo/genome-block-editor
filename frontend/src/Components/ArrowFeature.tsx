@@ -10,22 +10,37 @@ export interface IProps {
   style: any;
   annotationPart: IAnnotationPart;
   shape: number;
+  specialEffect: any;
   onMouseMove?: (event: React.MouseEvent<any, MouseEvent>) => void;
   onMouseLeave?: (event: React.MouseEvent<any, MouseEvent>) => void;
 }
 
-const ArrowFeature = ({x,y,blockId, annotationPart, width, height, style, shape, onMouseMove, onMouseLeave}:IProps) => {
+const ArrowFeature = ({x,y,blockId, annotationPart, width, height, style, shape, onMouseMove, onMouseLeave, specialEffect}:IProps) => {
   const dispatch = useDispatch();
   let block;
   const maxHeadLen = height / 3;
   const headLen = width/3 < maxHeadLen ? width/3 : maxHeadLen;
   const bodyWidth = width - headLen;
   let textOffset = 2;
+  const finalStyle = {...style};
+  if (shape === -1) {
+    finalStyle.stroke = '#00f';
+  }
+
+  if(specialEffect) {
+    if (specialEffect.highLighted) {
+      finalStyle.stroke = 'red';
+      finalStyle.strokeWidth = 2;
+    }
+    if (specialEffect.lowLighted) {
+      finalStyle.fillOpacity=0.2;
+    }
+  } 
   switch (shape) {
     case 1:
       block = <path 
         d={`M ${x} ${y} l ${bodyWidth} 0 l ${headLen} ${height/2} l ${-headLen} ${height/2} l ${-bodyWidth} 0 Z`}
-        style={style}
+        style={finalStyle}
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}  
         />
@@ -33,7 +48,7 @@ const ArrowFeature = ({x,y,blockId, annotationPart, width, height, style, shape,
     case -1:
       block = <path 
         d={`M ${x+width} ${y} l ${-bodyWidth} 0 l ${-headLen} ${height/2} l ${headLen} ${height/2} l ${bodyWidth} 0 Z`}
-        style={{...style, stroke:'#00f'}}
+        style={finalStyle}
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}  
         />
@@ -45,7 +60,7 @@ const ArrowFeature = ({x,y,blockId, annotationPart, width, height, style, shape,
         y={y}
         width={width}
         height={height}
-        style={style}
+        style={finalStyle}
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}
     />

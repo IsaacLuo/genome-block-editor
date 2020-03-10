@@ -42,9 +42,7 @@ const ProjectFunctions: React.FC = (props:any) => {
         <div className="basket-panel">
           <GenomeBrowser/>
         </div>
-        
-        <GenomeBrowserForHistory/>
-        
+
         <div>
           <GenomeOperationPanel/>
         </div>
@@ -52,6 +50,7 @@ const ProjectFunctions: React.FC = (props:any) => {
         <RemoveCreatedFeatureDlg/>
         <ForkProjectDlg/>
 
+        <GenomeBrowserForHistory/>
 
         <GenomeBrowserTooltip/>
       </div>

@@ -6,19 +6,55 @@ import ArrowFeature from'./ArrowFeature';
 import useDimensions from 'react-use-dimensions';
 import {Spin, Dropdown, Menu, message} from 'antd';
 import styled from 'styled-components';
-import GenomeBrowser from './GenomeBrowser';
+import GenomeBrowserCore from './GenomeBrowserCore';
 import { DownOutlined } from '@ant-design/icons';
 
+const HistorySelectorArea = styled.div`
+
+padding-top: 30px;
+padding-bottom: 30px;
+`
+
 const GenomeBrowserForHistory = () => {
-  const {projectId, historyBrowserVisible, availableHistory} = useMappedState((state:IStoreState)=>({
+  const {
+    projectId, 
+    historyBrowserVisible, 
+    availableHistory,
+    
+
+    // for GenomeBrowserCore
+    sourceFile,
+    zoomLevel,
+    loading,
+    viewWindowStart,
+    viewWindowEnd,
+    windowWidth,
+    rulerStep,
+    highLightedParts,
+    } = useMappedState((state:IStoreState)=>({
     projectId: (state.sourceFile && state.sourceFile.projectId),
     historyBrowserVisible: state.componentVisible.historyBrowserVisible,
     availableHistory: state.history.availableHistory,
+    
+
+    // for GenomeBrowserCore
+    sourceFile: state.history.historyFile,
+    loading: state.history.loading,
+    zoomLevel: state.genomeBrowser.zoomLevel,
+    viewWindowStart: state.genomeBrowser.viewWindowStart,
+    viewWindowEnd: state.genomeBrowser.viewWindowEnd,
+    bufferedWindowStart:state.genomeBrowser.bufferedWindowStart,
+    bufferedWindowEnd: state.genomeBrowser.bufferedWindowEnd,
+    windowWidth: state.genomeBrowser.windowWidth,
+    rulerStep: state.genomeBrowser.rulerStep,
+    highLightedParts: state.history.historyDiffParts.diffSetHistory,
   }));
+
   const dispatch = useDispatch();
 
   const onClick = ({ key }:{key:string}) => {
-    message.info(`Click on item ${key}`);
+    dispatch({type:'FETCH_HISTORY_SOURCE_FILE', data: key});
+    // message.info(`Click on item ${key}`);
   };
 
 
@@ -32,21 +68,42 @@ const GenomeBrowserForHistory = () => {
     <Menu onClick={onClick}>
       {
         availableHistory.map((v,i)=>
-          <Menu.Item key={i}>[{new Date(v.updatedAt).toLocaleString()}] {v.name}</Menu.Item>
+          <Menu.Item key={v._id}>[
+            {v.updatedAt
+            ?
+            new Date(v.updatedAt).toLocaleString()
+            :
+            'ORIGINAL'
+            }
+            ] {v.name}</Menu.Item>
         )
       }
     </Menu>
   );
+
   return <React.Fragment>
     {historyBrowserVisible && 
-      <div className="basket-panel">
-        <Dropdown overlay={menu}>
-    <a className="ant-dropdown-link" onClick={e => e.preventDefault()}>
-      history versions <DownOutlined />
-    </a>
-  </Dropdown>,
-        <GenomeBrowser mode={"history"}/>
-      </div>
+      <React.Fragment>
+        <HistorySelectorArea>
+          <Dropdown overlay={menu}>
+            <a className="ant-dropdown-link" onClick={e => e.preventDefault()}>
+              history versions <DownOutlined />
+            </a>
+          </Dropdown>
+        </HistorySelectorArea>
+        <div className="basket-panel">
+        <GenomeBrowserCore 
+          sourceFile = {sourceFile}
+          zoomLevel = {zoomLevel}
+          loading = {loading}
+          viewWindowStart = {viewWindowStart}
+          viewWindowEnd = {viewWindowEnd}
+          windowWidth = {windowWidth}
+          rulerStep = {rulerStep}
+          highLightedParts = {highLightedParts}
+        />
+        </div>
+      </React.Fragment>
     }
   </React.Fragment>
 };

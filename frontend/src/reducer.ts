@@ -72,6 +72,11 @@ const DEFAULT_COMPONENT_VISIBLE_STATE:IComponentVisibleState = {
 const DEFAULT_HISTORY_STATE:IHistoryState = {
   historyFile: undefined,
   availableHistory: [],
+  loading: false,
+  historyDiffParts: {
+    diffSetHistory: new Set(),
+    diffSetSource: new Set(),
+  }
 }
 
 const DEFAULT_STORE_STATE:IStoreState = {
@@ -376,10 +381,15 @@ export const historyReducer = (state:IHistoryState, action:IAction) => {
     state = DEFAULT_HISTORY_STATE;
   }
   switch(action.type) {
-    case 'SET_HISTORY_FILE':
+    case 'SET_HISTORY_SOURCE_FILE':
       return {...state, historyFile:action.data};
     case 'SET_AVAILABLE_HISTORY':
       return {...state, availableHistory: action.data};
+    case 'SET_HISTORY_GENOME_BROWSER_LOADING':
+      return {...state, loading: action.data};
+    case 'SET_HISTORY_DIFF':
+      console.log(action);
+      return {...state, historyDiffParts: action.data}
   }
   return state;
 }

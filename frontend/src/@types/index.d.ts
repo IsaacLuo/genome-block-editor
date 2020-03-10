@@ -144,6 +144,8 @@ interface IHistoryIndex {
 interface IHistoryState {
   historyFile?: ISourceFile;
   availableHistory: IHistoryIndex[];
+  loading: boolean;
+  historyDiffParts: {diffSetHistory:Set<string>, diffSetSource:Set<string>}
 }
 
 declare interface IStoreState {
