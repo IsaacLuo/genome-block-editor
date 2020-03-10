@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {useDispatch, useMappedState} from 'redux-react-hook';
 import calcFeatureColor from '../featureColors';
 import ArrowFeature from'./ArrowFeature';
@@ -51,11 +51,34 @@ const GenomeBrowserCore = (
 ) => {
   const dispatch = useDispatch();
   const [ref, { x, y, width }] = useDimensions();
+  
   useEffect(() => {
     if (width>0) {
       dispatch({type:'SET_GENOME_BROWSER_WINDOW_WIDTH', data: width});
     }
   },[width]);
+
+  let svgRef = useRef<any>(null);
+
+  const onSVGWheel = (e:any)=>{
+    e.preventDefault();
+    console.log('prevented');
+  }
+
+  useEffect(() => {
+    if(svgRef.current){
+      console.log('test1');
+      svgRef.current.addEventListener('wheel', onSVGWheel, { passive: false });
+    }
+    return ()=>{
+      if(svgRef.current) {
+        console.log('test2');
+        svgRef.current.removeEventListener('wheel', onSVGWheel);
+      }
+    }
+  }, [svgRef.current]);
+
+
 
   const setZoomLevel = (level:number) => {
     dispatch({type:'SET_ZOOM_LEVEL',data:level})
@@ -168,8 +191,14 @@ const GenomeBrowserCore = (
       overflowX: 'hidden',
     }}
     ref={ref}
+    // onWheel={(event)=>{
+    //     event.preventDefault();
+    //     event.stopPropagation();
+    //     console.log(event);
+    // }}
   >
     <svg height={svgHeight} width={svgWidth}
+      ref={svgRef}
       onWheel={(event)=>{
         const {deltaY} = event;
         scollDeltaY += deltaY;
@@ -180,7 +209,6 @@ const GenomeBrowserCore = (
           dispatch({type:'GENOME_BROWSER_SCROLL_RIGHT', data: {step:1, max:maxAllowedScollPos}})
           scollDeltaY = 0
         }
-        return false;
       }}
     >
       <g transform={`translate(${-zoom(viewWindowStart)},0)`}>
