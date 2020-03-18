@@ -3,7 +3,7 @@ import re
 import json
 import os.path
 import urllib
-# from fasta_db import FastaDB
+from fasta_db import FastaDB
 import uuid
 
 def rc(seq):
@@ -32,6 +32,8 @@ class GFFReader:
         self.fasta_file_name = fasta_file_name
         self.used_chr = set()
         self.dst_folder = kwargs['sequence_dir']
+        self.fasta_db = FastaDB()
+        self.fasta_db.set_file(fasta_file_name)
 
     def convert_sequence_file(self, file_obj, dst_folder):
         seq_name = None
@@ -73,7 +75,7 @@ class GFFReader:
     # def get_fasta_db(self):
     #     return self.fasta_db
 
-    def read_gff(self):
+    def read_gff(self, readSequence=False):
         with open(self.gff_file_name) as fp:
             for line in fp:
                 if re.match('##FASTA', line):
@@ -91,12 +93,6 @@ class GFFReader:
                 start = int(segment[3])-1
                 end =  int(segment[4])
                 strand = segment[6]
-                # if end - start > 15728640: # 15MB
-                #     sequence = None
-                
-                # sequence = self.fasta_db.find(seq_name, start, end)
-                # if strand == '-':
-                #     sequence = rc(sequence)
 
                 self.used_chr.add(seq_name)
                 record = {
@@ -109,9 +105,19 @@ class GFFReader:
                     'strand': strand,
                     'frame': segment[7],
                     'attribute': attributes,
-                    'chrFileName': self.file_dict[seq_name]
-                    # 'sequence': sequence,
+                    'chrFileName': self.file_dict[seq_name],
                     }
+
+                if readSequence:
+                    if end - start > 15728640: # 15MB
+                        sequence = None
+                
+                    sequence = self.fasta_db.find(seq_name, start, end)
+                    if strand == '-':
+                        sequence = rc(sequence)
+                    
+                    record['sequence'] = sequence
+
                 yield record
 
             for key in self.file_dict.keys():

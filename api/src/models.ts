@@ -24,12 +24,28 @@ export const AnnotationPartSchema = new Schema({
   end: Number,
   len: Number,
   strand: Number,
-  sequence: String,
+  // extendted attributes
   name: String,
   original: Boolean,
   origin: {
     type: Schema.Types.ObjectId,
     ref: 'AnnotationPart',
+  },
+  history: [{
+    type: Schema.Types.ObjectId,
+    ref: 'AnnotationPart',
+  }],
+  // md5 of the sequence
+  // to identify if the sequence has changed
+  // if the sequence keeps the same, 
+  sequenceHash: String,
+  // sequence reference points a part of sequence file, the start end, and strand may are the same as the main attributes, but it can also be not the same.
+  // if the annoations is moved, and the sequenceRef will keep pointing the old position of the old sequence until the new sequence is generated.
+  sequenceRef: { 
+    fileName: String,
+    start: Number,
+    end: Number,
+    strand: Number,
   },
   attribute: Schema.Types.Mixed,
 });

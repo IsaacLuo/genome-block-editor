@@ -6,12 +6,15 @@ import re
 from bson.objectid import ObjectId
 from read_gff import GFFReader
 import shutil
+import hashlib
 
 strand_dict={"+":1, "-":-1, ".":0}
 
-if not os.path.isfile('conf.json'):
+
+configJsonFilePath = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'conf.json'))
+if not os.path.isfile(configJsonFilePath):
     print('conf file not exists', file=sys.stderr)
-with open('conf.json', 'r') as fp:
+with open(configJsonFilePath, 'r') as fp:
     conf = json.load(fp)
 
 black_list_feature = ['contig', 'region']
@@ -26,7 +29,9 @@ ProjectFolder = db['project_folders']
 Project = db['projects']
 Parts = db['annotation_parts']
 
-sequence_dir = os.path.abspath(os.path.join(os.path.curdir,'..','public', 'sequences'))
+# sequence_dir = os.path.abspath(os.path.join(os.path.curdir,'..','public', 'sequences'))
+sequence_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'public', 'sequences'))
+
 
 def search_folder(root_folder, root_folder_name):
     folders = []
@@ -60,7 +65,7 @@ def import_project(file_path, project_name):
 
     gff_reader = GFFReader(file_path, fasta_file_name, sequence_dir=sequence_dir, db=db)
     count = 0
-    for record in gff_reader.read_gff():
+    for record in gff_reader.read_gff(True):
         count+=1
         if count%100 == 0:
             print('imported {} records                          '.format(count), end='\r')
@@ -71,6 +76,11 @@ def import_project(file_path, project_name):
             name = record['attribute']['Name']
         if 'Alias' in record['attribute']:
             name = record['attribute']['Alias']
+
+        sequenceHash = ''
+        if 'sequence' in record:
+            sequenceHash = hashlib.md5(record['sequence'].encode())
+            seqeunceHash = sequenceHash.hexdigest()
         
         if record['seqName'] not in seq_dict:
             seq_dict[record['seqName']] = {
@@ -98,8 +108,17 @@ def import_project(file_path, project_name):
                 "strand": strand_dict[record['strand']],
                 "attribute": record['attribute'],
                 "name": name,
-                "chrFileName": record['chrFileName'],
+                
                 "original": True,
+                "history": [],
+
+                "sequenceHash": seqeunceHash,
+                "sequenceRef": {
+                    "fileName": record['chrFileName'],
+                    "start": record['start'],
+                    "end": record['end'],
+                    "strand": strand_dict[record['strand']],
+                }
             })
             if insert_result.acknowledged:
                 seq_dict[record['seqName']]['parts_raw'].append({
@@ -210,9 +229,17 @@ def import_project(file_path, project_name):
         return None
 
 def main():
-    base_dir = os.path.abspath(os.path.join(os.path.curdir,'..','..', 'gff'))
+    # base_dir = os.path.abspath(os.path.join(os.path.curdir,'..','..', 'gff'))
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'gff'))
+
+    ProjectFolder.delete_many({})
+    Project.delete_many({})
+    Parts.delete_many({})
+    for fileName in os.listdir(sequence_dir):
+        if fileName[0] != '.':
+            os.remove(os.path.join(sequence_dir, fileName))
     source_file_folder_id = search_folder(base_dir, 'Source Files')
-    insert_result = ProjectFolder.insert_one({"name":'Projects', "subFolders": [], "projects": []})
+    insert_result = ProjectFolder.insert_one({"name":'Project Files', "subFolders": [], "projects": []})
     insert_result = ProjectFolder.insert_one({"_id":ObjectId('000000000000000000000000'), "name":"/", "subFolders": [source_file_folder_id, insert_result.inserted_id, ], "projects": []})
     print('done')
 
