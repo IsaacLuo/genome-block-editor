@@ -264,6 +264,11 @@ def import_project(file_path, project_name):
     else:
         return None
 
+def remove_all_files(dir):
+    for fileName in os.listdir(dir):
+        if fileName[0] != '.':
+            os.remove(os.path.join(dir, fileName))
+
 def main():
     # base_dir = os.path.abspath(os.path.join(os.path.curdir,'..','..', 'gff'))
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'gff'))
@@ -271,9 +276,11 @@ def main():
     ProjectFolder.delete_many({})
     Project.delete_many({})
     Parts.delete_many({})
-    for fileName in os.listdir(sequence_dir):
-        if fileName[0] != '.':
-            os.remove(os.path.join(sequence_dir, fileName))
+
+    remove_all_files(sequence_dir)
+    remove_all_files(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'public', 'sourceFileCaches')))
+
+
     source_file_folder_id = search_folder(base_dir, 'Source Files')
     insert_result = ProjectFolder.insert_one({"name":'Project Files', "subFolders": [], "projects": []})
     insert_result = ProjectFolder.insert_one({"_id":ObjectId('000000000000000000000000'), "name":"/", "subFolders": [source_file_folder_id, insert_result.inserted_id, ], "projects": []})

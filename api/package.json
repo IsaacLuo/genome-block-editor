@@ -36,11 +36,13 @@
     "production": "cross-env NODE_ENV=production node build/src/index.js",
     "dev": "node ./node_modules/nodemon/bin/nodemon.js",
     "debug": "node ./node_modules/nodemon/bin/nodemon.js --inspect",
-    "importDB": "ts-node src/script/importData.ts",
+    "importDB": "cd utility && pipenv run python import_data.py",
     "testScript": "ts-node src/script/test_script.ts",
     "shell": "ts-node"
   },
   "devDependencies": {
+    "@types/jest": "^25.1.4",
+    "jest": "^25.1.0",
     "nodemon": "^1.19.3",
     "ts-node": "^8.5.4",
     "typescript": "^3.6.3"
