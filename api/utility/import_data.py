@@ -7,6 +7,7 @@ from bson.objectid import ObjectId
 from read_gff import GFFReader
 import shutil
 import hashlib
+import datetime
 
 strand_dict={"+":1, "-":-1, ".":0}
 
@@ -65,6 +66,9 @@ def import_project(file_path, project_name):
 
     gff_reader = GFFReader(file_path, fasta_file_name, sequence_dir=sequence_dir, db=db)
     count = 0
+
+    now = datetime.datetime.now()
+
     for record in gff_reader.read_gff(True):
         count+=1
         if count%100 == 0:
@@ -118,7 +122,10 @@ def import_project(file_path, project_name):
                     "start": record['start'],
                     "end": record['end'],
                     "strand": strand_dict[record['strand']],
-                }
+                },
+
+                "createdAt": now,
+                "updatedAt": now,
             })
             if insert_result.acknowledged:
                 seq_dict[record['seqName']]['parts_raw'].append({
@@ -162,16 +169,30 @@ def import_project(file_path, project_name):
 
         for i, p in enumerate(parts_raw):
             if p['start']> end_pos_of_unknown:
+                start = end_pos_of_unknown
+                end = p['start']
                 insert_result = Parts.insert_one({
                     "featureType": 'unknown',
                     "chrName": p['chrName'],
                     "chrId": p['chrId'],
-                    "start": end_pos_of_unknown,
-                    "end": p['start'],
+                    "start": start,
+                    "end": end,
                     "strand": 0,
                     "name": 'unknown',
-                    "chrFileName": p['chrFileName'],
                     "original": True,
+
+                    "history": [],
+
+                    "sequenceHash": seqeunceHash,
+                    "sequenceRef": {
+                        "fileName": p['chrFileName'],
+                        "start": start,
+                        "end": end,
+                        "strand": 0,
+                    },
+
+                    "createdAt": now,
+                    "updatedAt": now,
                 })
                 if insert_result.acknowledged:
                     parts.append(insert_result.inserted_id)
@@ -188,16 +209,27 @@ def import_project(file_path, project_name):
 
         # use last blank space
         if end_pos_of_unknown < project['len']:
+            start = end_pos_of_unknown
+            end = project['len']
             insert_result = Parts.insert_one({
                 "featureType": 'unknown',
                 "chrName": p['chrName'],
                 "chrId": p['chrId'],
-                "start": end_pos_of_unknown,
-                "end": project['len'],
+                "start": start,
+                "end": end,
                 "strand": 0,
                 "name": 'unknown',
-                "chrFileName": p['chrFileName'],
                 "original": True,
+
+                "sequenceHash": seqeunceHash,
+                "sequenceRef": {
+                    "fileName": p['chrFileName'],
+                    "start": start,
+                    "end": end,
+                    "strand": 0,
+                },
+                "createdAt": now,
+                "updatedAt": now,
             })
             if insert_result.acknowledged:
                 parts.append(insert_result.inserted_id)
@@ -209,10 +241,14 @@ def import_project(file_path, project_name):
 
         insert_result = Project.insert_one({
             "name": project['name'],
+            "projectId": ObjectId(),
             "version": project['version'],
             "parts": parts,
             "len": project['len'],
-            "chrFileName": project['chrFileName'],
+            "history": [],
+            "sequenceRef":{
+                "fileName":project['chrFileName'],
+            },
             "ctype": "source",
         })
         print('project ', project['name'], len(parts))
