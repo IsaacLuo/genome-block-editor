@@ -25,6 +25,7 @@ import socket from 'socket.io';
 import fs from 'fs';
 import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProjectIdStr, saveProjectIdStr } from './redisCache';
 import workerTs from './workerTs';
+import forkProject from './projectGlobalTasks/forkProject';
 
 require('dotenv').config()
 
@@ -70,6 +71,10 @@ app.use(serve('./public'));
 app.use(koaBody());
 middleware(app);
 
+router.get('/', async (ctx:Ctx, next:Next)=> {
+  ctx.body = {message:'OK'};
+});
+
 router.post('/api/session', 
 userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
@@ -83,6 +88,7 @@ async (ctx:Ctx, next:Next)=> {
     ctx.throw(401, 'user is not logged in');
   }
 });
+
 
 router.get('/api/user/current', async (ctx:Ctx, next:Next)=> {
   const user = ctx.state.user;
@@ -102,27 +108,7 @@ async (ctx:Ctx, next:Next)=> {
   const user = ctx.state.user;
   const {id} = ctx.params;
   const {name} = ctx.request.query;
-  const project = await (await Project.findById(id).exec()).toObject();
-  if (name) {
-    project.name = name;
-  } else {
-    const now = new Date();
-    project.name += `[${now.toLocaleDateString()} ${now.toLocaleTimeString()}]`
-  }
-  project.projectId = new mongoose.Types.ObjectId();
-  project.ctype = 'project';
-  project.owner = user._id;
-  project.group = user.groups;
-  project.permission = 0x600;
-  project.history = [project._id, ...project.history];
-  project._id = undefined;
-  delete project._id;
-  const result = await Project.create(project);
-  ctx.body = {_id:result._id, projectId:result.projectId};
-
-  // save to redis
-  saveProject(result);
-  saveProjectIdStr(result.projectId.toString(), result._id.toString());
+  ctx.body = await forkProject(user, id, name);
 });
 
 // delete project
@@ -282,3 +268,5 @@ app.use(router.routes());
 server.listen(process.env.PORT);
 
 log4js.getLogger().info(`start listening at ${process.env.PORT}`);
+
+export default app;
