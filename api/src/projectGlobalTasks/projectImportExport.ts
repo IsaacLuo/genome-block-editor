@@ -49,10 +49,10 @@ export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId)=>{
     seqInfos: {
       [project.name]: {length: project.len}
     },
-    records: project.toObject().parts.map(part=>({...part, seqName: project.name})),
-    sequence: [
-      {[project.name]: projectSequence}
-    ]
+    records: project.toObject().parts.map(part=>({...part, chrName: project.name})),
+    sequence: {
+      [project.name]: projectSequence
+    }
   }
 
   return gffJson;
