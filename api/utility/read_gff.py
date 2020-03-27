@@ -66,14 +66,14 @@ class GFFReader:
                 count+=1
                 print('imported {} fasta records                          '.format(count), end='\r')
             else:
-                seq.append(line)
+                seq.append(line.strip())
         
         print('\nimported done')
         
         return file_dict
 
-    # def get_fasta_db(self):
-    #     return self.fasta_db
+    def get_fasta_db(self):
+        return self.fasta_db
 
     def read_gff(self, readSequence=False):
         with open(self.gff_file_name) as fp:

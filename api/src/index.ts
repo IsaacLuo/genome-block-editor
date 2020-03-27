@@ -25,7 +25,8 @@ import socket from 'socket.io';
 import fs from 'fs';
 import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProjectIdStr, saveProjectIdStr } from './redisCache';
 import workerTs from './workerTs';
-import forkProject from './projectGlobalTasks/forkProject';
+import { forkProject, hideProject } from './projectGlobalTasks/project';
+import { projectToGFFJSON } from './projectGlobalTasks/projectImportExport';
 
 require('dotenv').config()
 
@@ -119,11 +120,7 @@ async (ctx:Ctx, next:Next)=> {
   const {id} = ctx.params;
   const project = await Project.findById(id).exec();
   if (project.ctype === 'project' || project.ctype === 'flatProject') {
-    await Project.update({_id:id}, {ctype:'deletedProject', updatedAt: new Date()});
-    
-    // save to redis
-    deleteProject(id);
-
+    await hideProject(id);
     ctx.body = {message:'OK'}
   } else if (project.ctype === 'deletedProject') {
     console.log(project);
@@ -133,6 +130,14 @@ async (ctx:Ctx, next:Next)=> {
     ctx.throw(401, `project type is ${project.ctype}`);
   }
 });
+
+// get seqeunce of project
+router.get('/api/project/:id/sequence',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {id} = ctx.params;
+  ctx.body = await projectToGFFJSON(id);
+})
 
 router.get('/api/test',
 async (ctx:Ctx, next:Next)=> {
@@ -238,6 +243,9 @@ async (ctx:Ctx, next:Next)=> {
     .exec()
   ctx.body = result;
 });
+
+
+
 
 createPromoterTerminators(router);
 removeGeneratedFeatures(router);

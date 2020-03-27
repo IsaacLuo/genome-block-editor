@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import conf from './conf.json';
 import koaJwt from 'koa-jwt';
 import jwt from 'jsonwebtoken';
+import connectMongoDB from './mongodb';
 
 const mainAppender:LogLevelFilterAppender = {
   type: 'logLevelFilter',
@@ -51,20 +52,7 @@ export default function middleware (app:koa) {
   // mongodb
   app.use( async (ctx:koa.ParameterizedContext<any, {}>, next: ()=>Promise<any>)=> {
     try {
-      const mongooseState = mongoose.connection.readyState;
-      switch (mongooseState) {
-        case 3:
-        case 0:
-        await mongoose.connect(
-          conf.secret.mongoDB.url,
-          {
-            useNewUrlParser: true,
-            // user: conf.secret.mongoDB.username,
-            // pass: conf.secret.mongoDB.password, 
-          }
-        );
-        break;
-      }
+      connectMongoDB();
     } catch(error) {
       ctx.throw(500,'db connection error');
     }

@@ -16,6 +16,13 @@ export interface IUserModel extends IUser, Document{
 
 export const User:Model<IUserModel> = mongoose.model('User', UserSchema, 'users');
 
+export const SequenceRefSchema = new Schema({
+  fileName: String,
+  start: Number,
+  end: Number,
+  strand: Number,
+})
+
 export const AnnotationPartSchema = new Schema({
   featureType: String,
   chrId: Number,
@@ -41,12 +48,7 @@ export const AnnotationPartSchema = new Schema({
   sequenceHash: String,
   // sequence reference points a part of sequence file, the start end, and strand may are the same as the main attributes, but it can also be not the same.
   // if the annoations is moved, and the sequenceRef will keep pointing the old position of the old sequence until the new sequence is generated.
-  sequenceRef: { 
-    fileName: String,
-    start: Number,
-    end: Number,
-    strand: Number,
-  },
+  sequenceRef: SequenceRefSchema,
   attribute: Schema.Types.Mixed,
 });
 
@@ -72,6 +74,16 @@ export const ProjectSchema = new Schema({
   permission: Number,
   history: [Schema.Types.ObjectId],
   ctype: String,
+
+
+  // md5 of the sequence
+  // to identify if the sequence has changed
+  // if the sequence keeps the same, 
+  sequenceHash: String,
+  // sequence reference points a part of sequence file, the start end, and strand may are the same as the main attributes, but it can also be not the same.
+  // if the annoations is moved, and the sequenceRef will keep pointing the old position of the old sequence until the new sequence is generated.
+  sequenceRef: SequenceRefSchema,
+
 }, {
   timestamps: true
 })

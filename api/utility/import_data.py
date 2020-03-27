@@ -55,6 +55,8 @@ def search_folder(root_folder, root_folder_name):
     else:
         return None
 
+# import project from gff file
+# @file_path: the gff file path
 def import_project(file_path, project_name):
     fasta_file_name = os.path.splitext(file_path)[0] + '.fa'
     if not os.path.isfile(fasta_file_name):
@@ -89,6 +91,7 @@ def import_project(file_path, project_name):
         if record['seqName'] not in seq_dict:
             seq_dict[record['seqName']] = {
                 "name": '{}_{}'.format(project_name, record['seqName']),
+                "seqName": record['seqName'],
                 "version": "0.1",
                 "len": record['end'],
                 "chrId": chr_count,
@@ -97,6 +100,7 @@ def import_project(file_path, project_name):
                 "original": True,
             }
             chr_count+=1
+            print('new seq_dict', record['seqName'])
         else:
             proj = seq_dict[record['seqName']]
             if proj['len'] < record['end']:
@@ -238,7 +242,9 @@ def import_project(file_path, project_name):
 
         print('generated {} records                          '.format(count))
 
-
+        # insert projrct
+        wholeSequence = gff_reader.get_fasta_db().find(project['seqName'])
+        wholeSequenceHash = hashlib.md5(wholeSequence.encode()).hexdigest()
         insert_result = Project.insert_one({
             "name": project['name'],
             "projectId": ObjectId(),
@@ -246,10 +252,19 @@ def import_project(file_path, project_name):
             "parts": parts,
             "len": project['len'],
             "history": [],
+
+            "sequenceHash": wholeSequenceHash,
+            "sequenceHashLen": len(wholeSequence),
             "sequenceRef":{
                 "fileName":project['chrFileName'],
+                "start": 0,
+                "end": project['len'],
+                "strand": 0,
             },
             "ctype": "source",
+            "createdAt": now,
+            "updatedAt": now,
+            'seqName': project['seqName']
         })
         print('project ', project['name'], len(parts))
 

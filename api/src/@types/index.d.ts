@@ -33,7 +33,14 @@ declare interface ICustomState {
   cacheFileName?: string;
 }
 
-interface IAnnotationPart {
+declare interface ISequenceRef {
+  fileName: string,
+  start: number,
+  end: number,
+  strand: number,
+}
+
+declare interface IAnnotationPart {
   _id: any;
   featureType: string;
   chrId: number;
@@ -59,7 +66,8 @@ declare interface IProject {
   createdAt: Date,
   updatedAt: Date,
   history: [any],
-  len: number
+  len: number,
+  sequenceRef: ISequenceRef,
 }
 
 declare interface ISourceChomosome {
