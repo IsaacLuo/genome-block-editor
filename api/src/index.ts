@@ -132,7 +132,7 @@ async (ctx:Ctx, next:Next)=> {
 });
 
 // get seqeunce of project
-router.get('/api/project/:id/sequence',
+router.get('/api/project/:id/gffJson',
 userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
   const {id} = ctx.params;

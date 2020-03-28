@@ -11,6 +11,7 @@ import axios from 'axios';
 import conf from './conf.json';
 import { notification } from 'antd';
 import io from 'socket.io-client';
+import watchProjects from 'sagas/projects';
 
 function getFuncName() {
    return getFuncName.caller.name
@@ -297,6 +298,7 @@ export function* watchHistories() {
 export default function* rootSaga() {
   yield all([
     fork(watchUsers),
+    fork(watchProjects),
     fork(watchFolders),
     fork(watchGenomeOperations),
     fork(watchHistories),

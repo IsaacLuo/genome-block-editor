@@ -29,6 +29,17 @@ const GenomeOperationPanel: React.FC = () => {
       }
     },
     {
+      name: 'export project',
+      visible: (state:any) => state.sourceFile !== undefined ,
+      onClick: ()=>{
+        if (state.sourceFile) {
+          dispatch({type:'EXPORT_SOURCE_FILE_TO_GFF_JSON'});
+        } else {
+          console.error('EXPORT_SOURCE_FILE_TO_GFF_JSON');
+        }
+      }
+    },
+    {
       name: 'create promoter terminator',
       visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),
       onClick: ()=>{
