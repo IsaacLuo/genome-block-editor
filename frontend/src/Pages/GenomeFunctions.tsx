@@ -12,6 +12,7 @@ import ForkProjectDlg from 'Components/dialogs/ForkProjectDlg';
 import {useDispatch, useMappedState} from 'redux-react-hook';
 import { LOAD_SOURCE_FILE_BY_PROJECT_ID } from 'actions';
 import GenomeBrowserForHistory from 'Components/GenomeBrowserForHistory';
+import ReplaceCodonDlg from 'Components/dialogs/ReplaceCodonDlg';
 
 const ProjectFunctions: React.FC = (props:any) => {
   const {projectId} = useMappedState((state:IStoreState)=>({
@@ -51,6 +52,7 @@ const ProjectFunctions: React.FC = (props:any) => {
         <ForkProjectDlg/>
 
         <GenomeBrowserForHistory/>
+        <ReplaceCodonDlg/>
 
         <GenomeBrowserTooltip/>
       </div>

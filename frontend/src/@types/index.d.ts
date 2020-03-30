@@ -69,6 +69,7 @@ declare interface IComponentVisibleState {
   removeCreatedFeaturesDialogVisible: boolean;
   forkProjectDialogVisible: boolean;
   historyBrowserVisible: boolean;
+  replaceCodonDialogVisible: boolean;
 }
 
 declare interface IGenomBrowserState {

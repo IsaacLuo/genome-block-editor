@@ -67,6 +67,7 @@ const DEFAULT_COMPONENT_VISIBLE_STATE:IComponentVisibleState = {
   removeCreatedFeaturesDialogVisible: false,
   forkProjectDialogVisible: false,
   historyBrowserVisible: false,
+  replaceCodonDialogVisible: false,
 }
 
 const DEFAULT_HISTORY_STATE:IHistoryState = {
@@ -153,6 +154,12 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
     }
     case 'HIDE_FORK_PROJECT_DIALOG': {
       return {...state, forkProjectDialogVisible: false};
+    }
+    case 'SHOW_REPLACE_CODON_DIALOG': {
+      return {...state, replaceCodonDialogVisible: true};
+    }
+    case 'HIDE_REPLACE_CODON_DIALOG': {
+      return {...state, replaceCodonDialogVisible: false};
     }
     case 'HIDE_ALL_DIALOG':
       return DEFAULT_COMPONENT_VISIBLE_STATE;

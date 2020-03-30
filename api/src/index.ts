@@ -27,6 +27,7 @@ import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProject
 import workerTs from './workerTs';
 import { forkProject, hideProject } from './projectGlobalTasks/project';
 import { projectToGFFJSON } from './projectGlobalTasks/projectImportExport';
+import { replaceCodon } from './projectGlobalTasks/replaceCodon';
 
 require('dotenv').config()
 
@@ -249,6 +250,18 @@ async (ctx:Ctx, next:Next)=> {
 
 createPromoterTerminators(router);
 removeGeneratedFeatures(router);
+
+router.post('/api/mapping_project/replace_codons/from/:id', 
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const user = ctx.state.user;
+  const {id} = ctx.params;
+  const {rules} = ctx.request.body;
+  const clientToken = ctx.cookies.get('token');
+  
+  ctx.body = await replaceCodon(user, id, rules, clientToken);
+  console.log(ctx.body);
+})
 
 // router.get('/api/admin/clearIsolatedParts', clearIsolatedParts);
 

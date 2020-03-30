@@ -12,6 +12,7 @@ import conf from './conf.json';
 import { notification } from 'antd';
 import io from 'socket.io-client';
 import watchProjects from 'sagas/projects';
+import watchGlobalProcessTasks from 'sagas/globalProcessTasks';
 
 function getFuncName() {
    return getFuncName.caller.name
@@ -302,6 +303,7 @@ export default function* rootSaga() {
     fork(watchFolders),
     fork(watchGenomeOperations),
     fork(watchHistories),
+    fork(watchGlobalProcessTasks),
     // fork(watchWebExe),
   ]);
 }

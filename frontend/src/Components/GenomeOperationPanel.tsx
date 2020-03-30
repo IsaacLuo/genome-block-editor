@@ -67,6 +67,15 @@ const GenomeOperationPanel: React.FC = () => {
         dispatch({type:'SHOW_HIDE_HISTORY_VERSIONS'})
       }
     },
+
+    {
+      name: 'replace codons',
+      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),
+      onClick: ()=>{
+        dispatch({type:'SHOW_REPLACE_CODON_DIALOG'})
+      }
+    },
+
   ]
 
   return (

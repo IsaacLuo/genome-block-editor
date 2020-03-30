@@ -17,7 +17,7 @@ describe('test of forkProject', ()=>{
     }
 
     project = await Project.findOne({ctype:'source'}).exec();
-    console.log(project);
+    // console.log(project);
     console.log('project prepared? ', !!project);
   }, 10000);
 
