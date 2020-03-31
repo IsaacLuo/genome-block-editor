@@ -211,6 +211,8 @@ def import_project(file_path, project_name):
             if end_pos_of_unknown < p['end']:
                 end_pos_of_unknown = p['end']
 
+        wholeSequence = gff_reader.get_fasta_db().find(project['seqName'])
+        project['len'] = len(wholeSequence)
         # use last blank space
         if end_pos_of_unknown < project['len']:
             start = end_pos_of_unknown
@@ -243,7 +245,7 @@ def import_project(file_path, project_name):
         print('generated {} records                          '.format(count))
 
         # insert projrct
-        wholeSequence = gff_reader.get_fasta_db().find(project['seqName'])
+        
         wholeSequenceHash = hashlib.md5(wholeSequence.encode()).hexdigest()
         insert_result = Project.insert_one({
             "name": project['name'],
@@ -252,9 +254,8 @@ def import_project(file_path, project_name):
             "parts": parts,
             "len": project['len'],
             "history": [],
-
             "sequenceHash": wholeSequenceHash,
-            "sequenceHashLen": len(wholeSequence),
+            # "sequenceHashLen": project['len'],
             "sequenceRef":{
                 "fileName":project['chrFileName'],
                 "start": 0,

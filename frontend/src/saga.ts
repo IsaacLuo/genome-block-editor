@@ -173,9 +173,13 @@ export function* removeCreatedFeatures (aciton:IAction) {
 function* handleServerResult(action:IAction) {
   // got server results send to backend
   const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
-  const result  = yield call(axios.put, `${conf.backendURL}/api/project/${id}/fromFileUrl`, {fileUrl:action.data.files[0]}, {withCredentials: true});
-  yield put({type:'LOAD_SOURCE_FILE', data: result.data.newProjectId});
-  yield put({type: 'GOTO_AND_FETCH_PROJECT_FILES'});
+  const resultFileUrls = action.data.files;
+  if (resultFileUrls[0]) {
+    const result  = yield call(axios.put, `${conf.backendURL}/api/project/${id}/fromFileUrl`, {fileUrl:resultFileUrls[0]}, {withCredentials: true});
+    yield put({type:'LOAD_SOURCE_FILE', data: result.data.newProjectId});
+    yield put({type: 'GOTO_AND_FETCH_PROJECT_FILES'});
+  }
+  
 }
 
 export function* createPromoterTerminator(aciton:IAction) {

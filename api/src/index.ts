@@ -8,7 +8,7 @@ import middleware from './middleware'
 import Router from 'koa-router';
 import log4js from 'log4js';
 import conf from './conf.json';
-import {Project, User} from './models';
+import {Project, User, AnnotationPart} from './models';
 import jwt from 'jsonwebtoken';
 import cors from 'koa-cors';
 import mongoose from 'mongoose';
@@ -28,6 +28,8 @@ import workerTs from './workerTs';
 import { forkProject, hideProject } from './projectGlobalTasks/project';
 import { projectToGFFJSON } from './projectGlobalTasks/projectImportExport';
 import { replaceCodon } from './projectGlobalTasks/replaceCodon';
+
+import axios from 'axios';
 
 require('dotenv').config()
 
@@ -250,6 +252,59 @@ async (ctx:Ctx, next:Next)=> {
 
 createPromoterTerminators(router);
 removeGeneratedFeatures(router);
+
+router.put('/api/project/:id/fromFileUrl',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {id} = ctx.params;
+  const project = await Project.findById(id).exec();
+  if (!project) {
+    ctx.throw(404);
+  }
+  const fileUrl = ctx.request.body.fileUrl;
+  // get file from webexe server
+  const clientToken = ctx.cookies.get('token');
+  console.log(`${conf.webexe.internalUrl}/api/resultFile/${fileUrl.url}/as/${fileUrl.name}`);
+  const result = await axios.get(`${conf.webexe.internalUrl}/api/resultFile/${fileUrl.url}/as/${fileUrl.name}`,
+  {
+    headers: {
+      'Cookie': `token=${clientToken}`,
+    }
+  });
+  const gffObj = result.data;
+  // read new data from the file
+  const originalParts = project.parts;
+  const newParts = [];
+  for(const record of gffObj.records) {
+    if (record.__modified || !record._id) {
+      const newPartTable = {
+        ...record,
+        original: false,
+      };
+      if (record._id) {
+        const oldRecord = await AnnotationPart.findById(record._id).exec();
+        newPartTable.history = [oldRecord._id, ...newPartTable.history];
+        delete newPartTable.updatedAt;
+        delete newPartTable._id;
+      }
+      // create new feature
+      const newAnnotation = await AnnotationPart.create(newPartTable);
+      newParts.push(newAnnotation._id);
+    } else {
+      newParts.push(record._id);
+    }
+  }
+  // create new project, save current one as history
+  const newObj = project.toObject();
+  newObj.history = [newObj._id, ...newObj.history];
+  newObj.parts = newParts;
+  delete newObj.updatedAt;
+  delete newObj._id;
+  const newItem = await Project.create(newObj);
+  // old project become history
+  await Project.update({_id:id}, {ctype:'history'});
+  ctx.body={message:'OK', newProjectId:newItem._id}
+})
 
 router.post('/api/mapping_project/replace_codons/from/:id', 
 userMust(beUser),

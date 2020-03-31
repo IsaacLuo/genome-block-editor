@@ -57,7 +57,7 @@ function generateSocketAction(serverAction:IAction):IAction {
       };
     default:
       return {
-        type: 'UNKOWN_SOCKET_ACTION',
+        type: 'UNKOWN_SOCKET_ACTION', 
         data: serverAction.data,
       }
   }
@@ -86,6 +86,7 @@ function* replaceCodonTask(action:IAction) {
         break;
       }
     }
+    
   } catch (err) {
     console.error(err);
   }

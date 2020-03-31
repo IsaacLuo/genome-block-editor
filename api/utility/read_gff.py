@@ -123,3 +123,6 @@ class GFFReader:
             for key in self.file_dict.keys():
                 if key not in self.used_chr:
                     os.remove(os.path.join(self.dst_folder, self.file_dict[key]))
+
+    def get_sequence_len(self, seqName):
+        return self.fasta_db.get_seq_len(seqName)

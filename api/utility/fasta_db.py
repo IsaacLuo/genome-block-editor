@@ -3,6 +3,7 @@ class FastaDB:
     cached_seq_name = None
     cached_seq = None
     seq_index = {}
+    seq_lens_dict = {}
 
     def set_file(self, file_name):
         self.file_obj = open(file_name, 'rb')
@@ -63,3 +64,8 @@ class FastaDB:
             if end == None:
                 end = len(seq)
             return seq[start:end]
+
+    def get_seq_len(self, seq_name):
+        if seq_name not in self.seq_lens_dict:
+            self.seq_lens_dict[seq_name] = len(self.get_seq(seq_name))
+        return self.seq_lens_dict[seq_name]
