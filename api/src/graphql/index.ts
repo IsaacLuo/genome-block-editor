@@ -19,6 +19,9 @@ export function useApolloServer(app:any) {
     name: String
     original: Boolean
     origin: OriginPart
+    history: [String]
+    createdAt: String
+    updatedAt: String
   }
 
   type OriginPart {
@@ -95,6 +98,7 @@ export function useApolloServer(app:any) {
     projectGenbank(_id:ID): String
     folder(_id: ID): ProjectFolder
     projectFolder: ProjectFolder
+    part(_id: ID): Part
   }
 
   type Mutation {
@@ -237,6 +241,19 @@ export function useApolloServer(app:any) {
           ctype:{$in:['project', 'flatProject']}
         }).select('_id name updatedAt').exec();
         return list;
+      },
+
+      part: async (parent:any, args:any, context: any, info:any) => {
+        const {_id} = args;
+        const part = await AnnotationPart.findById(_id).exec();
+        const partObj = part.toObject();
+        partObj.len = part.end - part.start;
+        
+        if (partObj.createdAt) partObj.createdAt = partObj.createdAt.toJSON();
+        if (partObj.updatedAt) partObj.updatedAt = partObj.updatedAt.toJSON();
+
+        console.log(partObj.updatedAt);
+        return partObj;
       },
 
 

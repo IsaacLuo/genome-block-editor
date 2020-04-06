@@ -51,6 +51,7 @@ declare interface IAnnotationPart {
   name: string;
   original: boolean;
   origin?: string|IAnnotationPart;
+  sequenceRef: ISequenceRef;
 }
 
 declare interface IProject {

@@ -69,6 +69,10 @@ const ArrowFeature = ({x,y,blockId, annotationPart, width, height, style, shape,
   return (
     <g
       onDoubleClick={()=>dispatch({type:'ADD_NEW_BLOCK', data: annotationPart})}
+      onContextMenu={(e)=>{
+        dispatch({type:'SHOW_PART_DETAIL_DIALOG', data: annotationPart._id})
+        e.preventDefault();
+      }}
     >
       {block}
       {annotationPart.name && width > annotationPart.name.length*8 && 

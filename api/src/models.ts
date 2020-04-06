@@ -49,6 +49,12 @@ export const AnnotationPartSchema = new Schema({
   // sequence reference points a part of sequence file, the start end, and strand may are the same as the main attributes, but it can also be not the same.
   // if the annoations is moved, and the sequenceRef will keep pointing the old position of the old sequence until the new sequence is generated.
   sequenceRef: SequenceRefSchema,
+  // changelog
+  changelog: String,
+  parent: {
+    type: Schema.Types.ObjectId,
+    ref: 'AnnotationPart',
+  },
   attribute: Schema.Types.Mixed,
 });
 
@@ -83,7 +89,8 @@ export const ProjectSchema = new Schema({
   // sequence reference points a part of sequence file, the start end, and strand may are the same as the main attributes, but it can also be not the same.
   // if the annoations is moved, and the sequenceRef will keep pointing the old position of the old sequence until the new sequence is generated.
   sequenceRef: SequenceRefSchema,
-
+  createdAt: Date,
+  updatedAt: Date,
 }, {
   timestamps: true
 })

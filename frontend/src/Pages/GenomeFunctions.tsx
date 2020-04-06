@@ -13,6 +13,7 @@ import {useDispatch, useMappedState} from 'redux-react-hook';
 import { LOAD_SOURCE_FILE_BY_PROJECT_ID } from 'actions';
 import GenomeBrowserForHistory from 'Components/GenomeBrowserForHistory';
 import ReplaceCodonDlg from 'Components/dialogs/ReplaceCodonDlg';
+import PartDetailDlg from 'Components/dialogs/PartDetailDlg';
 
 const ProjectFunctions: React.FC = (props:any) => {
   const {projectId} = useMappedState((state:IStoreState)=>({
@@ -53,8 +54,10 @@ const ProjectFunctions: React.FC = (props:any) => {
 
         <GenomeBrowserForHistory/>
         <ReplaceCodonDlg/>
-
+        
         <GenomeBrowserTooltip/>
+
+        <PartDetailDlg/>
       </div>
   );
 }

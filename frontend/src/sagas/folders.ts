@@ -4,14 +4,11 @@ import conf from '../conf.json'
 import { eventChannel } from 'redux-saga'
 import {delay} from 'redux-saga/effects'
 import axios from 'axios';
-import ApolloClient from 'apollo-boost';
+import apolloClient from '../apolloClient'
 import { gql } from "apollo-boost";
 import { InMemoryCache } from 'apollo-cache-inmemory';
 
-const client = new ApolloClient({
-  uri: `${conf.backendURL}/graphql`,
-  cache: new InMemoryCache(),
-});
+const client = apolloClient();
 
 function* fetchFolderContent(action:IAction) {
   try {

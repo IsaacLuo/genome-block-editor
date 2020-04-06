@@ -24,6 +24,7 @@ const ScrollBlock = styled.div`
     background-color: #ccffcc;
     border: solid 1px black;
     min-width:20px;
+    max-width:100%;
 `
 
 interface IProps {
@@ -62,7 +63,6 @@ const GenomeBrowserCore = (
 
   const onSVGWheel = (e:any)=>{
     e.preventDefault();
-    console.log('prevented');
   }
 
   useEffect(() => {
@@ -282,8 +282,8 @@ const GenomeBrowserCore = (
         <ScrollBlock
           style={{
             left:viewWindowStart/maxAllowedScollPos*windowWidth,
-            width:(viewWindowEnd - viewWindowStart)/maxAllowedScollPos*windowWidth}
-          }
+            width:(viewWindowEnd - viewWindowStart)/maxAllowedScollPos*windowWidth,
+          }}
         />
     </MyScrollBar>
     </Spin>;

@@ -63,13 +63,14 @@ def import_project(file_path, project_name):
         fasta_file_name = None
 
     project_ids = []
+    project_name_id_dict = {}
     chr_count = 0
     seq_dict = {}
 
     gff_reader = GFFReader(file_path, fasta_file_name, sequence_dir=sequence_dir, db=db)
     count = 0
 
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
 
     for record in gff_reader.read_gff(True):
         count+=1
@@ -141,23 +142,18 @@ def import_project(file_path, project_name):
                     "name": name,
                     "chrFileName": record['chrFileName'],
                 })
+                # insert name->id to dict
+                if 'ID' in record['attribute']:
+                    project_name_id_dict[record['attribute']['ID']] = insert_result.inserted_id
             else:
                 raise Exception('failed insert parts')
 
-    def build_index(self):
-        self.check_file_object()
-        self.file_obj.seek(0)
-        it = 0
-        seq_name = ''
-        for line_raw in self.file_obj:
-            line = line_raw.decode('utf-8').strip()
-            if line[0] == '>':
-                seq_name = line[1:]
-            elif seq_name not in self.seq_index:
-                self.seq_index[seq_name] = it
-                print(seq_name, it)
-            it += len(line_raw)
+    # set parent id if exists:
+    for k in seq_dict.keys():
+        project = seq_dict[k]
+        parts_raw = project['parts_raw']
 
+    # insert "unknown" features between marked segements
     for k in seq_dict.keys():
         project = seq_dict[k]
         parts_raw = project['parts_raw']
@@ -284,6 +280,8 @@ def remove_all_files(dir):
     for fileName in os.listdir(dir):
         if fileName[0] != '.':
             os.remove(os.path.join(dir, fileName))
+
+
 
 def main():
     # base_dir = os.path.abspath(os.path.join(os.path.curdir,'..','..', 'gff'))

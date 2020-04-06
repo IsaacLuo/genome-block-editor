@@ -30,6 +30,13 @@ declare interface IAnnotationPart {
   name: string;
   original: boolean;
   origin?: string|IAnnotationPart;
+  changelog: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+declare interface IAnnotationPartWithDetail extends IAnnotationPart{
+  history: string[];
 }
 
 declare interface ISourceFile {
@@ -70,6 +77,7 @@ declare interface IComponentVisibleState {
   forkProjectDialogVisible: boolean;
   historyBrowserVisible: boolean;
   replaceCodonDialogVisible: boolean;
+  partDetailDialogVisible: boolean;
 }
 
 declare interface IGenomBrowserState {
@@ -149,6 +157,12 @@ interface IHistoryState {
   historyDiffParts: {diffSetHistory:Set<string>, diffSetSource:Set<string>}
 }
 
+interface IPartDetailDialogState {
+  basePartId?: string;
+  part?: IAnnotationPartWithDetail,  
+  historyPart?: IAnnotationPartWithDetail,
+}
+
 declare interface IStoreState {
   app: IAppState;
   generalTask: IGeneralTaskState;
@@ -160,6 +174,7 @@ declare interface IStoreState {
   genomeBrowser: IGenomBrowserState;
   fileExplorer: IFileExplorerState;
   history: IHistoryState;
+  partDetailDialog: IPartDetailDialogState;
 }
 
 declare module 'react-use-dimensions'

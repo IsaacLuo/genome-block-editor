@@ -28,6 +28,7 @@ import workerTs from './workerTs';
 import { forkProject, hideProject } from './projectGlobalTasks/project';
 import { projectToGFFJSON } from './projectGlobalTasks/projectImportExport';
 import { replaceCodon } from './projectGlobalTasks/replaceCodon';
+import {reverseComplement} from './projectGlobalTasks/projectImportExport';
 
 import axios from 'axios';
 
@@ -35,8 +36,7 @@ require('dotenv').config()
 
 const { promisify } = require('util');
 const fs_exists = promisify(fs.exists);
-const fs_writeFile = promisify(fs.writeFile);
-const fs_readFile = promisify(fs.readFile);
+const fs_read = promisify(fs.read);
 
 type Ctx = koa.ParameterizedContext<ICustomState>;
 type Next = ()=>Promise<any>;
@@ -247,6 +247,25 @@ async (ctx:Ctx, next:Next)=> {
   ctx.body = result;
 });
 
+router.get('/api/part/:id/sequence',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {id} = ctx.params;
+  const part = await AnnotationPart.findById(id).exec();
+  if (!part.sequenceRef) {
+    ctx.throw(404, 'cannot find sequence ref');
+  }
+  const {fileName, start, end, strand} = part.sequenceRef;
+  const fp = await fs.promises.open(`public/sequences/${fileName}`, 'r');
+  const bufferSize = end-start;
+  const buffer = new Buffer(bufferSize);
+  const {bytesRead} = await fs_read(fp.fd, buffer, 0, end-start, start);
+  let sequence = buffer.toString('utf8', 0, bufferSize);
+  if (strand < 0) {
+    sequence = reverseComplement(sequence);
+  }
+  ctx.body = {sequence, len: bytesRead};
+})
 
 
 
@@ -280,11 +299,15 @@ async (ctx:Ctx, next:Next)=> {
       const newPartTable = {
         ...record,
         original: false,
+        updatedAt:new Date(),
       };
+      
+      if (newPartTable.createdAt) delete newPartTable.createdAt;
+      if (newPartTable.updatedAt) delete newPartTable.updatedAt;
+
       if (record._id) {
         const oldRecord = await AnnotationPart.findById(record._id).exec();
         newPartTable.history = [oldRecord._id, ...newPartTable.history];
-        delete newPartTable.updatedAt;
         delete newPartTable._id;
       }
       // create new feature

@@ -68,6 +68,7 @@ const DEFAULT_COMPONENT_VISIBLE_STATE:IComponentVisibleState = {
   forkProjectDialogVisible: false,
   historyBrowserVisible: false,
   replaceCodonDialogVisible: false,
+  partDetailDialogVisible: false,
 }
 
 const DEFAULT_HISTORY_STATE:IHistoryState = {
@@ -78,6 +79,11 @@ const DEFAULT_HISTORY_STATE:IHistoryState = {
     diffSetHistory: new Set(),
     diffSetSource: new Set(),
   }
+}
+
+const DEFAULT_PART_DETAIL_DIALOG_STATE:IPartDetailDialogState = {
+  basePartId: undefined,
+  part: undefined,
 }
 
 const DEFAULT_STORE_STATE:IStoreState = {
@@ -92,6 +98,7 @@ const DEFAULT_STORE_STATE:IStoreState = {
   genomeBrowser: DEFAULT_GENOME_BROWSER_STATE,
   fileExplorer: DEFAULT_FILE_EXPLORER_STATE,
   history: DEFAULT_HISTORY_STATE,
+  partDetailDialog: DEFAULT_PART_DETAIL_DIALOG_STATE,
 };
 
 
@@ -160,6 +167,12 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
     }
     case 'HIDE_REPLACE_CODON_DIALOG': {
       return {...state, replaceCodonDialogVisible: false};
+    }
+    case 'SHOW_PART_DETAIL_DIALOG': {
+      return {...state, partDetailDialogVisible: true};
+    }
+    case 'HIDE_PART_DETAIL_DIALOG': {
+      return {...state, partDetailDialogVisible: false};
     }
     case 'HIDE_ALL_DIALOG':
       return DEFAULT_COMPONENT_VISIBLE_STATE;
@@ -250,6 +263,10 @@ export const genomeBrowserReducer = (state:IGenomBrowserState, action:IAction):I
       let scrollWidth = rulerStep*multi;
       if(viewWindowEnd + scrollWidth > max) {
         scrollWidth = max - viewWindowEnd;
+      }
+      if (viewWindowStart + scrollWidth < 0) {
+        // unable to scroll left
+        return state;
       }
       viewWindowStart+=scrollWidth;
       viewWindowEnd+=scrollWidth;
@@ -401,6 +418,41 @@ export const historyReducer = (state:IHistoryState, action:IAction) => {
   return state;
 }
 
+export const partDetailDialogReducer = (state:IPartDetailDialogState, action:IAction) => {
+  if (state === undefined) {
+    state = DEFAULT_PART_DETAIL_DIALOG_STATE;
+  }
+  switch(action.type) {
+    case 'SHOW_PART_DETAIL_DIALOG':
+      return {
+        ...state,
+        basePartId: action.data,
+      }
+    case 'HIDE_PART_DETAIL_DIALOG':
+      return {
+        ...state,
+        basePartId: undefined,
+        part: undefined,
+      }
+    case 'SET_PART_DETAIL':
+      return {
+        ...state,
+        part: action.data,
+      }
+    case 'SET_HISTORY_PART_DETAIL':
+      return {
+        ...state,
+        historyPart: action.data,
+      }
+    case 'PART_DETAIL_GOTO_LATEEST_VERSION':
+      return {
+        ...state,
+        historyPart: undefined,
+      }
+  }
+  return state;
+}
+
 export const reducer = reCombineReducers({
   app: appReducer,
   generalTask: generalTaskReducer,
@@ -409,4 +461,5 @@ export const reducer = reCombineReducers({
   genomeBrowser: genomeBrowserReducer,
   fileExplorer: fileExplorerReducer,
   history:historyReducer,
+  partDetailDialog: partDetailDialogReducer,
 })
