@@ -56,6 +56,8 @@ export const AnnotationPartSchema = new Schema({
     ref: 'AnnotationPart',
   },
   attribute: Schema.Types.Mixed,
+  createdAt: Date,
+  updatedAt: Date,
 });
 
 

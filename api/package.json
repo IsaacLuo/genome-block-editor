@@ -40,8 +40,8 @@
     "production": "cross-env NODE_ENV=production node build/src/index.js",
     "dev": "node ./node_modules/nodemon/bin/nodemon.js",
     "debug": "node ./node_modules/nodemon/bin/nodemon.js --inspect",
-    "importDB": "cd utility && pipenv run python import_data.py",
-    "testScript": "ts-node src/script/test_script.ts",
+    "importDB": "cd utility && pipenv run python import_data.py",    
+    "testScript": "ts-node src/script/testScript.ts",
     "shell": "ts-node",
     "jest": "jest"
   },

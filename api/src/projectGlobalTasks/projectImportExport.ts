@@ -63,7 +63,6 @@ export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId)=>{
 
 export const updateProjectByGFFJSON = async (project:IProjectModel, gffJson:IGFFJSON, progressCallBack?:(progress:number, message:string)=>{}  ) => {
   const newParts = [];
-  const now = new Date();
 
   // save sequence to file
   const sequenceRefStore = {};
@@ -88,14 +87,15 @@ export const updateProjectByGFFJSON = async (project:IProjectModel, gffJson:IGFF
     }
     if (record.__modified || !record._id) {
       // need to create new part
+      const dateNow = new Date();
       const partSeq = gffJson.sequence[record.chrName].substring(record.start, record.end);
       let partSeqHash = crypto.createHash('md5').update(partSeq).digest("hex");
       const newPartTable = {
         history: [],
         ...record,
         original: false,
-        createdAt: now,
-        updatedAt: now,
+        createdAt: dateNow,
+        updatedAt: dateNow,
         sequenceHash: partSeqHash,
         sequenceRef: {
           fileName: sequenceRefStore[record.chrName].fileName,
@@ -104,6 +104,9 @@ export const updateProjectByGFFJSON = async (project:IProjectModel, gffJson:IGFF
           strand: record.strand,
         },
       };
+
+      // delete newPartTable.createdAt;
+      // delete newPartTable.updatedAt;
 
       if (record._id) {
         const oldRecord = await AnnotationPart.findById(record._id).exec();

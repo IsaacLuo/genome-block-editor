@@ -111,8 +111,8 @@ const PartDetailDlg = () => {
         history: genHistoryText('strand'),
       }, {
         key: 'time',
-        value: new Date(part!.updatedAt).toLocaleDateString(),
-        history: new Date(genHistoryText('updatedAt')).toLocaleDateString(),
+        value: new Date(part!.updatedAt).toLocaleString(),
+        history: new Date(genHistoryText('updatedAt')).toLocaleString(),
       }, {
         key: 'historyCount',
         value: part!.history.length,
