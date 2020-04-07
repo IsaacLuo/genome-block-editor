@@ -39,3 +39,22 @@ export const hideProject = async (_id:string|mongoose.Types.ObjectId) => {
   // save to redis
   deleteProject(_id.toString());
 }
+
+export const revertProject = async (_id:string|mongoose.Types.ObjectId) => {
+  const project = await Project.findById(_id).exec();
+  if(project.history && project.history[0]) {
+    const historyProject = await Project.findById(project.history[0]).exec();
+    if (historyProject.ctype === 'history') {
+      historyProject.ctype = project.ctype;
+      historyProject.save();
+      saveProject(historyProject);
+      saveProjectIdStr(historyProject.projectId.toString(), historyProject._id.toString());
+    }
+  }
+  project.ctype = 'deletedProject';
+  project.updatedAt=new Date();
+  await project.save();
+  // save to redis
+  deleteProject(_id.toString());
+}
+

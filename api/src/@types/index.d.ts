@@ -50,8 +50,11 @@ declare interface IAnnotationPart {
   strand: number;
   name: string;
   original: boolean;
-  origin?: string|IAnnotationPart;
+  history: any[];
+  sequenceHash?: string;
   sequenceRef: ISequenceRef;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 declare interface IProject {
@@ -66,7 +69,7 @@ declare interface IProject {
   permission: Number,
   createdAt: Date,
   updatedAt: Date,
-  history: [any],
+  history: any[],
   len: number,
   sequenceRef: ISequenceRef,
 }
@@ -106,4 +109,35 @@ declare interface IProjectFolder {
   name: String;
   subFolders: any[];
   projects: IProject[];
+}
+
+declare interface IGFFJSONRecord {
+  _id?: string;
+  featureType: string,
+  chrName: string;
+  chrId: number,
+  start: number,
+  end: number,
+  strand: number,
+  attribute?: any,
+  name?: string,
+  chrFileName?: string,
+  original?: boolean,
+  [key:string]: any;
+  createdAt?: Date,
+  updatedAt?: Date,
+}
+
+declare interface IGFFJSON {
+  fileType: string;
+  version: string;
+  seqInfo: {
+    [key:string]: any;
+  },
+  records: IGFFJSONRecord[],
+  sequence: {
+    [key:string]: string;
+  }
+  createdAt?: Date,
+  updatedAt?: Date,
 }

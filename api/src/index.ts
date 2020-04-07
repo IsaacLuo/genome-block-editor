@@ -26,7 +26,7 @@ import fs from 'fs';
 import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProjectIdStr, saveProjectIdStr } from './redisCache';
 import workerTs from './workerTs';
 import { forkProject, hideProject } from './projectGlobalTasks/project';
-import { projectToGFFJSON } from './projectGlobalTasks/projectImportExport';
+import { projectToGFFJSON, updateProjectByGFFJSON } from './projectGlobalTasks/projectImportExport';
 import { replaceCodon } from './projectGlobalTasks/replaceCodon';
 import {reverseComplement} from './projectGlobalTasks/projectImportExport';
 
@@ -291,41 +291,8 @@ async (ctx:Ctx, next:Next)=> {
     }
   });
   const gffObj = result.data;
-  // read new data from the file
-  const originalParts = project.parts;
-  const newParts = [];
-  for(const record of gffObj.records) {
-    if (record.__modified || !record._id) {
-      const newPartTable = {
-        ...record,
-        original: false,
-        updatedAt:new Date(),
-      };
-      
-      if (newPartTable.createdAt) delete newPartTable.createdAt;
-      if (newPartTable.updatedAt) delete newPartTable.updatedAt;
-
-      if (record._id) {
-        const oldRecord = await AnnotationPart.findById(record._id).exec();
-        newPartTable.history = [oldRecord._id, ...newPartTable.history];
-        delete newPartTable._id;
-      }
-      // create new feature
-      const newAnnotation = await AnnotationPart.create(newPartTable);
-      newParts.push(newAnnotation._id);
-    } else {
-      newParts.push(record._id);
-    }
-  }
-  // create new project, save current one as history
-  const newObj = project.toObject();
-  newObj.history = [newObj._id, ...newObj.history];
-  newObj.parts = newParts;
-  delete newObj.updatedAt;
-  delete newObj._id;
-  const newItem = await Project.create(newObj);
-  // old project become history
-  await Project.update({_id:id}, {ctype:'history'});
+  const newItem = await updateProjectByGFFJSON(project, gffObj);
+  
   ctx.body={message:'OK', newProjectId:newItem._id}
 })
 
