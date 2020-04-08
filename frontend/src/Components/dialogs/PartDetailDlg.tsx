@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import { RightOutlined, LeftOutlined, FastBackwardOutlined, StepForwardOutlined } from '@ant-design/icons';
 import TextArea from 'antd/lib/input/TextArea';
 import SequenceDiv from './SeqeunceDiv';
+import SequenceAlignmentDiv from './SequenceAlignmentDiv';
 
 const PartDetailDlgPanel = styled.div`
   display: flex;
@@ -121,16 +122,21 @@ const PartDetailDlg = () => {
     ]
   }
 
+  const onExit = () => {
+    setSeqSwitch(false);
+    dispatch({type:'HIDE_PART_DETAIL_DIALOG'});
+  }
+
   return <Modal
     title="part details"
     width={800}
     visible={showDialog}
     onOk={()=>{
-      dispatch({type:'HIDE_PART_DETAIL_DIALOG'})
+      onExit();
     }}
     onCancel={()=>{
-      dispatch({type:'HIDE_PART_DETAIL_DIALOG'})}
-    }
+      onExit();
+    }}
   >
     {part ?
     <PartDetailDlgPanel>
@@ -166,7 +172,12 @@ const PartDetailDlg = () => {
         seqSwitchOn
         ?
         <div style={{width:700,overflowX:"scroll", whiteSpace: "nowrap"}}>
-          <SequenceDiv partId={historyPart?historyPart._id : part._id}/>
+          {
+            historyPart ?
+            <SequenceAlignmentDiv partId1={part._id} partId2={historyPart._id}/>
+            :
+            <SequenceDiv partId={part._id}/>
+          }
         </div>
         :
         <Button type="link" onClick={()=>setSeqSwitch(true)}>get sequence</Button>

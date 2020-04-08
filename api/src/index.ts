@@ -26,11 +26,12 @@ import fs from 'fs';
 import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProjectIdStr, saveProjectIdStr } from './redisCache';
 import workerTs from './workerTs';
 import { forkProject, hideProject } from './projectGlobalTasks/project';
-import { projectToGFFJSON, updateProjectByGFFJSON } from './projectGlobalTasks/projectImportExport';
+import { projectToGFFJSON, updateProjectByGFFJSON, readSequenceFromSequenceRef } from './projectGlobalTasks/projectImportExport';
 import { replaceCodon } from './projectGlobalTasks/replaceCodon';
 import {reverseComplement} from './projectGlobalTasks/projectImportExport';
 
 import axios from 'axios';
+import { runExe } from './runExe';
 
 require('dotenv').config()
 
@@ -310,6 +311,36 @@ async (ctx:Ctx, next:Next)=> {
 
 // router.get('/api/admin/clearIsolatedParts', clearIsolatedParts);
 
+router.get('/api/part/:id/seqAlignmetWith/:anotherPartId',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const user = ctx.state.user;
+  const {id, anotherPartId} = ctx.params;
+
+  const part1 = await AnnotationPart.findById(id).exec();
+  const part2 = await AnnotationPart.findById(anotherPartId).exec();
+  if (!part1 || !part2) {
+    ctx.thorw(404, 'unable to find one or more parts');
+  }
+
+  const sequence1 = await readSequenceFromSequenceRef(part1.sequenceRef);
+  const sequence2 = await readSequenceFromSequenceRef(part2.sequenceRef);
+
+  // run python
+  await runExe(
+    {
+      program:'pipenv', 
+      params:['run', 'python', 'global_alignment.py'], 
+      options:{cwd:'utility'}
+    }, 
+    {sequence1, sequence2},
+    (outputObj:any)=>{
+      console.log(outputObj[0]);
+      // ctx.body = {message:0}
+      ctx.body = outputObj[0]
+  });
+
+})
 
 app.use(router.routes());
 

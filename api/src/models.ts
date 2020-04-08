@@ -60,9 +60,8 @@ export const AnnotationPartSchema = new Schema({
   updatedAt: Date,
 });
 
-
-
-export interface IAnnotationPartModel extends IAnnotationPart, Document {}
+export interface IAnnotationPartModel extends IAnnotationPart, Document {
+}
 export const AnnotationPart:Model<IAnnotationPartModel> = mongoose.model('AnnotationPart', AnnotationPartSchema, 'annotation_parts');
 
 export const ProjectSchema = new Schema({

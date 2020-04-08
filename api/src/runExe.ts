@@ -22,6 +22,7 @@ export function runExe (
     
     rl.on('line', input => {
       // console.log('debug: ', input);
+      // const messageObj = (typeof(input) === 'string') ? JSON.parse(input) : input;
       const messageObj = JSON.parse(input.toString());
       if(onOutput) {
         onOutput(messageObj, subProcess.stdin);

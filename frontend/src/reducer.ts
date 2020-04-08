@@ -433,6 +433,7 @@ export const partDetailDialogReducer = (state:IPartDetailDialogState, action:IAc
         ...state,
         basePartId: undefined,
         part: undefined,
+        historyPart: undefined,
       }
     case 'SET_PART_DETAIL':
       return {
