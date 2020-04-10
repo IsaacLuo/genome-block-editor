@@ -39,8 +39,9 @@ export const AnnotationPartSchema = new Schema({
     ref: 'AnnotationPart',
   },
   history: [{
-    type: Schema.Types.ObjectId,
-    ref: 'AnnotationPart',
+    _id:Schema.Types.ObjectId,
+    updatedAt: Date,
+    changelog: String,
   }],
   // md5 of the sequence
   // to identify if the sequence has changed
@@ -50,7 +51,7 @@ export const AnnotationPartSchema = new Schema({
   // if the annoations is moved, and the sequenceRef will keep pointing the old position of the old sequence until the new sequence is generated.
   sequenceRef: SequenceRefSchema,
   // changelog
-  changelog: String,
+  
   parent: {
     type: Schema.Types.ObjectId,
     ref: 'AnnotationPart',
@@ -58,6 +59,7 @@ export const AnnotationPartSchema = new Schema({
   attribute: Schema.Types.Mixed,
   createdAt: Date,
   updatedAt: Date,
+  changelog: String,
 });
 
 export interface IAnnotationPartModel extends IAnnotationPart, Document {
@@ -79,10 +81,12 @@ export const ProjectSchema = new Schema({
   },
   group: [String],
   permission: Number,
-  history: [Schema.Types.ObjectId],
+  history: [{
+    _id:Schema.Types.ObjectId,
+    updatedAt: Date,
+    changelog: String,
+  }],
   ctype: String,
-
-
   // md5 of the sequence
   // to identify if the sequence has changed
   // if the sequence keeps the same, 
@@ -92,6 +96,7 @@ export const ProjectSchema = new Schema({
   sequenceRef: SequenceRefSchema,
   createdAt: Date,
   updatedAt: Date,
+  changelog: String,
 }, {
   timestamps: true
 })

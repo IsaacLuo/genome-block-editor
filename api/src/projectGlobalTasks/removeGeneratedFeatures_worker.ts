@@ -52,6 +52,7 @@ async function main() {
           const newObj = project.toObject();
           newObj.history = [newObj._id, ...newObj.history];
           newObj.parts = newObj.parts.map(v=>v._id);
+          newObj.changelog = `removed all non gene parts.`;
           delete newObj.updatedAt;
           delete newObj._id;
           const newItem = await Project.create(newObj);

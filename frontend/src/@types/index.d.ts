@@ -35,8 +35,14 @@ declare interface IAnnotationPart {
   updatedAt: Date;
 }
 
+declare interface IHistory {
+  _id: string;
+  updatedAt: Date;
+  changelog: string;
+}
+
 declare interface IAnnotationPartWithDetail extends IAnnotationPart{
-  history: string[];
+  history:IHistory[];
 }
 
 declare interface ISourceFile {
@@ -64,7 +70,7 @@ declare interface IProject {
   permission: Number,
   createdAt: Date,
   updatedAt: Date,
-  history: any[],
+  history:IHistory[];
 }
 
 declare interface IComponentVisibleState {
@@ -148,6 +154,7 @@ interface IHistoryIndex {
   _id:string;
   name: string;
   updatedAt: Date;
+  changelog: string;
 }
 
 interface IHistoryState {

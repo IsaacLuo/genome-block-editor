@@ -19,3 +19,6 @@ export const HIDE_ALL_DIALOG = 'HIDE_ALL_DIALOG';
 export const ADD_NEW_BLOCK = 'ADD_NEW_BLOCK';
 
 export const LOAD_SOURCE_FILE_BY_PROJECT_ID = 'LOAD_SOURCE_FILE_BY_PROJECT_ID';
+
+// goto the project folder, and fetch all new files in it, it should be called ervery forking or saving project.
+export const GOTO_AND_FETCH_PROJECT_FILES = 'GOTO_AND_FETCH_PROJECT_FILES';

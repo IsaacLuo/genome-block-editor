@@ -67,7 +67,13 @@ const GenomeOperationPanel: React.FC = () => {
         dispatch({type:'SHOW_HIDE_HISTORY_VERSIONS'})
       }
     },
-
+    {
+      name: 'revert',
+      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject') && state.sourceFile.history.length > 0,
+      onClick: ()=>{
+        dispatch({type:'REVERT_TO_HISTORY_VERSION'})
+      }
+    },
     {
       name: 'replace codons',
       visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),

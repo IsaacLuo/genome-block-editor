@@ -58,6 +58,11 @@ def search_folder(root_folder, root_folder_name):
 # import project from gff file
 # @file_path: the gff file path
 def import_project(file_path, project_name):
+
+    _, file_name = os.path.split(file_path)
+
+    default_changelog = 'imported from file "{}"'.format(file_name)
+
     fasta_file_name = os.path.splitext(file_path)[0] + '.fa'
     if not os.path.isfile(fasta_file_name):
         fasta_file_name = None
@@ -129,6 +134,8 @@ def import_project(file_path, project_name):
                     "strand": strand_dict[record['strand']],
                 },
 
+                "changelog": default_changelog,
+
                 "createdAt": now,
                 "updatedAt": now,
             })
@@ -191,6 +198,8 @@ def import_project(file_path, project_name):
                         "strand": 0,
                     },
 
+                    "changelog": default_changelog,
+
                     "createdAt": now,
                     "updatedAt": now,
                 })
@@ -230,6 +239,9 @@ def import_project(file_path, project_name):
                     "end": end,
                     "strand": 0,
                 },
+
+                "changelog": default_changelog,
+
                 "createdAt": now,
                 "updatedAt": now,
             })
@@ -259,6 +271,9 @@ def import_project(file_path, project_name):
                 "strand": 0,
             },
             "ctype": "source",
+
+            "changelog": default_changelog,
+
             "createdAt": now,
             "updatedAt": now,
             'seqName': project['seqName']

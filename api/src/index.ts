@@ -25,7 +25,7 @@ import socket from 'socket.io';
 import fs from 'fs';
 import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProjectIdStr, saveProjectIdStr } from './redisCache';
 import workerTs from './workerTs';
-import { forkProject, hideProject } from './projectGlobalTasks/project';
+import { forkProject, hideProject, revertProject } from './projectGlobalTasks/project';
 import { projectToGFFJSON, updateProjectByGFFJSON, readSequenceFromSequenceRef } from './projectGlobalTasks/projectImportExport';
 import { replaceCodon } from './projectGlobalTasks/replaceCodon';
 import {reverseComplement} from './projectGlobalTasks/projectImportExport';
@@ -243,7 +243,6 @@ async (ctx:Ctx, next:Next)=> {
   const {id} = ctx.params;
   const result = await Project.findById(id)
     .select('history name')
-    .populate('history', 'name updatedAt ctype')
     .exec()
   ctx.body = result;
 });
@@ -297,6 +296,20 @@ async (ctx:Ctx, next:Next)=> {
   ctx.body={message:'OK', newProjectId:newItem._id}
 })
 
+router.post('/api/sourceFile/:id/revert',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {id} = ctx.params;
+  console.debug('revert project', id);
+  ctx.body = await revertProject(id);
+  // try {
+  //   // ctx.body = await revertProject(id);
+  // } catch (err) {
+  //   throw err;
+  // }
+})
+
+
 router.post('/api/mapping_project/replace_codons/from/:id', 
 userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
@@ -337,10 +350,11 @@ async (ctx:Ctx, next:Next)=> {
     (outputObj:any)=>{
       console.log(outputObj[0]);
       // ctx.body = {message:0}
-      ctx.body = outputObj[0]
+      ctx.body = outputObj[0];
   });
 
 })
+
 
 app.use(router.routes());
 

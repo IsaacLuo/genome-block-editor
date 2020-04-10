@@ -115,6 +115,10 @@ const PartDetailDlg = () => {
         value: new Date(part!.updatedAt).toLocaleString(),
         history: new Date(genHistoryText('updatedAt')).toLocaleString(),
       }, {
+        key: 'changelog',
+        value: part!.changelog,
+        history: genHistoryText('changelog'),
+      }, {
         key: 'historyCount',
         value: part!.history.length,
         history: '',

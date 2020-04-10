@@ -77,6 +77,7 @@ export function* loadSourceFileByProjectId(action:IAction) {
     yield put({type:'SET_GENOME_BROWSER_LOADING', data:false});
     yield put({type: 'SET_SOURCE_FILE', data:result.data});
     yield put({type: 'HIDE_ALL_DIALOG', data:result.data});
+    yield put({type:'GOTO_AND_FETCH_PROJECT_FILES'});
   } catch (error) {
     console.warn(`failed in ${getFuncName()}`);
   }
@@ -216,7 +217,7 @@ export function* createPromoterTerminator(aciton:IAction) {
         break;
       }
     }
-
+    
   } catch (error) {
     yield call(notification.error, {message:error});
   }

@@ -55,6 +55,7 @@ declare interface IAnnotationPart {
   sequenceRef: ISequenceRef;
   createdAt: Date;
   updatedAt: Date;
+  changelog: string;
 }
 
 declare interface IProject {
@@ -69,6 +70,7 @@ declare interface IProject {
   permission: Number,
   createdAt: Date,
   updatedAt: Date,
+  changelog: string,
   history: any[],
   len: number,
   sequenceRef: ISequenceRef,
@@ -131,6 +133,10 @@ declare interface IGFFJSONRecord {
 declare interface IGFFJSON {
   fileType: string;
   version: string;
+  history: {
+    createdAt: Date,
+    changelog: string,
+  }[];
   seqInfo: {
     [key:string]: any;
   },
@@ -140,4 +146,5 @@ declare interface IGFFJSON {
   }
   createdAt?: Date,
   updatedAt?: Date,
+  changelog?: string,
 }

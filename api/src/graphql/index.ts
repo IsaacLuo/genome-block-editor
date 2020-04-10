@@ -9,6 +9,11 @@ const fs_readFile = promisify(fs.readFile);
 
 export function useApolloServer(app:any) {
   const typeDefs = gql`
+  type History {
+    _id: String
+    updatedAt: String
+    changelog: String
+  }
   type Part {
     _id: ID
     len: Int
@@ -19,7 +24,8 @@ export function useApolloServer(app:any) {
     name: String
     original: Boolean
     origin: OriginPart
-    history: [String]
+    history: [History]
+    changelog: String
     createdAt: String
     updatedAt: String
   }
@@ -35,6 +41,7 @@ export function useApolloServer(app:any) {
     len: Int
     strand: Int
     name: String
+    changlog: String
   }
 
   type Project {
@@ -154,18 +161,6 @@ export function useApolloServer(app:any) {
 
       sourceFile: async (parent:any, args:any, context: any, info:any) => {
         const {_id} = args;
-        // let from, to;
-        // if (args.range) {
-        //   from = args.range.from;
-        //   to = args.range.to;
-        // }
-        // if (!from) {
-        //   from = 0;
-        // }
-        // if (!to) {
-        //   to = Number.MAX_SAFE_INTEGER;
-        //   // to=128*1024*100;
-        // }
         const start = Date.now();
         let result = await Project.findById(_id).exec();
 
@@ -184,10 +179,6 @@ export function useApolloServer(app:any) {
           result = await Project.findById(_id)
           .populate({
             path:'parts', 
-            // match:{
-            //   start:{$lte:to}, 
-            //   end:{$gte:from},
-            // }
           })
           .exec();
           const time = Date.now() - start;

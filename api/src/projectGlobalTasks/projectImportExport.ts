@@ -12,6 +12,7 @@ import {Project, User, AnnotationPart, IProjectModel} from '../models';
 
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
+import { pushHistory } from './project';
 
 const reverseDict = {a:'t', t:'a', c:'g', g:'c', A:'T', T:'A', C:'G', G:'C', n:'n', N:'N'};
 
@@ -55,7 +56,8 @@ export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId)=>{
     records: project.toObject().parts.map(part=>({...part, chrName: project.name})),
     sequence: {
       [project.name]: projectSequence
-    }
+    },
+    history:[],
   }
 
   return gffJson;
@@ -103,6 +105,7 @@ export const updateProjectByGFFJSON = async (project:IProjectModel, gffJson:IGFF
           end: record.end,
           strand: record.strand,
         },
+        changelog: record.__changelog,
       };
 
       // delete newPartTable.createdAt;
@@ -110,7 +113,11 @@ export const updateProjectByGFFJSON = async (project:IProjectModel, gffJson:IGFF
 
       if (record._id) {
         const oldRecord = await AnnotationPart.findById(record._id).exec();
-        newPartTable.history = [oldRecord._id, ...newPartTable.history];
+        newPartTable.history = [{
+          _id: oldRecord._id,
+          updatedAt: oldRecord.updatedAt,
+          changelog: oldRecord.changelog,
+        }, ...newPartTable.history];
         delete newPartTable._id;
       }
       // create new feature
@@ -127,8 +134,9 @@ export const updateProjectByGFFJSON = async (project:IProjectModel, gffJson:IGFF
     // object is mongoose object
     newObj = newObj.toObject();
   }
-  newObj.history = [newObj._id, ...newObj.history];
+  pushHistory(newObj);
   newObj.parts = newParts;
+  newObj.changelog = gffJson.changelog && gffJson.changelog[0];
   delete newObj.updatedAt;
   delete newObj._id;
   const newItem = await Project.create(newObj);

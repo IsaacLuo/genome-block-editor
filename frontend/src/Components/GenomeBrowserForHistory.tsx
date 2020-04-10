@@ -75,7 +75,7 @@ const GenomeBrowserForHistory = () => {
             :
             'ORIGINAL'
             }
-            ] {v.name}</Menu.Item>
+            ] {v.changelog}</Menu.Item>
         )
       }
     </Menu>
