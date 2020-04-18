@@ -73,7 +73,7 @@ declare interface IProject {
   changelog: string,
   history: any[],
   len: number,
-  sequenceRef: ISequenceRef,
+  sequenceRef?: ISequenceRef,
 }
 
 declare interface ISourceChomosome {
@@ -146,5 +146,5 @@ declare interface IGFFJSON {
   }
   createdAt?: Date,
   updatedAt?: Date,
-  changelog?: string,
+  __changelog?: string,
 }

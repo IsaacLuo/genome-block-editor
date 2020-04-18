@@ -7,7 +7,7 @@ import send from 'koa-send';
 import middleware from './middleware'
 import Router from 'koa-router';
 import log4js from 'log4js';
-import conf from './conf.json';
+import conf from './conf';
 import {Project, User, AnnotationPart} from './models';
 import jwt from 'jsonwebtoken';
 import cors from 'koa-cors';
@@ -200,7 +200,7 @@ async (ctx:Ctx, next:Next)=> {
   } else {
     result = await Project.findById(id)
       .exec();
-    let cacheFileName = './public/sourceFileCaches/'+id;
+    let cacheFileName = `./${conf.rootStorageFolder}/sourceFileCaches/${id}`;
     if (result.ctype !== 'source') {
       cacheFileName+= result.updatedAt.getTime();
     }
@@ -256,7 +256,7 @@ async (ctx:Ctx, next:Next)=> {
     ctx.throw(404, 'cannot find sequence ref');
   }
   const {fileName, start, end, strand} = part.sequenceRef;
-  const fp = await fs.promises.open(`public/sequences/${fileName}`, 'r');
+  const fp = await fs.promises.open(`${conf.rootStorageFolder}/sequences/${fileName}`, 'r');
   const bufferSize = end-start;
   const buffer = new Buffer(bufferSize);
   const {bytesRead} = await fs_read(fp.fd, buffer, 0, end-start, start);

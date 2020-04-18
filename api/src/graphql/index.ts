@@ -2,6 +2,7 @@ import {ApolloServer, gql} from 'apollo-server-koa'
 import { Project, AnnotationPart, ProjectFolder } from '../models';
 import {runExe} from '../runExe'
 import fs from 'fs';
+import conf from '../conf';
 const { promisify } = require('util');
 const fs_exists = promisify(fs.exists);
 const fs_writeFile = promisify(fs.writeFile);
@@ -164,7 +165,7 @@ export function useApolloServer(app:any) {
         const start = Date.now();
         let result = await Project.findById(_id).exec();
 
-        let cacheFileName = './public/sourceFileCaches/'+_id;
+        let cacheFileName = `./${conf.rootStorageFolder}/sourceFileCaches/${_id}`;
         if (result.ctype !== 'source') {
           cacheFileName+= result.updatedAt.getTime();
         }

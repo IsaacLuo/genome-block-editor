@@ -18,7 +18,8 @@ describe('test of forkProject', ()=>{
       name:'Test User',
     }
 
-    project = await Project.findOne({ctype:'project'}).exec();
+    // project = await Project.findOne({ctype:'project'}).exec();
+    
     // console.log(project);
     console.log('project prepared? ', !!project);
   }, 10000);

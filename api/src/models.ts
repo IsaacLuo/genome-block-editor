@@ -34,6 +34,7 @@ export const AnnotationPartSchema = new Schema({
   // extendted attributes
   name: String,
   original: Boolean,
+  
   origin: {
     type: Schema.Types.ObjectId,
     ref: 'AnnotationPart',
@@ -50,7 +51,9 @@ export const AnnotationPartSchema = new Schema({
   // sequence reference points a part of sequence file, the start end, and strand may are the same as the main attributes, but it can also be not the same.
   // if the annoations is moved, and the sequenceRef will keep pointing the old position of the old sequence until the new sequence is generated.
   sequenceRef: SequenceRefSchema,
-  // changelog
+  
+  // if built, all parts must share the same sequenceRef from project.
+  built: Boolean,
   
   parent: {
     type: Schema.Types.ObjectId,

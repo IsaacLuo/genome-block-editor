@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import {Project} from '../models';
+import {Project, AnnotationPart} from '../models';
 import { 
     saveProject, 
     deleteProject, 
@@ -79,3 +79,46 @@ export const revertProject = async (_id:string|mongoose.Types.ObjectId) => {
   }
 }
 
+export const buildProjectSequenceRefFromParts = async (project:IProject) => {
+  
+}
+
+// sometimes the project doesn't have a sequenceRef, or not all parts referencing the project
+// sequence. In this case, the project sequence needs to be updated before exporting
+export const buildWholeProject = async (_id:string|mongoose.Types.ObjectId) => {
+  const project = await Project.findById(_id).exec();
+  if(!project) {
+    throw createError(404, 'cannot find project');
+  }
+
+  if (!project.sequenceRef) {
+    // build sequenceRef for project from parts;
+
+  }
+
+  const fileName = project.sequenceRef.fileName;
+  // now verify if all parts has the same fileName
+  const partIds = project.parts;
+  const replaceDict:any = {};
+  const parts = await AnnotationPart.find({_id:{$in:partIds}, 'sequenceRef.fileName':fileName}).exec();
+  if (parts === []) {
+    return _id;
+  }
+  for (const part of parts) {
+    const newPart:IAnnotationPart = part.toObject();
+    delete newPart._id;
+    newPart.sequenceRef = {
+      fileName,
+      start: part.start,
+      end: part.end,
+      strand: part.strand,
+    };
+    newPart.history = [
+      {_id: part._id, updatedAt: part.updatedAt, changelog: part.changelog}, 
+      ...part.history];
+    const {_id:newPartId} = await AnnotationPart.create(newPart);
+    replaceDict[_id.toString()] = newPartId;
+  }
+  project.parts = partIds.map(id=>replaceDict[id.toString()] || id);
+  await project.save();
+}

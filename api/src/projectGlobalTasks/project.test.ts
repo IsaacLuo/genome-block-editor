@@ -1,8 +1,17 @@
 import {forkProject, hideProject} from './project'
 import request from 'supertest'
 import mongoose from 'mongoose';
-import {Project} from '../models';
+import {Project, AnnotationPart} from '../models';
 import connectMongoDB from '../mongodb';
+
+import {prepareTestProject, mock_generateSequenceRef, mock_readSequenceFromSequenceRef} from './test/prepareTestProject';
+// import { readSequenceFromSequenceRef } from '../sequenceRef';
+
+const seqRef = require("../sequenceRef");
+
+seqRef.generateSequenceRef = mock_generateSequenceRef;
+seqRef.readSequenceFromSequenceRef = mock_readSequenceFromSequenceRef;
+const {generateSequenceRef, readSequenceFromSequenceRef} = seqRef;
 
 describe('test of forkProject', ()=>{
   let user:IUserEssential;
@@ -15,23 +24,94 @@ describe('test of forkProject', ()=>{
       groups:['users'],
       name:'Test User',
     }
-
-    project = await Project.findOne({ctype:'source'}).exec();
-    // console.log(project);
+    // project = await Project.findOne({ctype:'source'}).exec();
+    project = await prepareTestProject({
+      name:"test",
+      projectId:"5e999fc99b3fbc8a5a000000",
+      version:"0.1",
+      parts:[{
+        featureType:"gene",
+        chrName:"chr01",
+        chrId:0,
+        start:20,
+        end:36,
+        strand:1,
+        attribute:{"ID":"YAL003W_BY4741","Name":"YAL003W","orf_classification":"Verified","gene":"EFB1","Alias":"EFB1,EF-1beta,eEF1Balpha,TEF5","dbxref":"SGD:S000000003","Note":"test gene"},
+        name:"test gene",
+        original:true,
+        history:[],
+        sequenceHash:"a4bcda462e0f63886e4f13446ed3615c",
+        sequence: 'ATGAAAAAAAAAATGA',
+        changelog:"test 1",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }],
+      len:60,
+      history:[],
+      sequenceHash:"ef1be857fb0cd00473aa11b60dea3430",
+      sequence:'CCCCCCCCCCCCCCCCCCCCATGAAAAAAAAAATGACCCCCCCCCCCCCCCCCCCCCCCC',
+      ctype:"source",
+      changelog:"test project",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      seqName:"chr01",
+    });
     console.log('project prepared? ', !!project);
   }, 10000);
 
-  test('fork a project', async ()=>{
-    const result = await forkProject(user, project._id, 'new name');
+  
+  test('project saved into database', async ()=>{
+    const result = await Project.findById(project._id).exec();
     expect(result).not.toBeUndefined();
-    expect(result._id).not.toBeUndefined();
-    const forkedProject:IProject = await Project.findById(result._id).exec();
-    expect(forkedProject.name).toBe('new name');
-    expect(['project', 'flatProject']).toContain(forkedProject.ctype);
-    expect(forkedProject.owner._id.toString()).toBe(user._id.toString());
-    expect(forkedProject.updatedAt.getTime()).toBeGreaterThan(project.updatedAt.getTime());
-    await Project.deleteOne({_id:forkedProject._id}).exec();
-  })
+    expect(result.name).toBe('test');
+  });
+
+  test('mocked project has sequence', async ()=>{
+    let proj = await Project
+    .findById(project._id)
+    .populate({
+      path:'parts',
+    })
+    .exec();
+
+    const sequence = await readSequenceFromSequenceRef(proj.sequenceRef);
+    expect(sequence).toBe('CCCCCCCCCCCCCCCCCCCCATGAAAAAAAAAATGACCCCCCCCCCCCCCCCCCCCCCCC');
+    const sequence2 = await readSequenceFromSequenceRef((proj.parts[0].sequenceRef as any).toObject());
+    expect(sequence2).toBe('ATGAAAAAAAAAATGA');
+  });
+
+  describe('fork a project', ()=>{
+    let result;
+    let forkedProject;
+    beforeAll(async ()=>{
+      result = await forkProject(user, project._id, 'new name');
+      if (result) {
+        forkedProject = await Project.findById(result._id).exec();
+      }
+    })
+    test('has result', ()=>{
+      expect(result).not.toBeUndefined();
+      expect(result._id).not.toBeUndefined();
+    });
+
+    test('project forked and name should be the new one', ()=>{
+      expect(forkedProject.name).toBe('new name');
+      expect(['project', 'flatProject']).toContain(forkedProject.ctype);
+      expect(forkedProject.owner._id.toString()).toBe(user._id.toString());
+    })
+
+    test('forked project must be newer', ()=>{
+      expect(forkedProject.updatedAt.getTime()).toBeGreaterThan(project.updatedAt.getTime());
+    });
+
+    test('forked project should share the same parts', ()=>{
+      expect(forkedProject.parts[0].toString()).toBe(project.parts[0].toString());
+    })
+
+    afterAll(async ()=>{
+      await Project.deleteOne({_id:forkedProject._id}).exec();
+    })
+  });
 
   test('fork and delete project', async ()=> {
     let result = await forkProject(user, project._id);
@@ -42,5 +122,10 @@ describe('test of forkProject', ()=>{
     
     await Project.deleteOne({_id:result._id}).exec();
     await Project.deleteOne({_id:hidedProject._id}).exec();
+  }, 10000);
+
+  afterAll(async () => {
+    await AnnotationPart.remove({_id:project.parts[0]});
+    await Project.remove({_id:project._id});
   }, 10000);
 })

@@ -13,25 +13,14 @@ import {Project, User, AnnotationPart, IProjectModel} from '../models';
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import { pushHistory } from './project';
+import conf from '../conf';
 
-const reverseDict = {a:'t', t:'a', c:'g', g:'c', A:'T', T:'A', C:'G', G:'C', n:'n', N:'N'};
+import {readSequenceFromSequenceRef} from '../sequenceRef';
 
-export const reverseComplement = (seq:string) => {
-  return Array.from(seq).reverse().map(v=>reverseDict[v]).join('');
-}
+// export const deleteFilesSequenceRef = async (sequenceRef: ISequenceRef, strand?:number) => {
+//   // find if there is any project or part is using this sequenceRef
 
-export const readSequenceFromSequenceRef = async (sequenceRef: ISequenceRef) => {
-  let sequence = await fs.promises.readFile(`public/sequences/${sequenceRef.fileName}`,{encoding:'utf-8'});
-  if (sequenceRef.start || sequenceRef.end) {
-    const start = sequenceRef.start || 0;
-    const end = sequenceRef.end;
-    sequence = sequence.substring(start,end);
-  }
-  if (sequenceRef.strand === -1) {
-    sequence = reverseComplement(sequence);
-  }
-  return sequence;
-}
+// }
 
 export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId)=>{
   const project = await Project
@@ -63,7 +52,13 @@ export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId)=>{
   return gffJson;
 }
 
-export const updateProjectByGFFJSON = async (project:IProjectModel, gffJson:IGFFJSON, progressCallBack?:(progress:number, message:string)=>{}  ) => {
+export const updateProjectByGFFJSON = async ( project:IProjectModel,
+                                              gffJson:IGFFJSON,
+                                              options?:{
+                                                useOriginalSequence?:boolean,
+                                              },
+                                              progressCallBack?:(progress:number, message:string)=>{},
+                                              ) => {
   const newParts = [];
 
   // save sequence to file
@@ -71,7 +66,7 @@ export const updateProjectByGFFJSON = async (project:IProjectModel, gffJson:IGFF
   for (const sequenceName in gffJson.sequence) {
     const uuid = uuidv4();
     const seq = gffJson.sequence[sequenceName];
-    fs.promises.writeFile(`public/sequences/${uuid}`, seq);
+    fs.promises.writeFile(`${conf.rootStorageFolder}/sequences/${uuid}`, seq);
     sequenceRefStore[sequenceName] = {
       fileName: uuid,
       start: 0,
@@ -136,7 +131,7 @@ export const updateProjectByGFFJSON = async (project:IProjectModel, gffJson:IGFF
   }
   pushHistory(newObj);
   newObj.parts = newParts;
-  newObj.changelog = gffJson.changelog && gffJson.changelog[0];
+  newObj.changelog = gffJson.__changelog;
   delete newObj.updatedAt;
   delete newObj._id;
   const newItem = await Project.create(newObj);
