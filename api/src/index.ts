@@ -26,12 +26,12 @@ import fs from 'fs';
 import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProjectIdStr, saveProjectIdStr } from './redisCache';
 import workerTs from './workerTs';
 import { forkProject, hideProject, revertProject } from './projectGlobalTasks/project';
-import { projectToGFFJSON, updateProjectByGFFJSON, readSequenceFromSequenceRef } from './projectGlobalTasks/projectImportExport';
+import { projectToGFFJSON, updateProjectByGFFJSON } from './projectGlobalTasks/projectImportExport';
 import { replaceCodon } from './projectGlobalTasks/replaceCodon';
-import {reverseComplement} from './projectGlobalTasks/projectImportExport';
 
 import axios from 'axios';
 import { runExe } from './runExe';
+import { reverseComplement, readSequenceFromSequenceRef } from './sequenceRef';
 
 require('dotenv').config()
 

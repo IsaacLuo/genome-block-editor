@@ -1,5 +1,5 @@
 import { Project, AnnotationPart } from '../models';
-import { readSequenceFromSequenceRef } from '../sequenceRef';
+import { readSequenceFromSequenceRef, generateSequenceRef } from '../sequenceRef';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import conf from '../conf';
@@ -45,14 +45,7 @@ export async function buildProjectSequenceRefFromParts(id:IProject) {
   }, ...newObj.history];
   newObj.parts = newObj.parts.map(v=>v._id);
   newObj.changelog = `built project sequence`;
-  const fileName = uuidv4();
-  await fs.promises.writeFile(`${conf.rootStorageFolder}/sequences/${fileName}`, sequenceArr.join(''));
-  newObj.sequenceRef = {
-    fileName,
-    start: 0,
-    end: project.len,
-    strand: 0,
-  }
+  newObj.sequenceRef = generateSequenceRef(sequenceArr.join(''));
   delete newObj.updatedAt;
   delete newObj._id;
   const newItem = await Project.create(newObj);

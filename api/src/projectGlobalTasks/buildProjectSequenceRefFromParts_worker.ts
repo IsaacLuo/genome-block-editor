@@ -9,6 +9,8 @@ function sleep(ms:number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+let mongoURL = conf.secret.mongoDB.url;
+
 async function connectDb() {
   try {
     const mongooseState = mongoose.connection.readyState;
@@ -16,7 +18,7 @@ async function connectDb() {
       case 3:
       case 0:
       await mongoose.connect(
-        conf.secret.mongoDB.url,
+        mongoURL,
         {
           useNewUrlParser: true,
           // user: conf.secret.mongoDB.username,
@@ -35,15 +37,18 @@ async function main() {
     // receive from main thread
     parentPort.on("message", async (messageObj) => {
       try {
-        await connectDb();
-        console.log('main thread send message', messageObj);
+        // console.log('main thread send message', messageObj);
         const {type, data:id} = messageObj;
         if (type === 'startTask') {
+          await connectDb();
           const newItem = await buildProjectSequenceRefFromParts(id);
           parentPort.postMessage({type:'result', data: newItem._id.toString()});
           // old project become history
           await Project.update({_id:id}, {ctype:'history'})
+        } else if (type === 'setMongoURL') {
+          mongoURL = messageObj.data;
         }
+
       } catch (err) {
         console.error(err);
         parentPort.postMessage({type:'error', data: err});

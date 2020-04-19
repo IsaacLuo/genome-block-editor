@@ -2,7 +2,7 @@ import {forkProject, hideProject} from './project'
 import request from 'supertest'
 import mongoose from 'mongoose';
 import {Project, AnnotationPart} from '../models';
-import connectMongoDB from '../mongodb';
+import { connectMemoryMongoDB, stopMongoMemoryServer } from '../mongodb';
 
 import {prepareTestProject, mock_generateSequenceRef, mock_readSequenceFromSequenceRef} from './test/prepareTestProject';
 // import { readSequenceFromSequenceRef } from '../sequenceRef';
@@ -17,7 +17,7 @@ describe('test of forkProject', ()=>{
   let user:IUserEssential;
   let project:IProject;
   beforeAll(async ()=>{
-    await connectMongoDB();
+    await connectMemoryMongoDB();
     user = {
       _id: new mongoose.Types.ObjectId(),
       email: 'test@gmail.com',
@@ -25,37 +25,7 @@ describe('test of forkProject', ()=>{
       name:'Test User',
     }
     // project = await Project.findOne({ctype:'source'}).exec();
-    project = await prepareTestProject({
-      name:"test",
-      projectId:"5e999fc99b3fbc8a5a000000",
-      version:"0.1",
-      parts:[{
-        featureType:"gene",
-        chrName:"chr01",
-        chrId:0,
-        start:20,
-        end:36,
-        strand:1,
-        attribute:{"ID":"YAL003W_BY4741","Name":"YAL003W","orf_classification":"Verified","gene":"EFB1","Alias":"EFB1,EF-1beta,eEF1Balpha,TEF5","dbxref":"SGD:S000000003","Note":"test gene"},
-        name:"test gene",
-        original:true,
-        history:[],
-        sequenceHash:"a4bcda462e0f63886e4f13446ed3615c",
-        sequence: 'ATGAAAAAAAAAATGA',
-        changelog:"test 1",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }],
-      len:60,
-      history:[],
-      sequenceHash:"ef1be857fb0cd00473aa11b60dea3430",
-      sequence:'CCCCCCCCCCCCCCCCCCCCATGAAAAAAAAAATGACCCCCCCCCCCCCCCCCCCCCCCC',
-      ctype:"source",
-      changelog:"test project",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      seqName:"chr01",
-    });
+    project = await prepareTestProject();
     console.log('project prepared? ', !!project);
   }, 10000);
 
@@ -75,9 +45,9 @@ describe('test of forkProject', ()=>{
     .exec();
 
     const sequence = await readSequenceFromSequenceRef(proj.sequenceRef);
-    expect(sequence).toBe('CCCCCCCCCCCCCCCCCCCCATGAAAAAAAAAATGACCCCCCCCCCCCCCCCCCCCCCCC');
+    expect(sequence).toBe('CCCCCCCCCCCCCCCCCCCCATGAAAGAAAAAATGACCCCCCCCCCCCCCCCCCCCCCCC');
     const sequence2 = await readSequenceFromSequenceRef((proj.parts[0].sequenceRef as any).toObject());
-    expect(sequence2).toBe('ATGAAAAAAAAAATGA');
+    expect(sequence2).toBe('ATGAAAGAAAAAATGA');
   });
 
   describe('fork a project', ()=>{
@@ -125,7 +95,8 @@ describe('test of forkProject', ()=>{
   }, 10000);
 
   afterAll(async () => {
-    await AnnotationPart.remove({_id:project.parts[0]});
-    await Project.remove({_id:project._id});
+    // await AnnotationPart.remove({_id:project.parts[0]});
+    // await Project.remove({_id:project._id});
+    await stopMongoMemoryServer();
   }, 10000);
 })

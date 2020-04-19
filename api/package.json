@@ -28,6 +28,8 @@
     "koa-send": "^5.0.0",
     "koa-static": "^5.0.0",
     "log4js": "^5.3.0",
+    "mongodb-memory-server": "^6.5.2",
+    "mongodb-memory-server-core": "^6.5.2",
     "mongoose": "^5.7.1",
     "redis": "^3.0.2",
     "socket.io": "^2.3.0",
@@ -40,7 +42,7 @@
     "production": "cross-env NODE_ENV=production node build/src/index.js",
     "dev": "node ./node_modules/nodemon/bin/nodemon.js",
     "debug": "node ./node_modules/nodemon/bin/nodemon.js --inspect",
-    "importDB": "cd utility && pipenv run python import_data.py",    
+    "importDB": "cd utility && pipenv run python import_data.py",
     "testScript": "ts-node src/script/testScript.ts",
     "shell": "ts-node",
     "jest": "jest"

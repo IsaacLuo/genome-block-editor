@@ -1,8 +1,4 @@
-import {reverseComplement, testA} from './sequenceRef';
-import * as sequenceRef from './sequenceRef';
-import * as testB from './testB';
-import request from 'supertest'
-import mongoose from 'mongoose';
+import {reverseComplement} from './sequenceRef';
 
 describe('test sequenceRef', ()=>{
   let user:IUserEssential;

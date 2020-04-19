@@ -2,15 +2,21 @@ import {replaceCodon} from './replaceCodon'
 import request from 'supertest'
 import mongoose from 'mongoose';
 import {Project} from '../models';
-import connectMongoDB from '../mongodb';
+import { connectMemoryMongoDB, stopMongoMemoryServer } from '../mongodb';
 
 import io from 'socket.io-client';
+
+const seqRef = require("../sequenceRef");
+import {prepareTestProject, mock_generateSequenceRef, mock_readSequenceFromSequenceRef} from './test/prepareTestProject';
+seqRef.generateSequenceRef = mock_generateSequenceRef;
+seqRef.readSequenceFromSequenceRef = mock_readSequenceFromSequenceRef;
+const {generateSequenceRef, readSequenceFromSequenceRef} = seqRef;
 
 describe('test of forkProject', ()=>{
   let user:IUserEssential;
   let project:IProject;
   beforeAll(async ()=>{
-    await connectMongoDB();
+    await connectMemoryMongoDB();
     user = {
       _id: new mongoose.Types.ObjectId(),
       email: 'test@gmail.com',
@@ -19,7 +25,7 @@ describe('test of forkProject', ()=>{
     }
 
     // project = await Project.findOne({ctype:'project'}).exec();
-    
+    project = await prepareTestProject();
     // console.log(project);
     console.log('project prepared? ', !!project);
   }, 10000);
@@ -52,4 +58,8 @@ describe('test of forkProject', ()=>{
 
     socket.disconnect();
   }, 30000);
+
+  afterAll(async()=>{
+    await stopMongoMemoryServer();
+  })
 })

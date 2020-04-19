@@ -2,13 +2,13 @@ import {updateProjectByGFFJSON} from './projectImportExport'
 import request from 'supertest'
 import mongoose from 'mongoose';
 import {Project} from '../models';
-import connectMongoDB from '../mongodb';
+import { connectMemoryMongoDB, stopMongoMemoryServer } from '../mongodb';
 
 describe('test of updateProjectByGFFJSON', ()=>{
   let user:IUserEssential;
   let project:IProject;
   beforeAll(async ()=>{
-    await connectMongoDB();
+    await connectMemoryMongoDB();
     user = {
       _id: new mongoose.Types.ObjectId(),
       email: 'test@gmail.com',
@@ -24,4 +24,7 @@ describe('test of updateProjectByGFFJSON', ()=>{
   test('fork a project', async ()=>{
     
   });
+  afterAll(async ()=>{
+    stopMongoMemoryServer();
+  })
 })
