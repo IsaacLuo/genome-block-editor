@@ -12,9 +12,10 @@ export async function buildProjectSequenceRefFromParts(id:IProject) {
       })
     .exec();
   let sequenceArr:string[] = [];
+  let originalSequence;
   if(project.sequenceRef) {
-    const sequence = await readSequenceFromSequenceRef(project.sequenceRef);
-    sequenceArr = sequence.split('');
+    originalSequence = await readSequenceFromSequenceRef(project.sequenceRef);
+    sequenceArr = originalSequence.split('');
   }
   for (const part of project.parts) {
     const sequence = await readSequenceFromSequenceRef(part.sequenceRef, 1);
@@ -37,6 +38,12 @@ export async function buildProjectSequenceRefFromParts(id:IProject) {
     }
   }
 
+  const newSeq = sequenceArr.join('');
+  if (newSeq === originalSequence) {
+    // nothing changed, return original
+    return project;
+  }
+
   const newObj = project.toObject();
   newObj.history = [{
     _id:newObj._id.toString(),
@@ -45,7 +52,7 @@ export async function buildProjectSequenceRefFromParts(id:IProject) {
   }, ...newObj.history];
   newObj.parts = newObj.parts.map(v=>v._id);
   newObj.changelog = `built project sequence`;
-  newObj.sequenceRef = generateSequenceRef(sequenceArr.join(''));
+  newObj.sequenceRef = generateSequenceRef(newSeq);
   delete newObj.updatedAt;
   delete newObj._id;
   const newItem = await Project.create(newObj);

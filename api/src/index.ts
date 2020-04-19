@@ -369,7 +369,7 @@ useApolloServer(app);
 
 
 // ----------------------------------socket.io part----------------------------------------------
-const server = http.createServer(app.callback());
+export const server = http.createServer(app.callback());
 const io = socket(server);
 
 

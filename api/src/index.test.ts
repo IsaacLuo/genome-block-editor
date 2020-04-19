@@ -1,4 +1,4 @@
-import app from './index'
+import app, {server} from './index'
 import request from 'supertest'
 import mongoose from 'mongoose';
 import {Project} from './models';
@@ -22,4 +22,8 @@ describe('test index', ()=>{
     expect(project.createdAt.getTime()).toBe(date.getTime());
     // expect(2).toBe(3);
   }, 10000)
+
+  afterAll(()=>{
+    server.close();
+  })
 })
