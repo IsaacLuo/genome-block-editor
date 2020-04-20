@@ -52,6 +52,7 @@ const GenomeBrowserCore = (
 ) => {
   const dispatch = useDispatch();
   const [ref, { x, y, width }] = useDimensions();
+  const [scrollBarRef, {x:scrollBarX}] = useDimensions();
   
   useEffect(() => {
     if (width>0) {
@@ -266,8 +267,9 @@ const GenomeBrowserCore = (
     </svg>
     </div>
     <MyScrollBar
+      ref = {scrollBarRef}
       onMouseDown={(event)=>{
-        let pos = event.clientX/windowWidth*sourceFileLen;
+        let pos = (event.clientX-scrollBarX)/windowWidth*sourceFileLen;
         const viewWindowWidth = viewWindowEnd - viewWindowStart
         let start = pos - Math.floor(viewWindowWidth/2);
         if (start < 0) start = 0;

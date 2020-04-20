@@ -55,24 +55,28 @@ export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId)=>{
 export const updateProjectByGFFJSON = async ( project:IProjectModel,
                                               gffJson:IGFFJSON,
                                               options?:{
-                                                useOriginalSequence?:boolean,
                                               },
                                               progressCallBack?:(progress:number, message:string)=>{},
                                               ) => {
   const newParts = [];
-
+  let reuseSequence = false;
   // save sequence to file
   const sequenceRefStore = {};
-  for (const sequenceName in gffJson.sequence) {
-    const uuid = uuidv4();
-    const seq = gffJson.sequence[sequenceName];
-    fs.promises.writeFile(`${conf.rootStorageFolder}/sequences/${uuid}`, seq);
-    sequenceRefStore[sequenceName] = {
-      fileName: uuid,
-      start: 0,
-      end: seq.length,
-      strand: 0,
+  if (gffJson.sequence) {    
+    for (const sequenceName in gffJson.sequence) {
+      const uuid = uuidv4();
+      const seq = gffJson.sequence[sequenceName];
+      fs.promises.writeFile(`${conf.rootStorageFolder}/sequences/${uuid}`, seq);
+      sequenceRefStore[sequenceName] = {
+        fileName: uuid,
+        start: 0,
+        end: seq.length,
+        strand: 0,
+      }
     }
+  } else {
+    // gffJson doesn't have sequence, reuse the project sequence;
+    reuseSequence = true;
   }
 
   const recordLength = gffJson.records.length;
@@ -85,7 +89,20 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
     if (record.__modified || !record._id) {
       // need to create new part
       const dateNow = new Date();
-      const partSeq = gffJson.sequence[record.chrName].substring(record.start, record.end);
+      let partSeq;
+      let partSequenceRef;
+      if (reuseSequence) {
+        partSequenceRef = {fileName: project.sequenceRef.fileName, start: record.start, end:record.end, strand: record.strand };
+        partSeq = await readSequenceFromSequenceRef(partSequenceRef);  
+      } else {
+        partSeq = gffJson.sequence[record.chrName].substring(record.start, record.end);
+        partSequenceRef =  {
+          fileName: sequenceRefStore[record.chrName].fileName,
+          start: record.start,
+          end: record.end,
+          strand: record.strand,
+        }
+      }
       let partSeqHash = crypto.createHash('md5').update(partSeq).digest("hex");
       const newPartTable = {
         history: [],
@@ -94,17 +111,9 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
         createdAt: dateNow,
         updatedAt: dateNow,
         sequenceHash: partSeqHash,
-        sequenceRef: {
-          fileName: sequenceRefStore[record.chrName].fileName,
-          start: record.start,
-          end: record.end,
-          strand: record.strand,
-        },
+        sequenceRef: partSequenceRef,
         changelog: record.__changelog,
       };
-
-      // delete newPartTable.createdAt;
-      // delete newPartTable.updatedAt;
 
       if (record._id) {
         const oldRecord = await AnnotationPart.findById(record._id).exec();
@@ -123,6 +132,10 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
       // the sequenceRef hasn't change, but I don't think it does a matter (for now)
     }
   }
+  // create new unknown parts
+  const unknownParts = await AnnotationPart.find({_id:{$in:project.parts}, featureType:'unknown'});
+  
+
   // create new project, save current one as history
   let newObj = project;
   if (project.constructor.name === 'model') {
