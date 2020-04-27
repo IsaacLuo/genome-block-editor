@@ -4,7 +4,7 @@ import axios from 'axios';
 import conf from 'conf.json';
 import ApolloClient from 'apollo-boost';
 import { gql } from "apollo-boost";
-import { Icon } from 'antd';
+import { FolderOutlined, FileOutlined } from '@ant-design/icons';
 import styles from "./FileList.module.scss";
 import styled from 'styled-components';
 
@@ -90,14 +90,14 @@ const FileList = (props:IProps = {id:'000000000000000000000000', level:0}) => {
         style={{cursor:'zoom-in'}}
         onClick={event=>fetchFolder(v._id)}
       >
-        <Icon type="folder" />
+        <FolderOutlined />
         {v.name}
       </div>)}
       {folderContent.projects.map((v:any,i:number)=>
       <div key={i} className={styles.Row}
         style={{cursor:'zoom-in'}}
         onClick={event=>fetchFile(v._id)}
-      ><Icon type="file" />
+      ><FileOutlined />
         {v.name}
         <DateTag>
           {new Date(parseInt(v.updatedAt)).toLocaleDateString()}

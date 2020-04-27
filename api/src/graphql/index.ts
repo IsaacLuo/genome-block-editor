@@ -29,6 +29,7 @@ export function useApolloServer(app:any) {
     changelog: String
     createdAt: String
     updatedAt: String
+    sequenceHash: String
   }
 
   type OriginPart {
@@ -43,6 +44,7 @@ export function useApolloServer(app:any) {
     strand: Int
     name: String
     changlog: String
+    sequenceHash: String
   }
 
   type Project {

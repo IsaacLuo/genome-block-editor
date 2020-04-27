@@ -14,6 +14,8 @@ import { LOAD_SOURCE_FILE_BY_PROJECT_ID } from 'actions';
 import GenomeBrowserForHistory from 'Components/GenomeBrowserForHistory';
 import ReplaceCodonDlg from 'Components/dialogs/ReplaceCodonDlg';
 import PartDetailDlg from 'Components/dialogs/PartDetailDlg';
+import InsertFeatureDlg from 'Components/dialogs/InsertFeatureDlg';
+import DebugPanel from 'Components/DebugPanel';
 
 const ProjectFunctions: React.FC = (props:any) => {
   const {projectId} = useMappedState((state:IStoreState)=>({
@@ -54,10 +56,12 @@ const ProjectFunctions: React.FC = (props:any) => {
 
         <GenomeBrowserForHistory/>
         <ReplaceCodonDlg/>
+        <InsertFeatureDlg/>
         
         <GenomeBrowserTooltip/>
 
         <PartDetailDlg/>
+        <DebugPanel/>
       </div>
   );
 }

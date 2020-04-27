@@ -93,8 +93,36 @@ function* replaceCodonTask(action:IAction) {
 
 }
 
+function* insertPartAfterFeature(action:IAction) {
+  try {
+    const {id, featureType, direct, offset, sequenceType, sequence} = action.data;
+    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/insert_parts_after_features/from/${id}`, {featureType, direct, offset, sequenceType, sequence})
+    const {taskInfo} = result.data;
+    // console.log(taskInfo);
+    const {processId, serverURL} = taskInfo;
+
+    // 2. use socket.io
+    const socket = io(serverURL);
+    const channel = yield call(monitorSocket, socket);
+    socket.emit('startTask', processId, ()=>{})
+    while (true) {
+      const serverAction = yield take(channel)
+      // console.debug('messageType', serverAction.type)
+      console.log(serverAction);
+      const reduxAction = generateSocketAction(serverAction);
+      yield put(reduxAction);
+      if (serverAction.type === 'result') {
+        break;
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 export default function* watchGlobalProcessTasks() {
   yield takeLatest('REPLACE_CODON_TASK', replaceCodonTask);
+  yield takeLatest('INSERT_PART_AFTER_FEATURE', insertPartAfterFeature);
 }
 
 

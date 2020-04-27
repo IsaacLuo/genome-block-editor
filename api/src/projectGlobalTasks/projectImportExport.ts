@@ -22,7 +22,7 @@ import {readSequenceFromSequenceRef} from '../sequenceRef';
 
 // }
 
-export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId)=>{
+export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId, keepUnknown=false)=>{
   const project = await Project
   .findById(_id)
   .populate({
@@ -36,13 +36,17 @@ export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId)=>{
     projectSequence = await readSequenceFromSequenceRef(project.sequenceRef);
   }
 
+  const newRecord = project.toObject().parts.map(part=>({...part, chrName: project.name}))
+
+  // console.log('keepUnknown=',keepUnknown);
+
   const gffJson:IGFFJSON = {
     fileType: "cailab_gff_json",
     version: "0.1",
     seqInfo: {
       [project.name]: {length: project.len}
     },
-    records: project.toObject().parts.map(part=>({...part, chrName: project.name})),
+    records: keepUnknown ? newRecord : newRecord.filter(part=>part.featureType !== 'unknown'),
     sequence: {
       [project.name]: projectSequence
     },
@@ -103,14 +107,15 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
           strand: record.strand,
         }
       }
-      let partSeqHash = crypto.createHash('md5').update(partSeq).digest("hex");
+      let sequenceHash = record.sequenceHash;
+      if (sequenceHash) sequenceHash = crypto.createHash('md5').update(partSeq).digest("hex");
       const newPartTable = {
         history: [],
         ...record,
         original: false,
         createdAt: dateNow,
         updatedAt: dateNow,
-        sequenceHash: partSeqHash,
+        sequenceHash,
         sequenceRef: partSequenceRef,
         changelog: record.__changelog,
       };
@@ -133,7 +138,7 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
     }
   }
   // create new unknown parts
-  const unknownParts = await AnnotationPart.find({_id:{$in:project.parts}, featureType:'unknown'});
+  // const unknownParts = await AnnotationPart.find({_id:{$in:project.parts}, featureType:'unknown'});
   
 
   // create new project, save current one as history
@@ -147,6 +152,7 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
   newObj.changelog = gffJson.__changelog;
   delete newObj.updatedAt;
   delete newObj._id;
+  console.log(newObj.changelog);
   const newItem = await Project.create(newObj);
   // old project become history
   await Project.update({_id:project._id}, {ctype:'history'});

@@ -9,20 +9,20 @@ import conf from 'conf.json';
 
 const DebugPanel = () => {
   const state = useMappedState((state:IStoreState)=>(state));
+  
   return (
     <div style={{textAlign:"left"}}>
-      {/* <Card style={{ width: 300 }}> */}
-        {state.sourceFile && <p dangerouslySetInnerHTML={{__html:
-        JSON.stringify(state.sourceFile, function (key) {
-          switch(key) {
-            case 'parts':
-              return {count:this.parts.length, first:this.parts[0]}
-            default:
-              return this[key];
-          }
-        }, 2).replace(/ /g, '&nbsp;').replace(/\n/g, '<br>')
-        }}></p>}
-      {/* </Card>, */}
+      <div>(debug info)</div>
+      {state.sourceFile &&
+      <div>
+        <div> id: {state.sourceFile._id}</div>
+        <div>pid: {state.sourceFile.projectId}</div>
+      </div>}
+      {state.history.historyFile &&
+      <div>
+        <div>history id: {state.history.historyFile._id}</div>
+        <div>history pid: {state.history.historyFile.projectId}</div>
+      </div>}
     </div>
   );
 }

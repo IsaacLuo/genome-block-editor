@@ -69,6 +69,7 @@ const DEFAULT_COMPONENT_VISIBLE_STATE:IComponentVisibleState = {
   historyBrowserVisible: false,
   replaceCodonDialogVisible: false,
   partDetailDialogVisible: false,
+  insertFeatureDialogVisible: false,
 }
 
 const DEFAULT_HISTORY_STATE:IHistoryState = {
@@ -173,6 +174,12 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
     }
     case 'HIDE_PART_DETAIL_DIALOG': {
       return {...state, partDetailDialogVisible: false};
+    }
+    case 'SHOW_INSERT_FEATURE_DIALOG': {
+      return {...state, insertFeatureDialogVisible: true};
+    }
+    case 'HIDE_INSERT_FEATURE_DIALOG': {
+      return {...state, insertFeatureDialogVisible: false};
     }
     case 'HIDE_ALL_DIALOG':
       return DEFAULT_COMPONENT_VISIBLE_STATE;
@@ -414,6 +421,8 @@ export const historyReducer = (state:IHistoryState, action:IAction) => {
     case 'SET_HISTORY_DIFF':
       console.log(action);
       return {...state, historyDiffParts: action.data}
+    case 'SHOW_HIDE_HISTORY_VERSIONS':
+      return DEFAULT_HISTORY_STATE;
   }
   return state;
 }

@@ -24,6 +24,9 @@ export const pens:any = {
   internal_transcribed_spacer_region:'#97d7f7',
   plus_1_translational_frameshift:'#97d7f7',
   snoRNA:'#99b3ff',
+  loxP: '#e8716b',
+  Rox: '#e8716b',
+  Vlox: '#e8716b',
 }
 
 export default (type: string):string => pens[type as any] || '#eee';

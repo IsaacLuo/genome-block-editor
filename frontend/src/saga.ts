@@ -273,8 +273,8 @@ export function* fetchHistorySourceFile(action:IAction) {
     const {sourceFile}:{sourceFile:ISourceFile} = yield select((state:IStoreState)=>({sourceFile:state.sourceFile}));
     const historyFile:ISourceFile = result.data;
     if (sourceFile && historyFile) {
-      const sourcePartsSet = new Set<string>(sourceFile.parts.map(v=>v._id));
-      const historyPartSet = new Set<string>(historyFile.parts.map(v=>v._id));
+      const sourcePartsSet = new Set<string>(sourceFile.parts.map(v=>v.sequenceHash));
+      const historyPartSet = new Set<string>(historyFile.parts.map(v=>v.sequenceHash));
       const diffSetHistory = new Set<string>();
       const diffSetSource = new Set<string>();
       yield put({type: 'SET_HISTORY_DIFF', data: {diffSetHistory, diffSetSource}});
@@ -288,6 +288,7 @@ export function* fetchHistorySourceFile(action:IAction) {
           diffSetSource.add(p);
         }
       }
+      // console.log('SET+DIFF', diffSetHistory, diffSetSource);
       yield put({type: 'SET_HISTORY_DIFF', data: {diffSetHistory, diffSetSource}});
     }
     yield put({type: 'SET_HISTORY_SOURCE_FILE', data:result.data});

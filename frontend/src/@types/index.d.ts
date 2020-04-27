@@ -33,6 +33,7 @@ declare interface IAnnotationPart {
   changelog: string;
   createdAt: Date;
   updatedAt: Date;
+  sequenceHash: string;
 }
 
 declare interface IHistory {
@@ -56,6 +57,7 @@ declare interface ISourceFile {
   permission: Number,
   createdAt: Date,
   updatedAt: Date,
+  changelog: string,
   projectId?: string;
 }
 
@@ -84,6 +86,7 @@ declare interface IComponentVisibleState {
   historyBrowserVisible: boolean;
   replaceCodonDialogVisible: boolean;
   partDetailDialogVisible: boolean;
+  insertFeatureDialogVisible: boolean,
 }
 
 declare interface IGenomBrowserState {

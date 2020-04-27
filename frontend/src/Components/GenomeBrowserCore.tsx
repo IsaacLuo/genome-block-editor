@@ -6,6 +6,7 @@ import ArrowFeature from'./ArrowFeature';
 import useDimensions from 'react-use-dimensions';
 import {Spin} from 'antd';
 import styled from 'styled-components';
+import { ZoomInOutlined, ZoomOutOutlined, ForwardOutlined, BackwardOutlined } from '@ant-design/icons';
 
 const SourceFileTitle = styled.span`
 margin-right:20px;
@@ -177,12 +178,13 @@ const GenomeBrowserCore = (
   return <Spin spinning={loading}>
     <div style={{height:40}}>
       {sourceFile && <SourceFileTitle>{sourceFile.name} ({sourceFile.len}bp)</SourceFileTitle>}
-      <button onClick={()=>setZoomLevel(zoomLevel*2)}>-</button>
-      <button onClick={()=>setZoomLevel(Math.max(1, zoomLevel/2))}>+</button>
+      <button onClick={()=>setZoomLevel(zoomLevel*2)}><ZoomOutOutlined /></button>
+      <button onClick={()=>setZoomLevel(Math.max(1, zoomLevel/2))}><ZoomInOutlined /></button>
       <span>zoom level: 1:{zoomLevel}</span>
-      <span> {viewWindowStart} {viewWindowEnd} / {Math.floor(windowWidth)} / {featuresLen}}</span>
-      <button onClick={()=>dispatch({type:'GENOME_BROWSER_SCROLL_LEFT', data: {step:3}})}> left </button>
-      <button onClick={()=>dispatch({type:'GENOME_BROWSER_SCROLL_RIGHT', data: {step:3, max:maxAllowedScollPos}})}> right </button>
+      {/* <span> {viewWindowStart} {viewWindowEnd} / {Math.floor(windowWidth)} / {featuresLen}}</span> */}
+      <button onClick={()=>dispatch({type:'GENOME_BROWSER_SCROLL_LEFT', data: {step:3}})}> <BackwardOutlined /> </button>
+      <button onClick={()=>dispatch({type:'GENOME_BROWSER_SCROLL_RIGHT', data: {step:3, max:maxAllowedScollPos}})}> <ForwardOutlined /> </button>
+      <span> changelog: {sourceFile.changelog}</span>
     </div>
   <div
     className="chromosome-svg-container"
@@ -228,8 +230,8 @@ const GenomeBrowserCore = (
                 width = windowWidth + 2;
                 shape = 0;
               }
-              const highLighted = (highLightedParts && highLightedParts.has(v._id));
-              const lowLighted = (highLightedParts && !highLighted);
+              const highLighted = (highLightedParts && highLightedParts.has(v.sequenceHash));
+              // const lowLighted = (highLightedParts && !highLighted);
               return <g key={i}>
               <ArrowFeature
                 x={x}

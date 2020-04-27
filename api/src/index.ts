@@ -32,6 +32,7 @@ import { replaceCodon } from './projectGlobalTasks/replaceCodon';
 import axios from 'axios';
 import { runExe } from './runExe';
 import { reverseComplement, readSequenceFromSequenceRef } from './sequenceRef';
+import { insertPartsAfterFeatures } from './projectGlobalTasks/insertPartsAfterFeatures';
 
 require('dotenv').config()
 
@@ -320,7 +321,19 @@ async (ctx:Ctx, next:Next)=> {
   
   ctx.body = await replaceCodon(user, id, rules, clientToken);
   console.log(ctx.body);
-})
+});
+
+router.post('/api/mapping_project/insert_parts_after_features/from/:id',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const user = ctx.state.user;
+  const {id} = ctx.params;
+  const {featureType, direct, offset, sequenceType, sequence} = ctx.request.body;
+  const clientToken = ctx.cookies.get('token');
+  
+  ctx.body = await insertPartsAfterFeatures(user, id, featureType, direct, offset, sequenceType, sequence, clientToken);
+  console.log(ctx.body);
+});
 
 // router.get('/api/admin/clearIsolatedParts', clearIsolatedParts);
 
@@ -353,7 +366,9 @@ async (ctx:Ctx, next:Next)=> {
       ctx.body = outputObj[0];
   });
 
-})
+});
+
+
 
 
 app.use(router.routes());

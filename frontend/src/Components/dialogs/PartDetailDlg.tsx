@@ -95,6 +95,10 @@ const PartDetailDlg = () => {
         value: part!._id,
         history: genHistoryText('_id'),
       }, {
+        key: 'hash',
+        value: part!.sequenceHash,
+        history: genHistoryText('sequenceHash'),
+      }, {
         key: 'length',
         value: part!.len,
         history: genHistoryText('len'),

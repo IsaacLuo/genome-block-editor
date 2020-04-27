@@ -81,6 +81,13 @@ const GenomeOperationPanel: React.FC = () => {
         dispatch({type:'SHOW_REPLACE_CODON_DIALOG'})
       }
     },
+    {
+      name: 'insert sequence',
+      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),
+      onClick: ()=>{
+        dispatch({type:'SHOW_INSERT_FEATURE_DIALOG'})
+      }
+    },
 
   ]
 

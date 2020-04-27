@@ -12,6 +12,10 @@ import datetime
 strand_dict={"+":1, "-":-1, ".":0}
 
 
+def rc(seq):
+    d = {'a':'t', 't':'a', 'c':'g', 'g':'c', 'A':'T', 'T':'A', 'C':'G', 'G':'C', 'n':'n', 'N':'N'}
+    return ''.join([d[x] for x in list(seq[::-1])])
+
 configJsonFilePath = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src', 'conf.json'))
 if not os.path.isfile(configJsonFilePath):
     print('conf file not exists', file=sys.stderr)
@@ -77,6 +81,7 @@ def import_project(file_path, project_name):
 
     now = datetime.datetime.utcnow()
 
+
     for record in gff_reader.read_gff(True):
         count+=1
         if count%100 == 0:
@@ -91,7 +96,10 @@ def import_project(file_path, project_name):
 
         sequenceHash = ''
         if 'sequence' in record:
-            sequenceHash = hashlib.md5(record['sequence'].encode())
+            seq = record['sequence']
+            # if record['strand'] == -1 or record['strand'] == '-':
+                # seq = rc(seq)
+            sequenceHash = hashlib.md5(seq.encode())
             seqeunceHash = sequenceHash.hexdigest()
         
         if record['seqName'] not in seq_dict:
@@ -99,7 +107,6 @@ def import_project(file_path, project_name):
                 "name": '{}_{}'.format(project_name, record['seqName']),
                 "seqName": record['seqName'],
                 "version": "0.1",
-                "len": record['end'],
                 "chrId": chr_count,
                 "parts_raw": [],
                 "chrFileName": record['chrFileName'],
@@ -107,10 +114,6 @@ def import_project(file_path, project_name):
             }
             chr_count+=1
             print('new seq_dict', record['seqName'])
-        else:
-            proj = seq_dict[record['seqName']]
-            if proj['len'] < record['end']:
-                proj['len'] = record['end']
         
         if record['feature'] not in black_list_feature and record['start'] != 0:
             insert_result = Parts.insert_one({
@@ -263,7 +266,6 @@ def import_project(file_path, project_name):
             "len": project['len'],
             "history": [],
             "sequenceHash": wholeSequenceHash,
-            # "sequenceHashLen": project['len'],
             "sequenceRef":{
                 "fileName":project['chrFileName'],
                 "start": 0,

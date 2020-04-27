@@ -50,6 +50,7 @@ function* loadPartDetail(action:IAction) {
           createdAt
           updatedAt
           changelog
+          sequenceHash
         }
       }`
     })
@@ -87,6 +88,7 @@ function* loadNextHistoryPart(action:IAction) {
           original
           updatedAt
           changelog
+          sequenceHash
           history {
             _id
           }

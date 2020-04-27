@@ -1,9 +1,10 @@
 class FastaDB:
-    file_obj = None
-    cached_seq_name = None
-    cached_seq = None
-    seq_index = {}
-    seq_lens_dict = {}
+    def __init__(self):
+        self.file_obj = None
+        self.cached_seq_name = None
+        self.cached_seq = None
+        self.seq_index = {}
+        self.seq_lens_dict = {}
 
     def set_file(self, file_name):
         self.file_obj = open(file_name, 'rb')

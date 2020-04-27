@@ -1,0 +1,22 @@
+##gff-version 3
+#Fri Oct 18 13:44:45 2013
+#
+# Saccharomyces cerevisiae strain BY4741 Genome
+#
+# SGD S288C features found in the BY4741 assembly using liftOver. Notes, Names, SGD
+# IDs based on existing SGD annotations
+#
+# Created by Saccharomyces Genome Database (http://www.yeastgenome.org)
+#
+# Please send comments and suggestions to sgd-helpdesk@lists.stanford.edu
+#
+# SGD is funded as a National Human Genome Research Institute Biomedical
+# Informatics Resource from the U. S. National Institutes of Health to Stanford
+# University. The staff of SGD is listed at:
+# http://www.yeastgenome.org/SGD-staff.html
+#
+chr01	liftOver	gene	1001	2000	.	+	.	ID=YAL003W_BY4741;Name=YAL003W;orf_classification=Verified;gene=EFB1;Alias=EFB1,EF-1beta,eEF1Balpha,TEF5;dbxref=SGD:S000000003;Note=Translation%20elongation%20factor%201%20beta%3B%20stimulates%20nucleotide%20exchange%20to%20regenerate%20EF-1%20alpha-GTP%20for%20the%20next%20elongation%20cycle%3B%20part%20of%20the%20EF-1%20complex%2C%20which%20facilitates%20binding%20of%20aminoacyl-tRNA%20to%20the%20ribosomal%20A%20site
+chr01	liftOver	mRNA	1001	2000	.	+	.	ID=YAL003W_mRNA;Name=YAL003W_mRNA;Parent=YAL003W_BY4741
+chr01	liftOver	CDS	1001	1300	.	+	0	Parent=YAL003W_mRNA;Name=YAL003W_CDS;orf_classification=Verified
+chr01	liftOver	CDS	1401	2000	.	+	1	Parent=YAL003W_mRNA;Name=YAL003W_CDS;orf_classification=Verified
+chr01	liftOver	intron	1301	1400	.	+	.	Parent=YAL003W_mRNA;Name=YAL003W_intron;orf_classification=Verified
