@@ -79,7 +79,8 @@ const DEFAULT_HISTORY_STATE:IHistoryState = {
   historyDiffParts: {
     diffSetHistory: new Set(),
     diffSetSource: new Set(),
-  }
+  },
+  focusedPartId: undefined,
 }
 
 const DEFAULT_PART_DETAIL_DIALOG_STATE:IPartDetailDialogState = {

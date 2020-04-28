@@ -361,7 +361,7 @@ async (ctx:Ctx, next:Next)=> {
     }, 
     {sequence1, sequence2},
     (outputObj:any)=>{
-      console.log(outputObj[0]);
+      // console.log(outputObj[0]);
       // ctx.body = {message:0}
       ctx.body = outputObj[0];
   });

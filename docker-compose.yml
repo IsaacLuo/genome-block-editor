@@ -8,15 +8,16 @@ services:
     working_dir: /app
     external_links:
       - "webexe-api:webexe"
-    networks:
-      - "redis"
+    # networks:
+      # - "redis"
+      # - "bridge"
     # command: ['pipenv', 'run', 'python', 'src/run.py']
     # environment:
     #   - GUNICORN_CMD_ARGS="--chdir=src"
     # command: ['gunicorn', '-b 0.0.0.0:5000','src.run:app']
     command: ['yarn', 'run', 'production']
-    restart: always
     network_mode: bridge
+    restart: always
 
   frontend:
     container_name: gbe-frontend

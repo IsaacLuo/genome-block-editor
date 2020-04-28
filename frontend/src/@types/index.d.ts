@@ -165,7 +165,8 @@ interface IHistoryState {
   historyFile?: ISourceFile;
   availableHistory: IHistoryIndex[];
   loading: boolean;
-  historyDiffParts: {diffSetHistory:Set<string>, diffSetSource:Set<string>}
+  historyDiffParts: {diffSetHistory:Set<string>, diffSetSource:Set<string>};
+  focusedPartId?: string;
 }
 
 interface IPartDetailDialogState {
