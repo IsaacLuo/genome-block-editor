@@ -3,6 +3,6 @@ build
 node_modules
 public/sourceFileCaches/*.project
 public/sourceFileCaches/*.source
-public/sequences/*
+# public/sequences/*
 public/genbank/*
 public/test/*

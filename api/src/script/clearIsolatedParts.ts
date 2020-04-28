@@ -72,7 +72,7 @@ async function main() {
     }
   }
   console.log(`collected ${isolatedIds.length} isolated parts`);
-  await AnnotationPart.deleteMany({_id:isolatedIds});
+  await AnnotationPart.deleteMany({_id:{$in:isolatedIds}});
   console.log('finish');
 }
 

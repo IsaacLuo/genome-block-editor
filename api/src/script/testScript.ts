@@ -6,10 +6,10 @@ import connectMongoDB from '../mongodb';
 async function main() {
   await connectMongoDB();
   let parts = await AnnotationPart.find({}).exec();
-  if (parts) {
-    const part = parts[0];
-    console.log(part.sequence);
-  }
+  // if (parts) {
+    // const part = parts[0];
+    // console.log(part.sequence);
+  // }
   
 
   // console.log(part.sequence);
