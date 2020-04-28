@@ -79,21 +79,12 @@ export const revertProject = async (_id:string|mongoose.Types.ObjectId) => {
   }
 }
 
-export const buildProjectSequenceRefFromParts = async (project:IProject) => {
-  
-}
-
 // sometimes the project doesn't have a sequenceRef, or not all parts referencing the project
 // sequence. In this case, the project sequence needs to be updated before exporting
 export const buildWholeProject = async (_id:string|mongoose.Types.ObjectId) => {
   const project = await Project.findById(_id).exec();
   if(!project) {
     throw createError(404, 'cannot find project');
-  }
-
-  if (!project.sequenceRef) {
-    // build sequenceRef for project from parts;
-
   }
 
   const fileName = project.sequenceRef.fileName;

@@ -15,7 +15,7 @@ import crypto from 'crypto';
 import { pushHistory } from './project';
 import conf from '../conf';
 
-import {readSequenceFromSequenceRef} from '../sequenceRef';
+import {readSequenceFromSequenceRef, generateSequenceRef} from '../sequenceRef';
 
 // export const deleteFilesSequenceRef = async (sequenceRef: ISequenceRef, strand?:number) => {
 //   // find if there is any project or part is using this sequenceRef
@@ -30,19 +30,21 @@ export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId, keepU
   })
   .exec();
 
+  // rebuild sequence 
+
   let projectSequence = '';
 
   if(project.sequenceRef && project.sequenceRef.fileName) {
     projectSequence = await readSequenceFromSequenceRef(project.sequenceRef);
   }
 
-  const newRecord = project.toObject().parts.map(part=>({...part, chrName: project.name}))
+  const newRecord = project.toObject().parts.map(part=>({...part, chrName: project.name}));
 
   // console.log('keepUnknown=',keepUnknown);
 
   const gffJson:IGFFJSON = {
-    fileType: "cailab_gff_json",
-    version: "0.1",
+    mimetype: 'application/gffjson',
+    version: "0.2",
     seqInfo: {
       [project.name]: {length: project.len}
     },
@@ -50,6 +52,7 @@ export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId, keepU
     sequence: {
       [project.name]: projectSequence
     },
+    defaultChr: project.name,
     history:[],
   }
 
@@ -62,25 +65,21 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
                                               },
                                               progressCallBack?:(progress:number, message:string)=>{},
                                               ) => {
+
+  if (gffJson.mimetype !== 'application/gffjson' && gffJson.mimetype !== 'application/gffjson-head' ) {
+    throw new Error('cannot hanle mimetype '+ gffJson.mimetype);
+  }
   const newParts = [];
   let reuseSequence = false;
   // save sequence to file
-  const sequenceRefStore = {};
-  if (gffJson.sequence) {    
-    for (const sequenceName in gffJson.sequence) {
-      const uuid = uuidv4();
-      const seq = gffJson.sequence[sequenceName];
-      fs.promises.writeFile(`${conf.rootStorageFolder}/sequences/${uuid}`, seq);
-      sequenceRefStore[sequenceName] = {
-        fileName: uuid,
-        start: 0,
-        end: seq.length,
-        strand: 0,
-      }
-    }
+  let projectSequenceRef:ISequenceRef;
+  console.log(gffJson);
+  if (gffJson.mimetype === 'application/gffjson') {
+    projectSequenceRef = await generateSequenceRef(gffJson.sequence[gffJson.defaultChr]);
   } else {
     // gffJson doesn't have sequence, reuse the project sequence;
     reuseSequence = true;
+    projectSequenceRef = project.sequenceRef;
   }
 
   const recordLength = gffJson.records.length;
@@ -101,7 +100,7 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
       } else {
         partSeq = gffJson.sequence[record.chrName].substring(record.start, record.end);
         partSequenceRef =  {
-          fileName: sequenceRefStore[record.chrName].fileName,
+          fileName: projectSequenceRef.fileName,
           start: record.start,
           end: record.end,
           strand: record.strand,
@@ -150,6 +149,7 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
   pushHistory(newObj);
   newObj.parts = newParts;
   newObj.changelog = gffJson.__changelog;
+  newObj.sequenceRef = projectSequenceRef;
   delete newObj.updatedAt;
   delete newObj._id;
   console.log(newObj.changelog);

@@ -17,6 +17,7 @@ export function useApolloServer(app:any) {
   }
   type Part {
     _id: ID
+    pid: ID
     len: Int
     featureType: String
     start: Int
@@ -34,6 +35,7 @@ export function useApolloServer(app:any) {
 
   type OriginPart {
     _id: ID
+    pid: ID
     featureType: String
     species: String
     chrId: Int

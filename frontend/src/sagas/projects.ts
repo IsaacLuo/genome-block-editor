@@ -35,6 +35,7 @@ function* loadPartDetail(action:IAction) {
       {
         part (_id:"${_id}") {
           _id
+          pid
           len
           featureType
           start
@@ -79,6 +80,7 @@ function* loadNextHistoryPart(action:IAction) {
       {
         part (_id:"${historyPartId}") {
           _id
+          pid
           len
           featureType
           start

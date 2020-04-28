@@ -117,6 +117,7 @@ def import_project(file_path, project_name):
         
         if record['feature'] not in black_list_feature and record['start'] != 0:
             insert_result = Parts.insert_one({
+                "pid":ObjectId(),
                 "featureType":record['feature'],
                 "chrName": record['seqName'],
                 "chrId": seq_dict[record['seqName']]['chrId'],
@@ -182,6 +183,7 @@ def import_project(file_path, project_name):
                 start = end_pos_of_unknown
                 end = p['start']
                 insert_result = Parts.insert_one({
+                    "pid":ObjectId(),
                     "featureType": 'unknown',
                     "chrName": p['chrName'],
                     "chrId": p['chrId'],
@@ -226,6 +228,7 @@ def import_project(file_path, project_name):
             start = end_pos_of_unknown
             end = project['len']
             insert_result = Parts.insert_one({
+                "pid":ObjectId(),
                 "featureType": 'unknown',
                 "chrName": p['chrName'],
                 "chrId": p['chrId'],

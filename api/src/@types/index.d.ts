@@ -42,6 +42,7 @@ declare interface ISequenceRef {
 
 declare interface IAnnotationPart {
   _id: any;
+  pid: any;
   featureType: string;
   chrId: number;
   chrName: string;
@@ -130,8 +131,10 @@ declare interface IGFFJSONRecord {
   updatedAt?: Date,
 }
 
+declare type GFFJsonMimeType = 'application/gffjson'|'application/gffjson-multi-chr'|'application/gffjson-head'|'application/gffjson-head-multi-chr';
+
 declare interface IGFFJSON {
-  fileType: string;
+  mimetype: GFFJsonMimeType;
   version: string;
   history: {
     createdAt: Date,
@@ -144,6 +147,7 @@ declare interface IGFFJSON {
   sequence: {
     [key:string]: string;
   }
+  defaultChr?: string;
   createdAt?: Date,
   updatedAt?: Date,
   __changelog?: string,

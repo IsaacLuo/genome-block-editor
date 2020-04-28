@@ -95,6 +95,10 @@ const PartDetailDlg = () => {
         value: part!._id,
         history: genHistoryText('_id'),
       }, {
+        key: 'pid',
+        value: part!.pid,
+        history: genHistoryText('pid'),
+      }, {
         key: 'hash',
         value: part!.sequenceHash,
         history: genHistoryText('sequenceHash'),

@@ -24,6 +24,7 @@ export const SequenceRefSchema = new Schema({
 })
 
 export const AnnotationPartSchema = new Schema({
+  pid: Schema.Types.ObjectId, // part id, it will const equal the original pid
   featureType: String,
   chrId: Number,
   chrName: String,
@@ -34,11 +35,6 @@ export const AnnotationPartSchema = new Schema({
   // extendted attributes
   name: String,
   original: Boolean,
-  
-  origin: {
-    type: Schema.Types.ObjectId,
-    ref: 'AnnotationPart',
-  },
   history: [{
     _id:Schema.Types.ObjectId,
     updatedAt: Date,
