@@ -16,4 +16,5 @@
 /api/.env
 /frontend/.env
 /api/public/sourceFileCaches/*
-
+*.log
+_gsdata_/*
