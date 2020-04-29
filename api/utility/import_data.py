@@ -27,8 +27,9 @@ black_list_feature = ['contig', 'region']
 conf_mongo = conf['secret']['mongoDB']
 # mongo_uri, mongo_db, mongo_auth = re.findall(r'^(.+)/(.+)\?authSource=(.+)',conf_mongo['url'])[0]
 # client = pymongo.MongoClient(conf_mongo['url'], username=conf_mongo['username'], password=conf_mongo['password'])
-mongo_uri, mongo_db = re.findall(r'^(.+)/(.+)',conf_mongo['url'])[0]
+mongo_uri, mongo_db_rest_part = re.findall(r'^(.+)/(.+)',conf_mongo['url'])[0]
 client = pymongo.MongoClient(conf_mongo['url'])
+mongo_db, _ = mongo_db_rest_part.split('?')
 db = client[mongo_db]
 ProjectFolder = db['project_folders']
 Project = db['projects']
