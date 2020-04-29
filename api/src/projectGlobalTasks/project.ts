@@ -42,9 +42,6 @@ export const forkProject = async (user:IUserEssential, _id:string|mongoose.Types
   project._id = new mongoose.Types.ObjectId();
   project.changelog = `forked from project ${oldName} (${oldId}).`
   const result = await Project.create(project);
-  // save to redis
-  saveProject(result);
-  saveProjectIdStr(result.projectId.toString(), result._id.toString());
 
   return {_id:result._id, projectId:result.projectId};
 }
