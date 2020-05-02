@@ -121,7 +121,7 @@ function* revertToHistoryVersion(aciton:IAction) {
             icon,
             content: 'project cannot be reverted, because it\'s the first version since forked, delete it?',
             okText: 'Yes',
-            okType: 'danger',
+            okType: 'danger' as any,
             cancelText: 'No',
             onOk() {
               resolve(true);

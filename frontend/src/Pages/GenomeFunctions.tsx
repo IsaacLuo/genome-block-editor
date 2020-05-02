@@ -16,6 +16,8 @@ import ReplaceCodonDlg from 'Components/dialogs/ReplaceCodonDlg';
 import PartDetailDlg from 'Components/dialogs/PartDetailDlg';
 import InsertFeatureDlg from 'Components/dialogs/InsertFeatureDlg';
 import DebugPanel from 'Components/DebugPanel';
+import GenomeOperationMenu from 'Components/GenomeOperationMenu';
+import { Collapse } from 'antd';
 
 const ProjectFunctions: React.FC = (props:any) => {
   const {projectId} = useMappedState((state:IStoreState)=>({
@@ -42,7 +44,12 @@ const ProjectFunctions: React.FC = (props:any) => {
 
   return (
       <div className="main-panel">
-        <FileExplorer/>
+        {/* <GenomeOperationMenu/> */}
+        <Collapse defaultActiveKey={['1']} style={{width:'100%'}}>
+          <Collapse.Panel header="" key="1">
+              <FileExplorer/>
+          </Collapse.Panel>
+        </Collapse>
         <div className="basket-panel">
           <GenomeBrowser/>
         </div>

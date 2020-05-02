@@ -52,6 +52,7 @@ declare interface ISourceFile {
   ctype: string;
   name: string;
   parts: IAnnotationPart[];
+  history: IHistory[];
   len: number;
   owner?: IUser,
   group: string,
