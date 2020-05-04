@@ -27,7 +27,7 @@ import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProject
 import workerTs from './workerTs';
 import { forkProject, hideProject, revertProject } from './projectGlobalTasks/project';
 import { projectToGFFJSON, updateProjectByGFFJSON } from './projectGlobalTasks/projectImportExport';
-import { replaceCodon } from './projectGlobalTasks/replaceCodon';
+import { replaceCodon, removeIntron } from './projectGlobalTasks/replaceCodon';
 
 import axios from 'axios';
 import { runExe } from './runExe';
@@ -332,6 +332,16 @@ async (ctx:Ctx, next:Next)=> {
   const clientToken = ctx.cookies.get('token');
   
   ctx.body = await insertPartsAfterFeatures(user, id, featureType, direct, offset, sequenceType, sequence, clientToken);
+  console.log(ctx.body);
+});
+
+router.post('/api/mapping_project/remove_intron/from/:id',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const user = ctx.state.user;
+  const {id} = ctx.params;
+  const clientToken = ctx.cookies.get('token');
+  ctx.body = await removeIntron(user, id, clientToken);
   console.log(ctx.body);
 });
 
