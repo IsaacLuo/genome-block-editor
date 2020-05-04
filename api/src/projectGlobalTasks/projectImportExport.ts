@@ -73,7 +73,7 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
   let reuseSequence = false;
   // save sequence to file
   let projectSequenceRef:ISequenceRef;
-  console.log(gffJson);
+  // console.log(gffJson);
   if (gffJson.mimetype === 'application/gffjson') {
     projectSequenceRef = await generateSequenceRef(gffJson.sequence[gffJson.defaultChr]);
   } else {
@@ -107,7 +107,7 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
         }
       }
       let sequenceHash = record.sequenceHash;
-      if (sequenceHash) sequenceHash = crypto.createHash('md5').update(partSeq).digest("hex");
+      if (!sequenceHash) sequenceHash = crypto.createHash('md5').update(partSeq).digest("hex");
       const newPartTable = {
         history: [],
         ...record,
@@ -152,7 +152,7 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
   newObj.sequenceRef = projectSequenceRef;
   delete newObj.updatedAt;
   delete newObj._id;
-  console.log(newObj.changelog);
+  // console.log(newObj.changelog);
   const newItem = await Project.create(newObj);
   // old project become history
   await Project.update({_id:project._id}, {ctype:'history'});

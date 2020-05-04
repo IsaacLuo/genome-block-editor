@@ -122,8 +122,8 @@ function* insertPartAfterFeature(action:IAction) {
 
 function* startRemoveIntronTask(action:IAction) {
   try {
-    const {id, featureType, direct, offset, sequenceType, sequence} = action.data;
-    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/remove_intron/from/${id}`, {})
+    const {id, intronTypes} = action.data;
+    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/remove_introns/from/${id}`, {intronTypes})
     const {taskInfo} = result.data;
     // console.log(taskInfo);
     const {processId, serverURL} = taskInfo;

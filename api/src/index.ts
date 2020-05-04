@@ -27,7 +27,8 @@ import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProject
 import workerTs from './workerTs';
 import { forkProject, hideProject, revertProject } from './projectGlobalTasks/project';
 import { projectToGFFJSON, updateProjectByGFFJSON } from './projectGlobalTasks/projectImportExport';
-import { replaceCodon, removeIntron } from './projectGlobalTasks/replaceCodon';
+import { replaceCodon } from './projectGlobalTasks/replaceCodon';
+import { removeIntron } from './projectGlobalTasks/removeIntron';
 
 import axios from 'axios';
 import { runExe } from './runExe';
@@ -128,7 +129,7 @@ async (ctx:Ctx, next:Next)=> {
     await hideProject(id);
     ctx.body = {message:'OK'}
   } else if (project.ctype === 'deletedProject') {
-    console.log(project);
+    // console.log(project);
     ctx.body = {message:'OK but nothing changed'}
   }
   else {
@@ -146,16 +147,12 @@ async (ctx:Ctx, next:Next)=> {
 
 router.get('/api/test',
 async (ctx:Ctx, next:Next)=> {
-  console.log('1');
   ctx.body = 'hello world';
 },
 
 async (ctx:Ctx, next:Next)=> {
   await sleep(3000);
-  console.log('inside');
-  console.log('2');
   ctx.body = 'hello again';
-  console.log('3');
 },
 
 )
@@ -320,7 +317,7 @@ async (ctx:Ctx, next:Next)=> {
   const clientToken = ctx.cookies.get('token');
   
   ctx.body = await replaceCodon(user, id, rules, clientToken);
-  console.log(ctx.body);
+  // console.log(ctx.body);
 });
 
 router.post('/api/mapping_project/insert_parts_after_features/from/:id',
@@ -332,17 +329,18 @@ async (ctx:Ctx, next:Next)=> {
   const clientToken = ctx.cookies.get('token');
   
   ctx.body = await insertPartsAfterFeatures(user, id, featureType, direct, offset, sequenceType, sequence, clientToken);
-  console.log(ctx.body);
+  // console.log(ctx.body);
 });
 
-router.post('/api/mapping_project/remove_intron/from/:id',
+router.post('/api/mapping_project/remove_introns/from/:id',
 userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
   const user = ctx.state.user;
   const {id} = ctx.params;
+  const {intronTypes} = ctx.request.body;
   const clientToken = ctx.cookies.get('token');
-  ctx.body = await removeIntron(user, id, clientToken);
-  console.log(ctx.body);
+  ctx.body = await removeIntron(user, id, intronTypes, clientToken);
+  // console.log(ctx.body);
 });
 
 // router.get('/api/admin/clearIsolatedParts', clearIsolatedParts);

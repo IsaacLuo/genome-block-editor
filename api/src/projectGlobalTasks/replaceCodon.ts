@@ -5,7 +5,10 @@ import axios from 'axios';
 import FormData from 'form-data';
 import conf from '../conf.json';
 
-export const removeIntron = async (user:IUserEssential, _id:string|mongoose.Types.ObjectId, clientToken:string) => {
+export const replaceCodon = async (user:IUserEssential, _id:string|mongoose.Types.ObjectId, rules:string, clientToken:string) => {
+  // const projectObj = await Project.findById(_id).exec();
+  // const project = await projectObj.toObject();
+
   const gffJson = await projectToGFFJSON(_id);
   // call webexe
   // uploading file
@@ -22,10 +25,11 @@ export const removeIntron = async (user:IUserEssential, _id:string|mongoose.Type
       });
     const gffJsonFilePath = result.data.filePath;
     // call webexe again to start mission
-    const result2 = await axios.post(`${conf.webexe.internalUrl}/api/task/remove_intron`,
+    const result2 = await axios.post(`${conf.webexe.internalUrl}/api/task/replace_codons`,
     {
       params: {
         srcFileName:[gffJsonFilePath],
+        rules,
       },
     },
     {

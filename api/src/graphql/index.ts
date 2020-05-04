@@ -175,7 +175,7 @@ export function useApolloServer(app:any) {
         }
         cacheFileName+='.'
         cacheFileName+=result.ctype
-        console.log(cacheFileName)
+        // console.log(cacheFileName)
         if(await fs_exists(cacheFileName)) {
           console.log('cache file exists')
           return JSON.parse(await fs_readFile(cacheFileName));
@@ -210,7 +210,7 @@ export function useApolloServer(app:any) {
             select:'name',
           })
           .exec();
-        console.log(result);
+        // console.log(result);
         // console.log((result as any)[0].projects[0]);
         if (result[0].name === 'Project Files') {
           const list = result[0];
@@ -248,7 +248,7 @@ export function useApolloServer(app:any) {
         if (partObj.createdAt) partObj.createdAt = partObj.createdAt.toJSON();
         if (partObj.updatedAt) partObj.updatedAt = partObj.updatedAt.toJSON();
 
-        console.log(partObj.updatedAt);
+        // console.log(partObj.updatedAt);
         return partObj;
       },
 
@@ -256,8 +256,7 @@ export function useApolloServer(app:any) {
     },
     Mutation: {
       saveTestObject: (parent:any, args:any, context: any) => {
-        const {_id} = args;
-        console.log(_id);
+        // const {_id} = args;
         return {code:200, success:true, message:'OK'}
       },
       saveProject: async (parent:any, args:any, context: any) => {

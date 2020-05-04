@@ -186,7 +186,7 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
     case 'SHOW_REMOVE_INTRON_DIALOG': {
       return {...state, removeIntronDialogVisible: true};
     }
-    case 'SHOW_REMOVE_INTRON_DIALOG': {
+    case 'HIDE_REMOVE_INTRON_DIALOG': {
       return {...state, removeIntronDialogVisible: false};
     }
     case 'HIDE_ALL_DIALOG':
