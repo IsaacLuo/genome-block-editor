@@ -70,6 +70,7 @@ const DEFAULT_COMPONENT_VISIBLE_STATE:IComponentVisibleState = {
   replaceCodonDialogVisible: false,
   partDetailDialogVisible: false,
   insertFeatureDialogVisible: false,
+  removeIntronDialogVisible: false,
 }
 
 const DEFAULT_HISTORY_STATE:IHistoryState = {
@@ -181,6 +182,12 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
     }
     case 'HIDE_INSERT_FEATURE_DIALOG': {
       return {...state, insertFeatureDialogVisible: false};
+    }
+    case 'SHOW_REMOVE_INTRON_DIALOG': {
+      return {...state, removeIntronDialogVisible: true};
+    }
+    case 'SHOW_REMOVE_INTRON_DIALOG': {
+      return {...state, removeIntronDialogVisible: false};
     }
     case 'HIDE_ALL_DIALOG':
       return DEFAULT_COMPONENT_VISIBLE_STATE;

@@ -18,6 +18,7 @@ import InsertFeatureDlg from 'Components/dialogs/InsertFeatureDlg';
 import DebugPanel from 'Components/DebugPanel';
 import GenomeOperationMenu from 'Components/GenomeOperationMenu';
 import { Collapse } from 'antd';
+import RemoveIntronDlg from 'Components/dialogs/RemoveIntronDlg';
 
 const ProjectFunctions: React.FC = (props:any) => {
   const {projectId} = useMappedState((state:IStoreState)=>({
@@ -35,9 +36,9 @@ const ProjectFunctions: React.FC = (props:any) => {
       if (!projectId && pathId) {
         // id doesn't match, fetch project again
         dispatch({type:LOAD_SOURCE_FILE_BY_PROJECT_ID, data:pathId});
-      } else if (projectId) {
-        history.replace(`/genome_functions/${projectId}`, {projectId});
       }
+  } else if (projectId) {
+    history.replace(`/genome_functions/${projectId}`, {projectId});
   }
 
   },[projectId])
@@ -64,7 +65,8 @@ const ProjectFunctions: React.FC = (props:any) => {
         <GenomeBrowserForHistory/>
         <ReplaceCodonDlg/>
         <InsertFeatureDlg/>
-        
+        <RemoveIntronDlg/>
+
         <GenomeBrowserTooltip/>
 
         <PartDetailDlg/>

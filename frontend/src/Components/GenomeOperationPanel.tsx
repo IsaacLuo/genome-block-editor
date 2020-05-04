@@ -88,6 +88,13 @@ const GenomeOperationPanel: React.FC = () => {
         dispatch({type:'SHOW_INSERT_FEATURE_DIALOG'})
       }
     },
+    {
+      name: 'remove intron',
+      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),
+      onClick: ()=>{
+        dispatch({type:'SHOW_REMOVE_INTRON_DIALOG'})
+      }
+    },
 
   ]
 

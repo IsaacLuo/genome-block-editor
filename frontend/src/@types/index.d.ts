@@ -89,6 +89,7 @@ declare interface IComponentVisibleState {
   replaceCodonDialogVisible: boolean;
   partDetailDialogVisible: boolean;
   insertFeatureDialogVisible: boolean,
+  removeIntronDialogVisible: boolean,
 }
 
 declare interface IGenomBrowserState {
