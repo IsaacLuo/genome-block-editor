@@ -28,6 +28,10 @@ const ScrollBlock = styled.div`
     max-width:100%;
 `
 
+const UnselectaleText = styled.text`
+    user-select: none;
+`
+
 interface IProps {
   sourceFile: ISourceFile|undefined,
   zoomLevel: number,
@@ -37,6 +41,10 @@ interface IProps {
   windowWidth: number,
   rulerStep: number,
   highLightedParts?: Set<string>,
+  
+  selectionStart?: number,
+  selectionEnd?: number,
+
 }
 
 const GenomeBrowserCore = (
@@ -49,6 +57,8 @@ const GenomeBrowserCore = (
     windowWidth,
     rulerStep,
     highLightedParts,
+    selectionStart,
+    selectionEnd,
   }:IProps
 ) => {
   const dispatch = useDispatch();
@@ -162,18 +172,26 @@ const GenomeBrowserCore = (
   for (let i=viewWindowStart;i<sourceFile.len && i<viewWindowEnd;i+=rulerStep) {
     const zi = zoom(i);
     rulerLines.push(<line key={i} x1={zi} y1="0" x2={zi} y2={svgHeight} stroke="#aaa"/>)
-    rulerLines.push(<text key={`${i}_t`} x={zi} y={0} alignmentBaseline="hanging">{i/1000}k</text>)
+    rulerLines.push(<UnselectaleText key={`${i}_t`} x={zi} y={0} alignmentBaseline="hanging">{i/1000}k</UnselectaleText>)
   }
 
   const zi = zoom(sourceFile.len);
   rulerLines.push(<line key={sourceFile.len} x1={zi} y1="0" x2={zi} y2={svgHeight} stroke="#aaa"/>)
-  rulerLines.push(<text key={`${sourceFile.len}_t`} x={zi} y={20} alignmentBaseline="hanging">{sourceFile.len/1000}k</text>)
+  rulerLines.push(<UnselectaleText key={`${sourceFile.len}_t`} x={zi} y={20} alignmentBaseline="hanging">{sourceFile.len/1000}k</UnselectaleText>)
 
 
   let scollDeltaY = 0;
 
   const sourceFileLen = sourceFile.len;
   const maxAllowedScollPos = sourceFileLen+100*zoomLevel;
+
+  const selectionRect = selectionStart && selectionEnd && <rect
+    x={zoom(selectionStart)}
+    y={0}
+    width={zoom(selectionEnd-selectionStart)}
+    height={svgHeight}
+    fill='#2343ff40'
+  />
   
   return <Spin spinning={loading}>
     <div style={{height:40}}>
@@ -216,6 +234,9 @@ const GenomeBrowserCore = (
     >
       <g transform={`translate(${-zoom(viewWindowStart)},0)`}>
       <g>
+        {selectionRect}
+      </g>
+      <g>
         {rulerLines}
       </g>
       <g transform="translate(0, 20)">
@@ -248,6 +269,10 @@ const GenomeBrowserCore = (
                 }}
                 specialEffect={{highLighted,}}
                 data-memo={`${v.start} ${v.end} ${v.end-v.start}`}
+                onClick={(event)=>{
+                  const {start, end, pid} = v;
+                  dispatch({type: 'GB_SELECT_ANNOTATION_PART', data: {pid, start, end}});
+                }}
                 onMouseMove={(event)=>{
                   if (event.buttons === 0) {
                     setToolTipPos(event.pageX+20, event.pageY+20, <div>

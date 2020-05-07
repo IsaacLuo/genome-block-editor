@@ -102,6 +102,9 @@ declare interface IGenomBrowserState {
   toolTipPos: {x:number, y:number, text:any};
   loading: boolean;
   rulerStep: number;
+  selectionStart: number;
+  selectionEnd: number;
+  cursorLocation: number;
 }
 
 declare interface IFileListState {
@@ -169,6 +172,8 @@ interface IHistoryState {
   loading: boolean;
   historyDiffParts: {diffSetHistory:Set<string>, diffSetSource:Set<string>};
   focusedPartId?: string;
+  locationStartOffset?: number;
+  locationEndOffset?: number;
 }
 
 interface IPartDetailDialogState {

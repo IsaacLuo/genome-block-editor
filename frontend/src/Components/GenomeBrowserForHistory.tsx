@@ -31,6 +31,11 @@ const GenomeBrowserForHistory = () => {
     windowWidth,
     rulerStep,
     highLightedParts,
+
+    locationStartOffset,
+    locationEndOffset,
+    selectionStart,
+    selectionEnd,
     } = useMappedState((state:IStoreState)=>({
     projectId: (state.sourceFile && state.sourceFile.projectId),
     historyBrowserVisible: state.componentVisible.historyBrowserVisible,
@@ -48,6 +53,11 @@ const GenomeBrowserForHistory = () => {
     windowWidth: state.genomeBrowser.windowWidth,
     rulerStep: state.genomeBrowser.rulerStep,
     highLightedParts: state.history.historyDiffParts.diffSetHistory,
+
+    locationStartOffset: state.history.locationStartOffset,
+    locationEndOffset: state.history.locationEndOffset,
+    selectionStart: state.genomeBrowser.selectionStart,
+    selectionEnd: state.genomeBrowser.selectionEnd,
   }));
 
   const dispatch = useDispatch();
@@ -96,11 +106,13 @@ const GenomeBrowserForHistory = () => {
           sourceFile = {sourceFile}
           zoomLevel = {zoomLevel}
           loading = {loading}
-          viewWindowStart = {viewWindowStart}
-          viewWindowEnd = {viewWindowEnd}
+          viewWindowStart = {viewWindowStart + (locationStartOffset || 0)}
+          viewWindowEnd = {viewWindowEnd + (locationStartOffset || 0)}
           windowWidth = {windowWidth}
           rulerStep = {rulerStep}
           highLightedParts = {highLightedParts}
+          selectionStart = {selectionStart + (locationStartOffset || 0)}
+          selectionEnd = {selectionEnd + (locationEndOffset || 0)}
         />
         </div>
       </React.Fragment>

@@ -15,16 +15,19 @@ const DEFAULT_APP_STATE:IAppState = {
 };
 
 const DEFAULT_GENOME_BROWSER_STATE:IGenomBrowserState ={
-      zoomLevel: 64,
-      windowWidth: 1024,
-      viewWindowStart:0,
-      viewWindowEnd: 1024*128,
-      bufferedWindowStart:0,
-      bufferedWindowEnd:0,
-      toolTipPos: {x:0,y:0, text:''},
-      loading: false,
-      rulerStep: 1000,
-    }
+  zoomLevel: 64,
+  windowWidth: 1024,
+  viewWindowStart:0,
+  viewWindowEnd: 1024*128,
+  bufferedWindowStart:0,
+  bufferedWindowEnd:0,
+  toolTipPos: {x:0,y:0, text:''},
+  loading: false,
+  rulerStep: 1000,
+  selectionStart: 500,
+  selectionEnd: 5000,
+  cursorLocation: 0,
+}
 
 const DEFAULT_FILE_EXPLORER_STATE:IFileExplorerState = {
   fileLists: [{_id:'000000000000000000000000'}],
@@ -305,6 +308,29 @@ export const genomeBrowserReducer = (state:IGenomBrowserState, action:IAction):I
     case 'SET_TOOL_TIPS' : {
       return {...state, toolTipPos:action.data};
     }
+    case 'SET_GB_SELECTION_START': {
+      if (typeof(action.data) === 'number') {
+        if (action.data > state.selectionEnd) {
+          action.data = state.selectionEnd;
+        }
+        return {...state, selectionStart: action.data}
+      }
+    }
+    case 'SET_GB_SELECTION_END': {
+      if (typeof(action.data) === 'number') {
+        if (action.data < state.selectionStart) {
+          action.data = state.selectionStart;
+        }
+        return {...state, selectionEnd: action.data}
+      }
+    }
+    case 'GB_SELECT_ANNOTATION_PART': {
+      return {
+        ...state, 
+        selectionStart: action.data.start, 
+        selectionEnd: action.data.end
+      }
+    }
     default:
       return state;
   }
@@ -431,6 +457,27 @@ export const historyReducer = (state:IHistoryState, action:IAction) => {
       return {...state, historyDiffParts: action.data}
     case 'SHOW_HIDE_HISTORY_VERSIONS':
       return DEFAULT_HISTORY_STATE;
+    case 'SET_GB_SELECTION_START':
+    case 'SET_GB_SELECTION_START':
+      return {...state, locationStartOffset: 0, locationEndOffset: 0, focusedPartId: null}
+    case 'GB_SELECT_ANNOTATION_PART': {
+      const {start, end, pid} = action.data;
+      let locationStartOffset = 0;
+      let locationEndOffset = 0;
+      if (state.historyFile) {
+        const part = state.historyFile.parts.find(v=>v.pid === pid)
+        if (part) {
+          locationStartOffset = part.start - start;
+          locationEndOffset = part.end - end;
+        }
+      }
+      return {
+        ...state,
+        focusedPartId: action.data.pid,
+        locationStartOffset,
+        locationEndOffset,
+      }
+    }
   }
   return state;
 }

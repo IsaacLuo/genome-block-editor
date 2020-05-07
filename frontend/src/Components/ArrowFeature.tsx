@@ -1,5 +1,10 @@
 import * as React from 'react'
 import { useDispatch } from "redux-react-hook";
+import styled from 'styled-components';
+
+const UnselectaleText = styled.text`
+    user-select: none;
+`
 
 export interface IProps {
   x:number;
@@ -13,9 +18,10 @@ export interface IProps {
   specialEffect: any;
   onMouseMove?: (event: React.MouseEvent<any, MouseEvent>) => void;
   onMouseLeave?: (event: React.MouseEvent<any, MouseEvent>) => void;
+  onClick?: (event: React.MouseEvent<any, MouseEvent>) => void;
 }
 
-const ArrowFeature = ({x,y,blockId, annotationPart, width, height, style, shape, onMouseMove, onMouseLeave, specialEffect}:IProps) => {
+const ArrowFeature = ({x,y,blockId, annotationPart, width, height, style, shape, onMouseMove, onMouseLeave, specialEffect, onClick}:IProps) => {
   const dispatch = useDispatch();
   let block;
   const maxHeadLen = height / 3;
@@ -68,6 +74,7 @@ const ArrowFeature = ({x,y,blockId, annotationPart, width, height, style, shape,
   }
   return (
     <g
+      onClick={(e)=>onClick && onClick(e) }
       onDoubleClick={()=>dispatch({type:'ADD_NEW_BLOCK', data: annotationPart})}
       onContextMenu={(e)=>{
         dispatch({type:'SHOW_PART_DETAIL_DIALOG', data: annotationPart._id})
@@ -77,7 +84,7 @@ const ArrowFeature = ({x,y,blockId, annotationPart, width, height, style, shape,
       {block}
       {annotationPart.name && width > annotationPart.name.length*8 && 
         annotationPart.name !== 'unknown' && 
-        <text 
+        <UnselectaleText 
           x={x+textOffset} 
           y={y+height/2} 
           alignmentBaseline="middle"
@@ -85,7 +92,7 @@ const ArrowFeature = ({x,y,blockId, annotationPart, width, height, style, shape,
           fontSize={Math.min(Math.floor(height), 12)}
         >
           {annotationPart.name}
-        </text>
+        </UnselectaleText>
       }
     </g>
   );
