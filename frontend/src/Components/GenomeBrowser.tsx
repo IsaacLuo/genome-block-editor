@@ -51,8 +51,8 @@ const GenomeBrowser = () => {
         selectionEnd = {selectionEnd}
       />
       {sourceFile && <div>
-        from:<InputNumber min={1} max={sourceFile.len} value={selectionStart+1} onChange={(val)=>val && dispatch({type:'SET_GB_SELECTION_START', data:val-1})} />
-        to:<InputNumber min={1} max={sourceFile.len} value={selectionEnd+1} onChange={(val)=>val && dispatch({type:'SET_GB_SELECTION_END', data:val-1})} />
+        from:<InputNumber min={1} max={sourceFile.len} value={selectionStart === 0 ? undefined : selectionStart+1} onChange={(val)=>val && dispatch({type:'SET_GB_SELECTION_START', data:val-1})} />
+        to:<InputNumber min={1} max={sourceFile.len} value={selectionEnd === 0 ? undefined:  selectionEnd} onChange={(val)=>val && dispatch({type:'SET_GB_SELECTION_END', data:val})} />
       </div>}
     </React.Fragment>
   )

@@ -5,7 +5,7 @@ import koa from 'koa';
 import axios from 'axios';
 import conf from '../conf.json';
 import FormData from 'form-data';
-import { projectToGFFJSON } from './projectImportExport';
+import { projectToGFFJSON, projectToGFFJSONPartial } from './projectImportExport';
 type Ctx = koa.ParameterizedContext<ICustomState>;
 type Next = ()=>Promise<any>;
 
@@ -16,30 +16,16 @@ export default (router) => {
   async (ctx:Ctx, next:Next)=> {
     const _id = ctx.params.id;
     const clientToken = ctx.cookies.get('token');
-    const {promoterLength, terminatorLength} = ctx.request.body;
+    const {promoterLength, terminatorLength, selectedRange} = ctx.request.body;
     let startTime = Date.now();
-    console.log('query project');
+    console.log('query project', selectedRange);
     // first get project genes and generate gff json
-    // const project = await Project
-    //   .findById(_id)
-    //   .populate({
-    //     path:'parts',
-    //     match: {featureType: 'gene'},
-    //   })
-    //   .exec();
-    // const gffJson = {
-    //   fileType: "cailab_gff_json",
-    //   version: "0.1",
-    //   seqInfos: {
-    //     [project.name]: {length: project.len}
-    //   },
-    //   records: project.toObject().parts.map(part=>({...part, seqName: project.name})),
-    // }
-    // console.log('project found', project.len, Date.now() - startTime);
-    // ctx.body = gffJson;
-
-    const gffJson = await projectToGFFJSON(_id);
-
+    let gffJson;
+    if (selectedRange) {
+      gffJson = await projectToGFFJSONPartial(_id, selectedRange);
+    } else {
+      gffJson = await projectToGFFJSON(_id);
+    }
     // call webexe
     // uploading file
     try {
@@ -63,6 +49,13 @@ export default (router) => {
         promoterLength,
         terminatorLength,
       },
+      comments: {
+        taskName: 'generate_promoter_terminator',
+        _id,
+        promoterLength,
+        terminatorLength,
+        selectedRange,
+      }
     },
     {
       headers: {

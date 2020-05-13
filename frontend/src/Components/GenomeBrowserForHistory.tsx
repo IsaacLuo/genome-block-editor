@@ -111,8 +111,8 @@ const GenomeBrowserForHistory = () => {
           windowWidth = {windowWidth}
           rulerStep = {rulerStep}
           highLightedParts = {highLightedParts}
-          selectionStart = {selectionStart + (locationStartOffset || 0)}
-          selectionEnd = {selectionEnd + (locationEndOffset || 0)}
+          selectionStart = {selectionStart && (selectionStart + (locationStartOffset || 0))}
+          selectionEnd = {selectionEnd && (selectionEnd + (locationEndOffset || 0))}
         />
         </div>
       </React.Fragment>

@@ -182,6 +182,7 @@ export async function prepareTestProject(obj?:any) {
   if (sequence) {
     sequenceRef = await mock_generateSequenceRef(sequence, 0, len, 0);
   }
+  try {
   const project = await Project.create({
     projectId,
     ctype,
@@ -198,6 +199,10 @@ export async function prepareTestProject(obj?:any) {
     len,
     sequenceRef,
   });
-
   return project;
+} catch (err) {
+  console.error(err);
+}
+
+  
 }

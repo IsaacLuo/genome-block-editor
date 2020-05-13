@@ -5,6 +5,12 @@
 		},
 		{
 			"path": "api"
+		},
+		{
+			"path": "..\\webexe\\api"
+		},
+		{
+			"path": "..\\webexe\\api\\scripts"
 		}
 	],
 	"settings": {}

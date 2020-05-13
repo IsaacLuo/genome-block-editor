@@ -35,9 +35,14 @@ const ProjectFunctions: React.FC = (props:any) => {
       const pathId = regx[1];
       if (!projectId && pathId) {
         // id doesn't match, fetch project again
+        console.log('reload project ', pathId);
         dispatch({type:LOAD_SOURCE_FILE_BY_PROJECT_ID, data:pathId});
+      } else if (projectId) {
+        console.log('overwrite path ', projectId);
+        history.replace(`/genome_functions/${projectId}`, {projectId});
       }
   } else if (projectId) {
+    console.log('overwrite path ', projectId);
     history.replace(`/genome_functions/${projectId}`, {projectId});
   }
 

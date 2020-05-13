@@ -167,6 +167,13 @@ const UserBar = () => {
         dispatch({type:'SHOW_INSERT_FEATURE_DIALOG'})
       }
     },
+    {
+      name: 'remove intron',
+      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),
+      onClick: ()=>{
+        dispatch({type:'SHOW_REMOVE_INTRON_DIALOG'})
+      }
+    },
   ]
 
   const filteredProjectOperationChoice = projectOperationChoice.filter(v=>v.visible(state));
@@ -175,7 +182,7 @@ const UserBar = () => {
     {
       filteredProjectOperationChoice
         .map((operation, i)=> (
-          <Menu.Item onClick={operation.onClick}>
+          <Menu.Item key={i} onClick={operation.onClick}>
             {operation.name}
           </Menu.Item>
         ))
@@ -188,7 +195,7 @@ const UserBar = () => {
     <Menu.SubMenu title="Global Operations" disabled= {filteredGlobalOperationChoice.length === 0}>
       {filteredGlobalOperationChoice
       .map((operation, i)=> (
-        <Menu.Item onClick={operation.onClick}>
+        <Menu.Item key={i} onClick={operation.onClick}>
           {operation.name}
         </Menu.Item>
       ))}

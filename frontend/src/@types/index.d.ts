@@ -1,6 +1,7 @@
 declare interface IAction {
   type: string;
   data: any;
+  payload?: any;
 }
 
 declare interface IBlock {

@@ -26,7 +26,7 @@ import fs from 'fs';
 import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProjectIdStr, saveProjectIdStr } from './redisCache';
 import workerTs from './workerTs';
 import { forkProject, hideProject, revertProject } from './projectGlobalTasks/project';
-import { projectToGFFJSON, updateProjectByGFFJSON } from './projectGlobalTasks/projectImportExport';
+import { projectToGFFJSON, updateProjectByGFFJSON, updateProjectByGFFJSONPartial } from './projectGlobalTasks/projectImportExport';
 import { replaceCodon } from './projectGlobalTasks/replaceCodon';
 import { removeIntron } from './projectGlobalTasks/removeIntron';
 
@@ -278,7 +278,7 @@ async (ctx:Ctx, next:Next)=> {
   if (!project) {
     ctx.throw(404);
   }
-  const fileUrl = ctx.request.body.fileUrl;
+  const {fileUrl, partialUpdate, range} = ctx.request.body;
   // get file from webexe server
   const clientToken = ctx.cookies.get('token');
   console.log(`${conf.webexe.internalUrl}/api/resultFile/${fileUrl.url}/as/${fileUrl.name}`);
@@ -289,8 +289,13 @@ async (ctx:Ctx, next:Next)=> {
     }
   });
   const gffObj = result.data;
-  const newItem = await updateProjectByGFFJSON(project, gffObj);
-  
+
+  let newItem;
+  if (partialUpdate) {
+    newItem = await updateProjectByGFFJSONPartial(project, gffObj, range);
+  } else {
+    newItem = await updateProjectByGFFJSON(project, gffObj);
+  }
   ctx.body={message:'OK', newProjectId:newItem._id}
 })
 

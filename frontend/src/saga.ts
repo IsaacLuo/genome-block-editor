@@ -111,42 +111,49 @@ function monitorSocket(socket:SocketIOClient.Socket) {
   });
 }
 
-function generateSocketAction(serverAction:IAction):IAction {
+function generateSocketAction(serverAction:IAction, extraPayload?:any):IAction {
   switch (serverAction.type) {
     case 'message':
         return {
           type: 'SERVER_MESSAGE',
           data: serverAction.data,
+          payload: extraPayload,
         };
     case 'progress':
         return{
           type: 'PROGRESS',
           data: serverAction.data,
+          payload: extraPayload,
         };
     case 'state':
       return {
         type: 'SET_PROCESS_STATE',
         data: serverAction.data,
+        payload: extraPayload,
       };
     case 'result':
       return {
         type: 'SERVER_RESULT',
         data: serverAction.data,
+        payload: extraPayload,
       };
     case 'stderr':
       return {
         type: 'SERVER_LOG',
-        data: serverAction.data
+        data: serverAction.data,
+        payload: extraPayload,
       };
     case 'abort':
       return {
         type: 'ABORT_TASK',
         data: serverAction.data,
+        payload: extraPayload,
       };
     default:
       return {
         type: 'UNKOWN_SOCKET_ACTION',
         data: serverAction.data,
+        payload: extraPayload,
       }
   }
 }
@@ -175,8 +182,16 @@ function* handleServerResult(action:IAction) {
   // got server results send to backend
   const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
   const resultFileUrls = action.data.files;
+  let _id;
+  let selectedRange; 
+
+  if (action.payload) {
+    _id = action.payload._id;
+    selectedRange = action.payload.selectedRange;
+  }
   if (resultFileUrls[0]) {
-    const result  = yield call(axios.put, `${conf.backendURL}/api/project/${id}/fromFileUrl`, {fileUrl:resultFileUrls[0]}, {withCredentials: true});
+    
+    const result  = yield call(axios.put, `${conf.backendURL}/api/project/${id}/fromFileUrl`, {fileUrl:resultFileUrls[0], partialUpdate:!!selectedRange, range:selectedRange}, {withCredentials: true});
     yield put({type:'LOAD_SOURCE_FILE', data: result.data.newProjectId});
     yield put({type: 'GOTO_AND_FETCH_PROJECT_FILES'});
   }
@@ -188,13 +203,14 @@ export function* createPromoterTerminator(aciton:IAction) {
   try {
     console.log('createPromoterTerminator')
     const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
-    const {promoterLength, terminatorLength} = aciton.data;
+    const {promoterLength, terminatorLength, selectedRange} = aciton.data;
     const result = yield call(
       axios.put, 
       `${conf.backendURL}/api/mapping_project/gen_pro_ter/from/${id}`, 
       {
         promoterLength, 
         terminatorLength,
+        selectedRange,
       }, {withCredentials: true});
     const {taskInfo} = result.data;
     console.log(taskInfo);
@@ -211,10 +227,14 @@ export function* createPromoterTerminator(aciton:IAction) {
       const serverAction = yield take(channel)
       // console.debug('messageType', serverAction.type)
       console.log(serverAction);
-      const reduxAction = generateSocketAction(serverAction);
-      yield put(reduxAction);
+      
       if (serverAction.type === 'result') {
+        const reduxAction = generateSocketAction(serverAction, {_id:id, selectedRange});
+        yield put(reduxAction);
         break;
+      } else {
+        const reduxAction = generateSocketAction(serverAction);
+        yield put(reduxAction);
       }
     }
     

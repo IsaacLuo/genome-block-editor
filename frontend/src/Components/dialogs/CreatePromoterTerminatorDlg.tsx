@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {useDispatch, useMappedState} from 'redux-react-hook';
-import { Modal, InputNumber, Progress, Button} from 'antd';
-import styled from 'styled-components'
+import { Modal, InputNumber, Progress, Button, Checkbox, Form} from 'antd';
+import styled from 'styled-components';
 
 const LogList = styled.div`
   height: 150px;
@@ -17,20 +17,28 @@ const CreatePromoterTermiatorDlg = () => {
     message,
     progress,
     outputLog,
+    selectionStart,
+    selectionEnd,
   } = useMappedState((state:IStoreState)=>({
     showDialog: state.componentVisible.generatePromoterTerminatorDialogVisible,
     message: state.generalTask.message,
     progress: state.generalTask.progress,
     outputLog: state.generalTask.outputLog,
+    selectionStart: state.genomeBrowser.selectionStart,
+    selectionEnd: state.genomeBrowser.selectionEnd,
   }));
   const [promoterLength, setPromoterLen] = useState<number>(500);
   const [terminatorLength, setTerminatorLen] = useState<number>(200);
-  const [percentage, setPercentage] = useState<number>(0);
+  const [selectedSegmentOnly, setSelectedSegmentOnly] = useState<boolean>(false);
   const [confirming, setConfirming] = useState<boolean>(false);
 
+  const selectionValid = selectionStart !== 0 && selectionEnd !== 0 && selectionEnd > selectionStart;
+
   useEffect(()=>{
+    console.log('showDialog', showDialog);
     if (!showDialog) {
       setConfirming(false);
+      setSelectedSegmentOnly(false);
     }
   }, [showDialog])
 
@@ -40,7 +48,12 @@ const CreatePromoterTermiatorDlg = () => {
     visible={showDialog}
     onOk={()=>{
       setConfirming(true);
-      dispatch({type:'CREATE_PROMOTER_TERMINATOR', data:{promoterLength, terminatorLength}})
+      dispatch({
+        type:'CREATE_PROMOTER_TERMINATOR', 
+        data:{
+          promoterLength, 
+          terminatorLength, 
+          selectedRange: (selectionValid && selectedSegmentOnly ? {start: selectionStart, end: selectionEnd} : undefined)}})
     }}
     confirmLoading={confirming}
     onCancel={()=>{
@@ -48,9 +61,33 @@ const CreatePromoterTermiatorDlg = () => {
       dispatch({type:'HIDE_CREATE_PROMOTER_TERMINATOR_DIALOG'})}
     }
   >
-    promoter length <InputNumber min={0} defaultValue={promoterLength} onChange={(value)=>setPromoterLen(value?value:promoterLength)} />
-    terminator length <InputNumber min={0} defaultValue={terminatorLength} onChange={(value)=>setTerminatorLen(value?value:terminatorLength)} />
+    <Form
+      labelCol={{span:8}}
+      wrapperCol={{span:16}}
+      name="basic"
+    >
+      <Form.Item
+        label="promoter length"
+        rules={[{ required: true }]}
+      >
+        <InputNumber min={0} defaultValue={promoterLength} onChange={(value)=>setPromoterLen(value?value:promoterLength)} />
+      </Form.Item>
+
+      <Form.Item
+        label="terminator length"
+        rules={[{ required: true }]}
+      >
+        <InputNumber min={0} defaultValue={terminatorLength} onChange={(value)=>setTerminatorLen(value?value:terminatorLength)} />
+      </Form.Item>
+
+    </Form>
     <p>create promoter and terminator annotations besides each gene</p>
+    {
+      selectionStart !== 0 &&
+      selectionEnd !== 0 &&
+      selectionEnd > selectionStart && 
+      <Checkbox checked={selectedSegmentOnly} onChange={(e)=>{setSelectedSegmentOnly(e.target.checked)}}>for selected segment only</Checkbox>
+    }
     <Progress percent={progress} />
     <div>{message}</div>
   {/* <LogList>{outputLog}</LogList> */}

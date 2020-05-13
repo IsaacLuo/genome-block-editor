@@ -24,8 +24,8 @@ const DEFAULT_GENOME_BROWSER_STATE:IGenomBrowserState ={
   toolTipPos: {x:0,y:0, text:''},
   loading: false,
   rulerStep: 1000,
-  selectionStart: 500,
-  selectionEnd: 5000,
+  selectionStart: 800,
+  selectionEnd: 2200,
   cursorLocation: 0,
 }
 
