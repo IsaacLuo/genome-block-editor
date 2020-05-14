@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {useDispatch, useMappedState} from 'redux-react-hook';
-import { Modal, Input, Progress, Button, Dropdown, Menu, InputNumber, Form, Radio} from 'antd';
+import { Modal, Input, Progress, Button, Dropdown, Menu, InputNumber, Form, Radio, Checkbox} from 'antd';
 import styled from 'styled-components'
 import { UserOutlined, DownOutlined } from '@ant-design/icons';
 
@@ -16,14 +16,21 @@ const InsertFeatureDlg = () => {
     progress,
     outputLog,
     sourceFile,
+    selectionStart,
+    selectionEnd,
+    selectionEnabled,
   } = useMappedState((state:IStoreState)=>({
     showDialog: state.componentVisible.insertFeatureDialogVisible,
     message: state.generalTask.message,
     progress: state.generalTask.progress,
     outputLog: state.generalTask.outputLog,
     sourceFile: state.sourceFile,
+    selectionStart: state.genomeBrowser.selectionStart,
+    selectionEnd: state.genomeBrowser.selectionEnd,
+    selectionEnabled: state.genomeBrowser.selectionEnabled,
   }));
   const [confirming, setConfirming] = useState<boolean>(false);
+  const [selectedSegmentOnly, setSelectedSegmentOnly] = useState<boolean>(selectionEnabled);
   const dispatch = useDispatch();
 
   type SeqDictKey = 'loxP'|'Rox'|'Vlox';
@@ -93,6 +100,7 @@ const InsertFeatureDlg = () => {
         offset,
         sequenceType: seqName,
         sequence: seqDict[seqName as SeqDictKey],
+        selectedRange: (selectionEnabled && selectedSegmentOnly ? {start: selectionStart, end: selectionEnd} : undefined),
       }});
     }}
     confirmLoading={confirming}
@@ -144,9 +152,12 @@ const InsertFeatureDlg = () => {
         </Dropdown>
       </Form.Item>
     </Form>
+    {
+      selectionEnabled &&
+      <Checkbox checked={selectedSegmentOnly} onChange={(e)=>{setSelectedSegmentOnly(e.target.checked)}}>for selected segment only</Checkbox>
+    }
     <Progress percent={progress} />
     <div>{message}</div>
-    {/* <Button type="primary" onClick={()=>dispatch({type:'REMOVE_CREATED_FEATURES'})}>start</Button> */}
   </Modal>
 }
 

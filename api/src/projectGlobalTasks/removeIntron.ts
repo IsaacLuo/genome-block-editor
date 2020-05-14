@@ -1,12 +1,17 @@
 import mongoose from 'mongoose';
 import {Project} from '../models';
-import {projectToGFFJSON} from './projectImportExport'
+import {projectToGFFJSON, projectToGFFJSONPartial} from './projectImportExport'
 import axios from 'axios';
 import FormData from 'form-data';
 import conf from '../conf.json';
 
-export const removeIntron = async (user:IUserEssential, _id:string|mongoose.Types.ObjectId, intronTypes: string[], clientToken:string) => {
-  const gffJson = await projectToGFFJSON(_id);
+export const removeIntron = async (user:IUserEssential, _id:string|mongoose.Types.ObjectId, intronTypes: string[], selectedRange, clientToken:string) => {
+  let gffJson;
+  if (selectedRange) {
+    gffJson = await projectToGFFJSONPartial(_id, selectedRange);
+  } else {
+    gffJson = await projectToGFFJSON(_id);
+  }
   // call webexe
   // uploading file
   try {
@@ -27,6 +32,11 @@ export const removeIntron = async (user:IUserEssential, _id:string|mongoose.Type
       params: {
         srcFileName:[gffJsonFilePath],
         intronTypes: intronTypes.join(' '),
+      },
+      comments: {
+        taskName: 'replace_codons',
+        _id,
+        selectedRange,
       },
     },
     {

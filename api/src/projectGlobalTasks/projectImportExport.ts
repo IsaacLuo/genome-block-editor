@@ -319,8 +319,32 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
       // the sequenceRef hasn't change, but I don't think it does a matter (for now)
     }
   }
+  
+  // if the length of gffJson = range, we don't change the parts on the right
+  if(gffJson.seqInfo[gffJson.defaultChr].length === range.end - range.start) {
+    newParts = newParts.concat(partsOnRight.map(v=>v._id));
+  } else {
+    const offset =  gffJson.seqInfo[gffJson.defaultChr].length - (range.end - range.start);
+    // shift all parts on the right
+    newParts = newParts.concat(await Promise.all(partsOnRight.map(async (part)=>{
+      const partObj = part.toObject();
 
-  newParts = newParts.concat(partsOnRight.map(v=>v._id));
+      const newAnnotation = await AnnotationPart.create({
+        ...partObj,
+        _id:undefined,
+        start:part.start + offset,
+        end:part.end + offset,
+        history: [{_id: partObj._id, updatedAt: partObj.updatedAt, changelog: partObj.changelog}],
+        original:false,
+        sequenceRef: {fileName: projectSequenceRef.fileName, start: part.start + offset, end: part.end + offset, strand: part.strand},
+        built: true,
+        updatedAt: new Date(),
+        changelog: 'moved because ' + gffJson.__changelog,
+      });
+
+      return newAnnotation._id;
+    })))
+  }
 
   // create new project, save current one as history
   let newObj = project;

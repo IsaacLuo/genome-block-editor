@@ -19,6 +19,7 @@ const CreatePromoterTermiatorDlg = () => {
     outputLog,
     selectionStart,
     selectionEnd,
+    selectionEnabled,
   } = useMappedState((state:IStoreState)=>({
     showDialog: state.componentVisible.generatePromoterTerminatorDialogVisible,
     message: state.generalTask.message,
@@ -26,13 +27,14 @@ const CreatePromoterTermiatorDlg = () => {
     outputLog: state.generalTask.outputLog,
     selectionStart: state.genomeBrowser.selectionStart,
     selectionEnd: state.genomeBrowser.selectionEnd,
+    selectionEnabled: state.genomeBrowser.selectionEnabled,
   }));
   const [promoterLength, setPromoterLen] = useState<number>(500);
   const [terminatorLength, setTerminatorLen] = useState<number>(200);
-  const [selectedSegmentOnly, setSelectedSegmentOnly] = useState<boolean>(false);
+  const [selectedSegmentOnly, setSelectedSegmentOnly] = useState<boolean>(selectionEnabled);
   const [confirming, setConfirming] = useState<boolean>(false);
 
-  const selectionValid = selectionStart !== 0 && selectionEnd !== 0 && selectionEnd > selectionStart;
+  // const selectionValid = selectionStart !== 0 && selectionEnd !== 0 && selectionEnd > selectionStart;
 
   useEffect(()=>{
     console.log('showDialog', showDialog);
@@ -53,7 +55,7 @@ const CreatePromoterTermiatorDlg = () => {
         data:{
           promoterLength, 
           terminatorLength, 
-          selectedRange: (selectionValid && selectedSegmentOnly ? {start: selectionStart, end: selectionEnd} : undefined)}})
+          selectedRange: (selectionEnabled && selectedSegmentOnly ? {start: selectionStart, end: selectionEnd} : undefined)}})
     }}
     confirmLoading={confirming}
     onCancel={()=>{
@@ -83,9 +85,7 @@ const CreatePromoterTermiatorDlg = () => {
     </Form>
     <p>create promoter and terminator annotations besides each gene</p>
     {
-      selectionStart !== 0 &&
-      selectionEnd !== 0 &&
-      selectionEnd > selectionStart && 
+      selectionEnabled &&
       <Checkbox checked={selectedSegmentOnly} onChange={(e)=>{setSelectedSegmentOnly(e.target.checked)}}>for selected segment only</Checkbox>
     }
     <Progress percent={progress} />

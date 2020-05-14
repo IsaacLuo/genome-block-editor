@@ -26,6 +26,7 @@ const DEFAULT_GENOME_BROWSER_STATE:IGenomBrowserState ={
   rulerStep: 1000,
   selectionStart: 800,
   selectionEnd: 2200,
+  selectionEnabled: false,
   cursorLocation: 0,
 }
 
@@ -310,25 +311,30 @@ export const genomeBrowserReducer = (state:IGenomBrowserState, action:IAction):I
     }
     case 'SET_GB_SELECTION_START': {
       if (typeof(action.data) === 'number') {
-        if (action.data > state.selectionEnd) {
-          action.data = state.selectionEnd;
-        }
-        return {...state, selectionStart: action.data}
+        const selectionStart = action.data;
+        const selectionEnd = state.selectionEnd;
+        const selectionEnabled = selectionStart < selectionEnd;
+        return {...state, selectionStart, selectionEnabled}
       }
     }
     case 'SET_GB_SELECTION_END': {
       if (typeof(action.data) === 'number') {
-        if (action.data < state.selectionStart) {
-          action.data = state.selectionStart;
-        }
-        return {...state, selectionEnd: action.data}
+        const selectionEnd = action.data;
+        const selectionStart = state.selectionStart;
+        const selectionEnabled = selectionStart < selectionEnd;
+        return {...state, selectionEnd, selectionEnabled}
       }
+    }
+
+    case 'CLEAR_GB_SELECTION': {
+      return {...state, selectionEnabled: false}
     }
     case 'GB_SELECT_ANNOTATION_PART': {
       return {
         ...state, 
         selectionStart: action.data.start, 
-        selectionEnd: action.data.end
+        selectionEnd: action.data.end,
+        selectionEnabled: true,
       }
     }
     default:

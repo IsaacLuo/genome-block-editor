@@ -318,10 +318,10 @@ userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
   const user = ctx.state.user;
   const {id} = ctx.params;
-  const {rules} = ctx.request.body;
+  const {rules, selectedRange} = ctx.request.body;
   const clientToken = ctx.cookies.get('token');
   
-  ctx.body = await replaceCodon(user, id, rules, clientToken);
+  ctx.body = await replaceCodon(user, id, rules, selectedRange, clientToken);
   // console.log(ctx.body);
 });
 
@@ -330,10 +330,10 @@ userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
   const user = ctx.state.user;
   const {id} = ctx.params;
-  const {featureType, direct, offset, sequenceType, sequence} = ctx.request.body;
+  const {featureType, direct, offset, sequenceType, sequence, selectedRange} = ctx.request.body;
   const clientToken = ctx.cookies.get('token');
   
-  ctx.body = await insertPartsAfterFeatures(user, id, featureType, direct, offset, sequenceType, sequence, clientToken);
+  ctx.body = await insertPartsAfterFeatures(user, id, featureType, direct, offset, sequenceType, sequence, selectedRange, clientToken);
   // console.log(ctx.body);
 });
 
@@ -342,9 +342,9 @@ userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
   const user = ctx.state.user;
   const {id} = ctx.params;
-  const {intronTypes} = ctx.request.body;
+  const {intronTypes, selectedRange} = ctx.request.body;
   const clientToken = ctx.cookies.get('token');
-  ctx.body = await removeIntron(user, id, intronTypes, clientToken);
+  ctx.body = await removeIntron(user, id, intronTypes, selectedRange, clientToken);
   // console.log(ctx.body);
 });
 

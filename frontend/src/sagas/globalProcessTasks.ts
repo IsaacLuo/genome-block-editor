@@ -23,42 +23,49 @@ function monitorSocket(socket:SocketIOClient.Socket) {
   });
 }
 
-function generateSocketAction(serverAction:IAction):IAction {
+function generateSocketAction(serverAction:IAction, extraPayload?:any):IAction {
   switch (serverAction.type) {
     case 'message':
         return {
           type: 'SERVER_MESSAGE',
           data: serverAction.data,
+          payload: extraPayload,
         };
     case 'progress':
         return{
           type: 'PROGRESS',
           data: serverAction.data,
+          payload: extraPayload,
         };
     case 'state':
       return {
         type: 'SET_PROCESS_STATE',
         data: serverAction.data,
+        payload: extraPayload,
       };
     case 'result':
       return {
         type: 'SERVER_RESULT',
         data: serverAction.data,
+        payload: extraPayload,
       };
     case 'stderr':
       return {
         type: 'SERVER_LOG',
-        data: serverAction.data
+        data: serverAction.data,
+        payload: extraPayload,
       };
     case 'abort':
       return {
         type: 'ABORT_TASK',
         data: serverAction.data,
+        payload: extraPayload,
       };
     default:
       return {
         type: 'UNKOWN_SOCKET_ACTION', 
         data: serverAction.data,
+        payload: extraPayload,
       }
   }
 }
@@ -66,8 +73,8 @@ function generateSocketAction(serverAction:IAction):IAction {
 
 function* replaceCodonTask(action:IAction) {
   try {
-    const {id, rules} = action.data;
-    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/replace_codons/from/${id}`, {rules})
+    const {id, rules, selectedRange} = action.data;
+    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/replace_codons/from/${id}`, {rules, selectedRange})
     const {taskInfo} = result.data;
     // console.log(taskInfo);
     const {processId, serverURL} = taskInfo;
@@ -80,7 +87,7 @@ function* replaceCodonTask(action:IAction) {
       const serverAction = yield take(channel)
       // console.debug('messageType', serverAction.type)
       console.log(serverAction);
-      const reduxAction = generateSocketAction(serverAction);
+      const reduxAction = generateSocketAction(serverAction, {_id:id, selectedRange});
       yield put(reduxAction);
       if (serverAction.type === 'result') {
         break;
@@ -95,8 +102,8 @@ function* replaceCodonTask(action:IAction) {
 
 function* insertPartAfterFeature(action:IAction) {
   try {
-    const {id, featureType, direct, offset, sequenceType, sequence} = action.data;
-    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/insert_parts_after_features/from/${id}`, {featureType, direct, offset, sequenceType, sequence})
+    const {id, featureType, direct, offset, sequenceType, sequence, selectedRange} = action.data;
+    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/insert_parts_after_features/from/${id}`, {featureType, direct, offset, sequenceType, sequence, selectedRange})
     const {taskInfo} = result.data;
     // console.log(taskInfo);
     const {processId, serverURL} = taskInfo;
@@ -109,7 +116,7 @@ function* insertPartAfterFeature(action:IAction) {
       const serverAction = yield take(channel)
       // console.debug('messageType', serverAction.type)
       console.log(serverAction);
-      const reduxAction = generateSocketAction(serverAction);
+      const reduxAction = generateSocketAction(serverAction, {_id:id, selectedRange});
       yield put(reduxAction);
       if (serverAction.type === 'result') {
         break;
@@ -122,8 +129,8 @@ function* insertPartAfterFeature(action:IAction) {
 
 function* startRemoveIntronTask(action:IAction) {
   try {
-    const {id, intronTypes} = action.data;
-    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/remove_introns/from/${id}`, {intronTypes})
+    const {id, intronTypes, selectedRange} = action.data;
+    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/remove_introns/from/${id}`, {intronTypes, selectedRange})
     const {taskInfo} = result.data;
     // console.log(taskInfo);
     const {processId, serverURL} = taskInfo;
@@ -135,7 +142,7 @@ function* startRemoveIntronTask(action:IAction) {
     while (true) {
       const serverAction = yield take(channel)
       console.log(serverAction);
-      const reduxAction = generateSocketAction(serverAction);
+      const reduxAction = generateSocketAction(serverAction, {_id:id, selectedRange});
       yield put(reduxAction);
       if (serverAction.type === 'result') {
         break;

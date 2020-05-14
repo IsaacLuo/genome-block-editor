@@ -4,19 +4,25 @@ import { readSequenceFromSequenceRef, generateSequenceRef } from '../sequenceRef
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import conf from '../conf';
-import { projectToGFFJSON } from './projectImportExport';
+import { projectToGFFJSON, IRange, projectToGFFJSONPartial } from './projectImportExport';
 import FormData from 'form-data';
 import Axios from 'axios';
 
 export async function insertPartsAfterFeatures( user:IUser, 
-                                                id:string, 
+                                                _id:string, 
                                                 featureType:string, 
                                                 direct:number, 
                                                 offset:number, 
                                                 sequenceType: string,
-                                                sequence:string, 
+                                                sequence:string,
+                                                selectedRange: IRange,
                                                 clientToken:any) {
-  const gffJson = await projectToGFFJSON(id);
+  let gffJson;
+  if (selectedRange) {
+    gffJson = await projectToGFFJSONPartial(_id, selectedRange);
+  } else {
+    gffJson = await projectToGFFJSON(_id);
+  }
   // call webexe
   // uploading file
   try {
@@ -40,9 +46,13 @@ export async function insertPartsAfterFeatures( user:IUser,
         direct,
         offset,
         sequenceType,
-        sequence,
-        
+        sequence, 
       },
+      comments: {
+        taskName: 'insert_parts_after_features',
+        _id,
+        selectedRange,
+      }
     },
     {
       headers: {

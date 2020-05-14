@@ -1,15 +1,17 @@
 import mongoose from 'mongoose';
 import {Project} from '../models';
-import {projectToGFFJSON} from './projectImportExport'
+import {projectToGFFJSON, projectToGFFJSONPartial, IRange} from './projectImportExport';
 import axios from 'axios';
 import FormData from 'form-data';
 import conf from '../conf.json';
 
-export const replaceCodon = async (user:IUserEssential, _id:string|mongoose.Types.ObjectId, rules:string, clientToken:string) => {
-  // const projectObj = await Project.findById(_id).exec();
-  // const project = await projectObj.toObject();
-
-  const gffJson = await projectToGFFJSON(_id);
+export const replaceCodon = async (user:IUserEssential, _id:string|mongoose.Types.ObjectId, rules:string, selectedRange:IRange, clientToken:string) => {
+  let gffJson;
+  if (selectedRange) {
+    gffJson = await projectToGFFJSONPartial(_id, selectedRange);
+  } else {
+    gffJson = await projectToGFFJSON(_id);
+  }
   // call webexe
   // uploading file
   try {
@@ -31,6 +33,11 @@ export const replaceCodon = async (user:IUserEssential, _id:string|mongoose.Type
         srcFileName:[gffJsonFilePath],
         rules,
       },
+      comments: {
+        taskName: 'replace_codons',
+        _id,
+        selectedRange,
+      }
     },
     {
       headers: {

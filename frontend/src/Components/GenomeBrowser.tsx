@@ -1,7 +1,8 @@
 import * as React from 'react'
 import {useDispatch, useMappedState} from 'redux-react-hook';
 import GenomeBrowserCore from './GenomeBrowserCore';
-import { Input, InputNumber } from 'antd';
+import { Input, InputNumber, Button } from 'antd';
+import { CloseCircleOutlined, CloseCircleFilled } from '@ant-design/icons';
 
 const GenomeBrowser = () => {
   const {
@@ -16,6 +17,7 @@ const GenomeBrowser = () => {
     historyBrowserVisible,
     selectionStart,
     selectionEnd,
+    selectionEnabled,
     } = useMappedState((state:IStoreState)=>({
     sourceFile: state.sourceFile,
     zoomLevel: state.genomeBrowser.zoomLevel,
@@ -32,6 +34,7 @@ const GenomeBrowser = () => {
     cursorLocation: state.genomeBrowser.cursorLocation,
     selectionStart: state.genomeBrowser.selectionStart,
     selectionEnd: state.genomeBrowser.selectionEnd,
+    selectionEnabled: state.genomeBrowser.selectionEnabled,
   }));
 
   const dispatch = useDispatch();
@@ -47,12 +50,15 @@ const GenomeBrowser = () => {
         windowWidth = {windowWidth}
         rulerStep = {rulerStep}
         highLightedParts = {historyBrowserVisible ? historyDiffParts.diffSetSource: undefined}
-        selectionStart = {selectionStart}
-        selectionEnd = {selectionEnd}
+        selectionStart = {selectionEnabled ? selectionStart: undefined}
+        selectionEnd = {selectionEnabled ? selectionEnd: undefined}
       />
       {sourceFile && <div>
-        from:<InputNumber min={1} max={sourceFile.len} value={selectionStart === 0 ? undefined : selectionStart+1} onChange={(val)=>val && dispatch({type:'SET_GB_SELECTION_START', data:val-1})} />
-        to:<InputNumber min={1} max={sourceFile.len} value={selectionEnd === 0 ? undefined:  selectionEnd} onChange={(val)=>val && dispatch({type:'SET_GB_SELECTION_END', data:val})} />
+        from:<InputNumber min={1} max={sourceFile.len} value={selectionEnabled ? selectionStart+1: undefined} onChange={(val)=>val && dispatch({type:'SET_GB_SELECTION_START', data:val-1})} />
+        to:<InputNumber min={1} max={sourceFile.len} value={selectionEnabled ? selectionEnd: undefined} onChange={(val)=>val && dispatch({type:'SET_GB_SELECTION_END', data:val})} />
+        {/* <Button type="link"> */}
+          <CloseCircleFilled onClick={()=>dispatch({type:'CLEAR_GB_SELECTION'})}/>
+        {/* </Button> */}
       </div>}
     </React.Fragment>
   )

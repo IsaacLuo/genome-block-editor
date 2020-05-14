@@ -105,6 +105,7 @@ declare interface IGenomBrowserState {
   rulerStep: number;
   selectionStart: number;
   selectionEnd: number;
+  selectionEnabled: boolean;
   cursorLocation: number;
 }
 
