@@ -43,6 +43,10 @@ const ReplaceCodonDlg = () => {
     }
   }, [showDialog])
 
+  useEffect(()=>{
+    setSelectedSegmentOnly(selectionEnabled);
+  }, [selectionEnabled])
+
   return <Modal
     title="Title"
     visible={showDialog}

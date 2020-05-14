@@ -52,6 +52,10 @@ const InsertFeatureDlg = () => {
     }
   }, [sourceFile, showDialog])
 
+  useEffect(()=>{
+    setSelectedSegmentOnly(selectionEnabled);
+  }, [selectionEnabled])
+
   const featureTypeMenu = (
     <Menu onClick={(v)=>{
       setFeatureType(v.key);

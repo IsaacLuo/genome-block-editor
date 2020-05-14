@@ -6,19 +6,19 @@ import GenomeBrowser from 'Components/GenomeBrowser'
 import ResultSequence from 'Components/ResultPanel'
 import GenomeOperationPanel from 'Components/GenomeOperationPanel'
 import GenomeBrowserTooltip from 'Components/GenomeBrowserTooltip'
-import CreatePromoterTermiatorDlg from 'Components/dialogs/CreatePromoterTerminatorDlg'
+import CreatePromoterTermiatorDlg from 'Components/dialogs/taskDialogs/CreatePromoterTerminatorDlg'
 import RemoveCreatedFeatureDlg from 'Components/dialogs/RemoveCreatedFeatureDlg'
 import ForkProjectDlg from 'Components/dialogs/ForkProjectDlg';
 import {useDispatch, useMappedState} from 'redux-react-hook';
 import { LOAD_SOURCE_FILE_BY_PROJECT_ID } from 'actions';
 import GenomeBrowserForHistory from 'Components/GenomeBrowserForHistory';
-import ReplaceCodonDlg from 'Components/dialogs/ReplaceCodonDlg';
+import ReplaceCodonDlg from 'Components/dialogs/taskDialogs/ReplaceCodonDlg';
 import PartDetailDlg from 'Components/dialogs/PartDetailDlg';
-import InsertFeatureDlg from 'Components/dialogs/InsertFeatureDlg';
+import InsertFeatureDlg from 'Components/dialogs/taskDialogs/InsertFeatureDlg';
 import DebugPanel from 'Components/DebugPanel';
 import GenomeOperationMenu from 'Components/GenomeOperationMenu';
 import { Collapse } from 'antd';
-import RemoveIntronDlg from 'Components/dialogs/RemoveIntronDlg';
+import RemoveIntronDlg from 'Components/dialogs/taskDialogs/RemoveIntronDlg';
 
 const ProjectFunctions: React.FC = (props:any) => {
   const {projectId} = useMappedState((state:IStoreState)=>({

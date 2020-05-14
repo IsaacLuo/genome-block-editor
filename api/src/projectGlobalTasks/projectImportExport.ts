@@ -321,7 +321,10 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
   }
   
   // if the length of gffJson = range, we don't change the parts on the right
-  if(gffJson.seqInfo[gffJson.defaultChr].length === range.end - range.start) {
+  if( gffJson.mimetype === 'application/gffjson-head' ||
+      gffJson.mimetype === 'application/gffjson' &&
+      gffJson.seqInfo[gffJson.defaultChr].length === range.end - range.start
+    ) {
     newParts = newParts.concat(partsOnRight.map(v=>v._id));
   } else {
     const offset =  gffJson.seqInfo[gffJson.defaultChr].length - (range.end - range.start);

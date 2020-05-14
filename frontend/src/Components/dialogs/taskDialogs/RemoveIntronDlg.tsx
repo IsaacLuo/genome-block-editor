@@ -35,6 +35,10 @@ const RemoveIntronDlg = () => {
     }
   }, [sourceFile, showDialog])
 
+  useEffect(()=>{
+    setSelectedSegmentOnly(selectionEnabled);
+  }, [selectionEnabled])
+
   const layout = {
     labelCol: { span: 8 },
     wrapperCol: { span: 16 },

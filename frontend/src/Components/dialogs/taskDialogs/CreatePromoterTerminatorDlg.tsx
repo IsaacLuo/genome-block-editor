@@ -44,6 +44,10 @@ const CreatePromoterTermiatorDlg = () => {
     }
   }, [showDialog])
 
+  useEffect(()=>{
+    setSelectedSegmentOnly(selectionEnabled);
+  }, [selectionEnabled])
+
   const dispatch = useDispatch();
   return <Modal
     title="Title"
