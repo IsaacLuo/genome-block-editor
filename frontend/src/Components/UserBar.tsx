@@ -29,6 +29,7 @@ const UserBar = () => {
   const state = useMappedState((state:IStoreState)=>({
     currentUser: state.app.currentUser,
     sourceFile: state.sourceFile,
+    selectionEnabled: state.genomeBrowser.selectionEnabled,
   }));
 
   const location = useLocation();
@@ -138,7 +139,7 @@ const UserBar = () => {
     },
   ];
   
-  const globalEditingOerationChoice = [
+  const globalEditingOperationChoice = [
     {
       name: 'create promoter terminator',
       visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),
@@ -176,6 +177,23 @@ const UserBar = () => {
     },
   ]
 
+  const partialEditingOperationChoice = [
+    {
+      name: 'remove/replace restriction sites',
+      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject') && state.selectionEnabled,
+      onClick: ()=>{
+        dispatch({type:'SHOW_REMOVE_RESTRICTION_SITES_DIALOG'})
+      }
+    },
+    {
+      name: 'edit base pairs',
+      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject') && state.selectionEnabled,
+      onClick: ()=>{
+        dispatch({type:'SHOW_SEQUENCE_EDITOR_DIALOG'})
+      }
+    },
+  ]
+
   const filteredProjectOperationChoice = projectOperationChoice.filter(v=>v.visible(state));
 
   let projectOperations = <Menu.SubMenu title="Edit" disabled={filteredProjectOperationChoice.length === 0}>
@@ -189,11 +207,24 @@ const UserBar = () => {
     }
     </Menu.SubMenu>
 
-  const filteredGlobalOperationChoice = globalEditingOerationChoice.filter(v=>v.visible(state));
+  const filteredGlobalOperationChoice = globalEditingOperationChoice.filter(v=>v.visible(state));
 
   let globalOperations = (
     <Menu.SubMenu title="Global Operations" disabled= {filteredGlobalOperationChoice.length === 0}>
       {filteredGlobalOperationChoice
+      .map((operation, i)=> (
+        <Menu.Item key={i} onClick={operation.onClick}>
+          {operation.name}
+        </Menu.Item>
+      ))}
+    </Menu.SubMenu>
+  )
+
+  const filteredPartialEditingOperationChoice = partialEditingOperationChoice.filter(v=>v.visible(state));
+
+  let partialOperations = (
+    <Menu.SubMenu title="Regional Operations" disabled= {filteredPartialEditingOperationChoice.length === 0}>
+      {filteredPartialEditingOperationChoice
       .map((operation, i)=> (
         <Menu.Item key={i} onClick={operation.onClick}>
           {operation.name}
@@ -213,6 +244,7 @@ const UserBar = () => {
         <HomeLogo><Link to="/" style={{color:'#ffffff'}}>Cailab-GBE</Link></HomeLogo>
         {showOperationMenu && projectOperations}
         {showOperationMenu && globalOperations}
+        {showOperationMenu && partialOperations}
         {loginControl}
       </Menu>
     </UserBarContainer>

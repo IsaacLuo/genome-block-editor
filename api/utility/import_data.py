@@ -279,6 +279,7 @@ def import_project(file_path, project_name):
             "ctype": "source",
 
             "changelog": default_changelog,
+            "built": True,
 
             "createdAt": now,
             "updatedAt": now,

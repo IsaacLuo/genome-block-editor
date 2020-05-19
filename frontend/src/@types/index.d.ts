@@ -91,6 +91,7 @@ declare interface IComponentVisibleState {
   partDetailDialogVisible: boolean;
   insertFeatureDialogVisible: boolean,
   removeIntronDialogVisible: boolean,
+  sequenceEditorDialogVisible: boolean,
 }
 
 declare interface IGenomBrowserState {
@@ -184,6 +185,13 @@ interface IPartDetailDialogState {
   historyPart?: IAnnotationPartWithDetail,
 }
 
+interface ISequenceEditorDialogState{
+  sequence: string,
+  parts: IAnnotationPart[],
+  start: number,
+  end: number,
+}
+
 declare interface IStoreState {
   app: IAppState;
   generalTask: IGeneralTaskState;
@@ -196,6 +204,7 @@ declare interface IStoreState {
   fileExplorer: IFileExplorerState;
   history: IHistoryState;
   partDetailDialog: IPartDetailDialogState;
+  sequenceEditorDialog: ISequenceEditorDialogState;
 }
 
 declare module 'react-use-dimensions'

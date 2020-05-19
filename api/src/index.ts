@@ -26,7 +26,7 @@ import fs from 'fs';
 import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProjectIdStr, saveProjectIdStr } from './redisCache';
 import workerTs from './workerTs';
 import { forkProject, hideProject, revertProject } from './projectGlobalTasks/project';
-import { projectToGFFJSON, updateProjectByGFFJSON, updateProjectByGFFJSONPartial } from './projectGlobalTasks/projectImportExport';
+import { projectToGFFJSON, updateProjectByGFFJSON, updateProjectByGFFJSONPartial, projectToGFFJSONPartial, projectToGenbank } from './projectGlobalTasks/projectImportExport';
 import { replaceCodon } from './projectGlobalTasks/replaceCodon';
 import { removeIntron } from './projectGlobalTasks/removeIntron';
 
@@ -270,6 +270,21 @@ async (ctx:Ctx, next:Next)=> {
 createPromoterTerminators(router);
 removeGeneratedFeatures(router);
 
+router.get('/api/webexe/file/:fileUrl/as/:fileName',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {fileUrl, fileName} = ctx.params;  
+  const clientToken = ctx.cookies.get('token');
+  const result = await axios.get(`${conf.webexe.internalUrl}/api/resultFile/${fileUrl}/as/${fileName}`,
+  {
+    headers: {
+      'Cookie': `token=${clientToken}`,
+    }
+  });
+  ctx.set('Content-Type', 'application/octstream');
+  ctx.body = result.data;
+})
+
 router.put('/api/project/:id/fromFileUrl',
 userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
@@ -381,8 +396,66 @@ async (ctx:Ctx, next:Next)=> {
 
 });
 
+router.get('/api/project/:id/sequence',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {id} = ctx.params;
+  let {start, end, strand} = ctx.request.query;
+  start = parseInt(start);
+  end = parseInt(end);
+  strand = parseInt(strand);
+  // load project first
+  let project = await Project.findById(id).populate({
+    path:'parts',
+    match:{start:{$gte: start}, end:{$lte:end}},
+  }).exec();
+  project = await project.toObject();
 
+  let sequence;
+  let skipBuiltPart;
+  if (project.built) {
+    // if project is built, load sequence directly from the project's ref
+    sequence = await readSequenceFromSequenceRef({fileName: project.sequenceRef.fileName, start, end, strand})
+  } else {
+    // build part sequence
+    let sequenceArr;
+    if (project.sequenceRef) {
+      sequence = await readSequenceFromSequenceRef({fileName: project.sequenceRef.fileName, start, end, strand});
+      sequenceArr = sequence.split('');
+      skipBuiltPart = true;
+    } else {
+      sequenceArr = new Array(end - start).fill('N')
+      skipBuiltPart = false;
+    }
+    // const parts = await AnnotationPart.find({_id:{$in:project.parts}, start:{$gte: start}, end:{$lte:end}});
+    for(const part of project.parts) {
+      if (skipBuiltPart && part.built) {
+        continue;
+      }
+      const partSequence = await readSequenceFromSequenceRef(part.sequenceRef, 0);
+      for (let i=0;i<partSequence.length;i++) {
+        const j = part.start - start + i;
+        if (sequenceArr[j] !== 'N' && sequenceArr[j] !== partSequence[i].toUpperCase()) {
+          ctx.throw(500, `conflict sequence data at ${i} with part ${part.name}`);
+        }
+        sequenceArr[j] = partSequence[i].toUpperCase();
+      }
+    }
+    sequence = sequenceArr.join('');
+  }
+  
+  ctx.body = {message:'OK', start, end, strand, sequence, parts: project.parts, projectBuilt: project.built, skipBuiltPart};
+});
 
+router.get('/api/project/:id/genbank',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {id} = ctx.params;
+  let {start, end} = ctx.request.query;
+  const clientToken = ctx.cookies.get('token');
+  ctx.body = await projectToGenbank(id, {start,end}, clientToken);
+}
+)
 
 app.use(router.routes());
 

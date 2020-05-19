@@ -1,5 +1,5 @@
 /// <reference path="@types/index.d.ts" />
-import mongoose, { Model, Document } from 'mongoose'
+import mongoose, { Model, Document, Mongoose } from 'mongoose'
 import {Schema} from 'mongoose'
 
 export const UserSchema = new Schema({
@@ -59,7 +59,13 @@ export const AnnotationPartSchema = new Schema({
   createdAt: Date,
   updatedAt: Date,
   changelog: String,
-});
+})
+.pre<IAnnotationPartModel>('save', function (next) {
+  if(this.pid === undefined) {
+    this.pid = mongoose.Types.ObjectId();
+  }
+  next();
+})
 
 export interface IAnnotationPartModel extends IAnnotationPart, Document {
 }
@@ -96,6 +102,9 @@ export const ProjectSchema = new Schema({
   createdAt: Date,
   updatedAt: Date,
   changelog: String,
+  
+  // if built, all seqeucnce of all parts matches the project sequenceRef
+  built: Boolean,
 }, {
   timestamps: true
 })

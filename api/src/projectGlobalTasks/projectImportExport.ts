@@ -8,12 +8,15 @@ import {
     saveProjectIdStr,
 } from '../redisCache';
 import fs from 'fs';
+import FormData from 'form-data';
 import {Project, User, AnnotationPart, IProjectModel, IProjectFolderModel} from '../models';
 
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import { pushHistory } from './project';
 import conf from '../conf';
+import axios from 'axios';
+
 
 import {readSequenceFromSequenceRef, generateSequenceRef} from '../sequenceRef';
 
@@ -369,3 +372,46 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
   return newItem;
 }
 
+// /api/project/${id}/genbank
+export const projectToGenbank = async (_id:string|mongoose.Types.ObjectId, selectedRange:IRange, clientToken:string) => {
+  let gffJson;
+  if (selectedRange!==undefined && selectedRange.start!==undefined && selectedRange.end!==undefined) {
+    gffJson = await projectToGFFJSONPartial(_id, selectedRange);
+  } else {
+    gffJson = await projectToGFFJSON(_id);  
+  }
+  
+  try {
+    const formData = new FormData();
+    formData.append('file', Buffer.from(JSON.stringify(gffJson), 'utf-8'), 'project.gff.json');
+    const result = await axios.post(`${conf.webexe.internalUrl}/api/fileParam/`,
+      formData.getBuffer(),
+      {
+        headers: {
+          ...formData.getHeaders(),
+          'Cookie': `token=${clientToken}`,
+        }
+      });
+    const gffJsonFilePath = result.data.filePath;
+    // call webexe again to start mission
+    const result2 = await axios.post(`${conf.webexe.internalUrl}/api/task/gffjson_to_genbank`,
+    {
+      params: {
+        srcFileName:[gffJsonFilePath],
+      },
+      comments: {
+        taskName: 'gff_to_genbank',
+        _id,
+        selectedRange,
+      },
+    },
+    {
+      headers: {
+        'Cookie': `token=${clientToken}`,
+      }
+    });
+    return {debugData: result.data, taskInfo: {...result2.data, serverURL: conf.webexe.url, processId: result2.data.processId},};
+  } catch (err) {
+    console.error(err);
+  }
+}

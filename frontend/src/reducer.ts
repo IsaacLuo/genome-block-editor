@@ -24,8 +24,8 @@ const DEFAULT_GENOME_BROWSER_STATE:IGenomBrowserState ={
   toolTipPos: {x:0,y:0, text:''},
   loading: false,
   rulerStep: 1000,
-  selectionStart: 800,
-  selectionEnd: 2200,
+  selectionStart: 0,
+  selectionEnd: 0,
   selectionEnabled: false,
   cursorLocation: 0,
 }
@@ -75,6 +75,7 @@ const DEFAULT_COMPONENT_VISIBLE_STATE:IComponentVisibleState = {
   partDetailDialogVisible: false,
   insertFeatureDialogVisible: false,
   removeIntronDialogVisible: false,
+  sequenceEditorDialogVisible: false,
 }
 
 const DEFAULT_HISTORY_STATE:IHistoryState = {
@@ -93,6 +94,13 @@ const DEFAULT_PART_DETAIL_DIALOG_STATE:IPartDetailDialogState = {
   part: undefined,
 }
 
+const DEFAULT_SEQUENCE_EDITOR_DIALOG_STATE = {
+  sequence: '',
+  parts: [],
+  start: 0,
+  end: 0,
+}
+
 const DEFAULT_STORE_STATE:IStoreState = {
   app: DEFAULT_APP_STATE,
   generalTask: DEFAULT_GENERAL_TASK_STATE,
@@ -106,8 +114,8 @@ const DEFAULT_STORE_STATE:IStoreState = {
   fileExplorer: DEFAULT_FILE_EXPLORER_STATE,
   history: DEFAULT_HISTORY_STATE,
   partDetailDialog: DEFAULT_PART_DETAIL_DIALOG_STATE,
+  sequenceEditorDialog: DEFAULT_SEQUENCE_EDITOR_DIALOG_STATE,
 };
-
 
 
 const rulerZoomList = [50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000];
@@ -197,6 +205,13 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
       return DEFAULT_COMPONENT_VISIBLE_STATE;
     case 'SHOW_HIDE_HISTORY_VERSIONS':
       return {...state, historyBrowserVisible: !state.historyBrowserVisible}
+
+    case 'SHOW_SEQUENCE_EDITOR_DIALOG': {
+      return {...state, sequenceEditorDialogVisible: true};
+    }
+    case 'HIDE_SEQUENCE_EDITOR_DIALOG': {
+      return {...state, sequenceEditorDialogVisible: false};
+    }
     default:
       return state;
   }
@@ -524,6 +539,23 @@ export const partDetailDialogReducer = (state:IPartDetailDialogState, action:IAc
   return state;
 }
 
+
+export const sequenceEditorDialogReducer = (state:ISequenceEditorDialogState, action:IAction) => {
+  if (state === undefined) {
+    state = DEFAULT_SEQUENCE_EDITOR_DIALOG_STATE;
+  }
+  switch(action.type) {
+    case 'SET_SEQUENCE_SEGMENT':
+      const {sequence, parts, start, end} = action.data;
+      return {
+        ...state,
+        sequence, parts, start, end,
+      }
+  }
+  return state;
+}
+
+
 export const reducer = reCombineReducers({
   app: appReducer,
   generalTask: generalTaskReducer,
@@ -533,4 +565,5 @@ export const reducer = reCombineReducers({
   fileExplorer: fileExplorerReducer,
   history:historyReducer,
   partDetailDialog: partDetailDialogReducer,
+  sequenceEditorDialog: sequenceEditorDialogReducer,
 })

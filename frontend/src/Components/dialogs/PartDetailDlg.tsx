@@ -108,8 +108,8 @@ const PartDetailDlg = () => {
         history: genHistoryText('len'),
       }, {
         key: 'start',
-        value: part!.start,
-        history: genHistoryText('start'),
+        value: part!.start + 1,
+        history: part && historyPart && historyPart.start !== part.start ? historyPart.start + 1 : ' - ',
       }, {
         key: 'end',
         value: part!.end,

@@ -11,6 +11,7 @@ import {saveAs} from 'file-saver';
 import { Modal, Button } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import * as React from 'react';
+import io from 'socket.io-client';
 
 const client = apolloClient();
 
@@ -137,10 +138,87 @@ function* revertToHistoryVersion(aciton:IAction) {
   }
 }
 
+function* loadSequence(action:IAction) {
+  try {
+    const {_id, start, end, strand} = action.data;
+    const result = yield call(axios.get, `${conf.backendURL}/api/project/${_id}/sequence?start=${start}&end=${end}&strand=${strand}`);
+    yield put({type:'SET_SEQUENCE_SEGMENT', data:result.data});
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+
+
+function* exportProjectToGenbank(action:IAction) {
+  const monitorSocket = (socket:SocketIOClient.Socket) => {
+    return eventChannel( emitter => {
+      const types = ['message', 'progress', 'state', 'result', 'stderr', 'abort'];
+      types.forEach(type=>{
+        socket.on(type,(data:any)=>{
+          emitter({type, data});
+        })
+      })
+      return () => {
+        console.log('Socket off')
+      }
+    });
+  }
+  
+  const generateSocketAction = (serverAction:IAction):IAction => {
+    switch (serverAction.type) {
+      case 'result':
+        return {
+          type: 'DOWNLOAD_FILE',
+          data: {
+            name: 'segment.gb',
+            url: `${conf.backendURL}/api/webexe/file/${serverAction.data.files[0].url}/as/segment.gb`,
+          }
+        };
+      case 'abort':
+        return {
+          type: 'ABORT_TASK',
+          data: serverAction.data,
+        };
+      default:
+        return {
+          type: 'UNKOWN_SOCKET_ACTION', 
+          data: serverAction.data,
+        }
+    }
+  }
+
+  try {
+    const {id, start, end} = action.data;
+    const result = yield call(axios.get, `${conf.backendURL}/api/project/${id}/genbank?start=${start}&end=${end}`);
+    const {taskInfo} = result.data;
+    // console.log(taskInfo);
+    const {processId, serverURL} = taskInfo;
+
+    // 2. use socket.io
+    const socket = io(serverURL);
+    const channel = yield call(monitorSocket, socket);
+    socket.emit('startTask', processId, ()=>{})
+    while (true) {
+      const serverAction = yield take(channel)
+      const reduxAction = generateSocketAction(serverAction);
+      yield put(reduxAction);
+      if (serverAction.type === 'result') {
+        break;
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+
 export default function* watchProjects() {
   yield takeLatest('EXPORT_SOURCE_FILE_TO_GFF_JSON', exportSourceFileToGffJson);
   yield takeLatest('SHOW_PART_DETAIL_DIALOG', loadPartDetail);
   yield takeLatest('LOAD_PART_DETAIL', loadPartDetail);
   yield takeEvery('FETCH_NEXT_HISORY_PART', loadNextHistoryPart);
   yield takeEvery('REVERT_TO_HISTORY_VERSION', revertToHistoryVersion);
+  yield takeLatest('LOAD_SEQUENCE_SEGMENT', loadSequence);
+  yield takeLatest('EXPORT_PROJECT_TO_GENBANK', exportProjectToGenbank);
 }

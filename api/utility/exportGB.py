@@ -16,8 +16,8 @@ import string
 
 inp = input()
 
-with open('d:\\x.txt', 'w') as fp:
-    fp.write(inp)
+# with open('d:\\x.txt', 'w') as fp:
+#     fp.write(inp)
 project = json.loads(inp)
 blocks = project['parts']
 seq = ''

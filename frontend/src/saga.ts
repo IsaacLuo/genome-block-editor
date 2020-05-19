@@ -322,6 +322,21 @@ export function* watchHistories() {
   yield takeLatest('FETCH_HISTORY_SOURCE_FILE', fetchHistorySourceFile);
 }
 
+
+export function* downloadFile(action:IAction) {
+  const {name, url} = action.data;
+  const a = document.createElement('a');
+  a.href = url
+  a.target =  '_blank';
+  a.download = `${name}`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+export function* watchApp() {
+  yield takeLatest('DOWNLOAD_FILE', downloadFile);
+}
+
 export default function* rootSaga() {
   yield all([
     fork(watchUsers),
@@ -331,5 +346,6 @@ export default function* rootSaga() {
     fork(watchHistories),
     fork(watchGlobalProcessTasks),
     // fork(watchWebExe),
+    fork(watchApp),
   ]);
 }

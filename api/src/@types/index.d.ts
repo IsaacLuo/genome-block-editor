@@ -57,6 +57,7 @@ declare interface IAnnotationPart {
   createdAt: Date;
   updatedAt: Date;
   changelog: string;
+  built: boolean;
 }
 
 declare interface IProject {
@@ -75,6 +76,7 @@ declare interface IProject {
   history: any[],
   len: number,
   sequenceRef?: ISequenceRef,
+  built: boolean,
 }
 
 declare interface ISourceChomosome {

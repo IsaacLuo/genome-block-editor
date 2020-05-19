@@ -19,6 +19,7 @@ import DebugPanel from 'Components/DebugPanel';
 import GenomeOperationMenu from 'Components/GenomeOperationMenu';
 import { Collapse } from 'antd';
 import RemoveIntronDlg from 'Components/dialogs/taskDialogs/RemoveIntronDlg';
+import SequenceEditorDlg from 'Components/dialogs/SequenceEditorDlg';
 
 const ProjectFunctions: React.FC = (props:any) => {
   const {projectId} = useMappedState((state:IStoreState)=>({
@@ -75,6 +76,7 @@ const ProjectFunctions: React.FC = (props:any) => {
         <GenomeBrowserTooltip/>
 
         <PartDetailDlg/>
+        <SequenceEditorDlg/>
         <DebugPanel/>
       </div>
   );
