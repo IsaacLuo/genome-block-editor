@@ -142,7 +142,7 @@ const InsertFeatureDlg = () => {
         label="offset"
         rules={[{ required: true }]}
       >
-        <InputNumber min={0} max={1000} defaultValue={0} onChange={(v)=>v ? setOffset(v):setOffset(0)} />
+        <InputNumber min={0} max={1000} defaultValue={0} onChange={(v)=>typeof(v)==='number' ? setOffset(v):setOffset(0)} />
         <span> bp</span>
       </Form.Item>
       <Form.Item

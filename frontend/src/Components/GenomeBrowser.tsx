@@ -54,8 +54,20 @@ const GenomeBrowser = () => {
         selectionEnd = {selectionEnabled ? selectionEnd: undefined}
       />
       {sourceFile && <div>
-        from:<InputNumber min={1} max={sourceFile.len} value={selectionEnabled ? selectionStart+1: undefined} onChange={(val)=>val && dispatch({type:'SET_GB_SELECTION_START', data:val-1})} />
-        to:<InputNumber min={1} max={sourceFile.len} value={selectionEnabled ? selectionEnd: undefined} onChange={(val)=>val && dispatch({type:'SET_GB_SELECTION_END', data:val})} />
+        from:
+        <InputNumber 
+          min={1} 
+          max={sourceFile.len} 
+          value={selectionEnabled ? selectionStart+1: undefined} 
+          onChange={(val)=>typeof(val)==='number' && dispatch({type:'SET_GB_SELECTION_START', data:val-1})} 
+        />
+        to:
+        <InputNumber 
+          min={1} 
+          max={sourceFile.len} 
+          value={selectionEnabled ? selectionEnd: undefined} 
+          onChange={(val)=>typeof(val)==='number' && dispatch({type:'SET_GB_SELECTION_END', data:val})} 
+        />
         {/* <Button type="link"> */}
           <CloseCircleFilled onClick={()=>dispatch({type:'CLEAR_GB_SELECTION'})}/>
         {/* </Button> */}

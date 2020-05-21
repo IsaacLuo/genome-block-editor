@@ -153,10 +153,15 @@ function* startRemoveIntronTask(action:IAction) {
   }
 }
 
+export function* sequenceEdit(action:IAction) {
+  
+}
+
 export default function* watchGlobalProcessTasks() {
   yield takeLatest('REPLACE_CODON_TASK', replaceCodonTask);
   yield takeLatest('INSERT_PART_AFTER_FEATURE', insertPartAfterFeature);
   yield takeLatest('START_REMOVE_INTRON_TASK', startRemoveIntronTask);
+  yield takeEvery('SEQUENCE_EDIT', sequenceEdit);
 }
 
 

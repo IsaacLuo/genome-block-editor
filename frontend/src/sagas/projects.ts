@@ -9,7 +9,7 @@ import { gql } from "apollo-boost";
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import {saveAs} from 'file-saver';
 import { Modal, Button } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { ExclamationCircleOutlined, ProjectFilled } from '@ant-design/icons';
 import * as React from 'react';
 import io from 'socket.io-client';
 
@@ -212,6 +212,11 @@ function* exportProjectToGenbank(action:IAction) {
   }
 }
 
+export function* sequenceEdit(action:IAction) { 
+  const {projectId, srcStart, srcEnd, newSeqeunce} = action.data;
+  const response = yield call(axios.post, `${conf.backendURL}/api/project/${projectId}/sequence/${srcStart}/${srcEnd}`,{sequence:newSeqeunce});
+  console.log(response.data);
+}
 
 export default function* watchProjects() {
   yield takeLatest('EXPORT_SOURCE_FILE_TO_GFF_JSON', exportSourceFileToGffJson);
@@ -221,4 +226,5 @@ export default function* watchProjects() {
   yield takeEvery('REVERT_TO_HISTORY_VERSION', revertToHistoryVersion);
   yield takeLatest('LOAD_SEQUENCE_SEGMENT', loadSequence);
   yield takeLatest('EXPORT_PROJECT_TO_GENBANK', exportProjectToGenbank);
+  yield takeEvery('SEQUENCE_EDIT', sequenceEdit);
 }

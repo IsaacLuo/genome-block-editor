@@ -396,6 +396,35 @@ async (ctx:Ctx, next:Next)=> {
 
 });
 
+// do global sequence alignment
+// @body parameters
+//     sequence1: string
+//     sequence2: string
+// @result
+//      
+router.post('/api/query/globalAlignment',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {sequence1, sequence2} = ctx.request.body;
+
+  // run python
+  await runExe(
+    {
+      program:'pipenv', 
+      params:['run', 'python', 'global_alignment.py'], 
+      options:{cwd:'utility'}
+    }, 
+    {sequence1, sequence2},
+    (outputObj:any)=>{
+      console.log(outputObj[0]);
+      // ctx.body = {message:0}
+      ctx.body = outputObj[0];
+  });
+
+});
+
+
+// get sequence of a project, by giving id, start, end
 router.get('/api/project/:id/sequence',
 userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
@@ -454,6 +483,17 @@ async (ctx:Ctx, next:Next)=> {
   let {start, end} = ctx.request.query;
   const clientToken = ctx.cookies.get('token');
   ctx.body = await projectToGenbank(id, {start,end}, clientToken);
+}
+)
+
+router.post('/api/project/:id/sequence/:start/:end',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {sequence} = ctx.request.body;
+  const {id, start, end} = ctx.params;
+  const project = await Project.findById(id).populate('parts').exec();
+
+  ctx.body = {message:'OK'}
 }
 )
 

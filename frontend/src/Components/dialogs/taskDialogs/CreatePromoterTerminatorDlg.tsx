@@ -76,14 +76,14 @@ const CreatePromoterTermiatorDlg = () => {
         label="promoter length"
         rules={[{ required: true }]}
       >
-        <InputNumber min={0} defaultValue={promoterLength} onChange={(value)=>setPromoterLen(value?value:promoterLength)} />
+        <InputNumber min={0} defaultValue={promoterLength} onChange={(value)=>typeof(value) === 'number' ? setPromoterLen(value) : setPromoterLen(promoterLength) } />
       </Form.Item>
 
       <Form.Item
         label="terminator length"
         rules={[{ required: true }]}
       >
-        <InputNumber min={0} defaultValue={terminatorLength} onChange={(value)=>setTerminatorLen(value?value:terminatorLength)} />
+        <InputNumber min={0} defaultValue={terminatorLength} onChange={(value)=>typeof(value) === 'number' ? setTerminatorLen(value) : setTerminatorLen(terminatorLength)} />
       </Form.Item>
 
     </Form>

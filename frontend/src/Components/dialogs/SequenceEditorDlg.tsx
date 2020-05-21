@@ -10,6 +10,7 @@ import { useQuery } from '@apollo/react-hooks';
 import { gql } from 'apollo-boost';
 import Axios from 'axios';
 import conf from '../../conf.json';
+import GeneralSequenceAlignmentDiv from './GeneralSequenceAlignmentDiv';
 
 const rcDict = {'a':'t', 't':'a', 'c':'g', 'g':'c', 'A':'T', 'T':'A', 'C':'G', 'G':'C', 'n':'n', 'N':'N'};
 type rcDictType = typeof rcDict;
@@ -40,6 +41,7 @@ const SequenceEditorDlg = () => {
   const [seq, setSeq] = useState('');
   const [cursorPos, setCursorPos] = useState(0);
   const [cursorEnd, setCursorEnd] = useState(0);
+  const [alignmentVisible, showAlignment] = useState(false);
 
   // const inputForward = useRef(null);
 
@@ -74,6 +76,13 @@ const SequenceEditorDlg = () => {
     dispatch({type:'EXPORT_PROJECT_TO_GENBANK', data:{id:projectId, start:selectionStart, end:selectionEnd}});
   }
 
+  const onChangeSequence = (e:any)=>{
+    const cursorPos = e.target.selectionStart;
+    const cursorPosEnd = e.target.selectionEnd;
+    if(typeof(cursorPos) === 'number') setCursorPos(cursorPos);
+    if(typeof(cursorPosEnd) === 'number') setCursorEnd(cursorPosEnd);
+  }
+
   return <Modal
     title="part details"
     width={800}
@@ -97,7 +106,7 @@ const SequenceEditorDlg = () => {
             }});
           },
           onCancel() {
-            onExit();
+            // onExit();
           },
         });
       }
@@ -111,10 +120,8 @@ const SequenceEditorDlg = () => {
     :
     (
       <div>
-        <li>{projectId}</li>
-        <li>{selectionStart}</li>
-        <li>{selectionEnd}</li>
-        <div>{cursorPos}</div>
+        <p>{projectId}</p>
+        <p>selection {selectionStart} - {selectionEnd}</p>
         <div>
         <Button type='link'
           onClick={onClickExport}
@@ -123,22 +130,26 @@ const SequenceEditorDlg = () => {
         <div>sequence ({seq.length} bp) (cursor:{selectionStart + cursorPos} {cursorEnd !== cursorPos && `- ${selectionStart + cursorEnd}`})</div>
         <TextArea
           rows={10}
-          value={seq} 
-          onKeyUp={(e:any)=>{
-            const cursorPos = e.target.selectionStart;
-            const cursorPosEnd = e.target.selectionEnd;
-            if(typeof(cursorPos) === 'number') setCursorPos(cursorPos);
-            if(typeof(cursorPosEnd) === 'number') setCursorEnd(cursorPosEnd);
-          }} 
-          onMouseUp={(e:any)=>{
-            const cursorPos = e.target.selectionStart;
-            const cursorPosEnd = e.target.selectionEnd;
-            if(typeof(cursorPos) === 'number') setCursorPos(cursorPos);
-            if(typeof(cursorPosEnd) === 'number') setCursorEnd(cursorPosEnd);
-          }}
+          value={seq}
+          onKeyUp={(e)=>{onChangeSequence(e);showAlignment(false);}} 
+          onMouseUp={onChangeSequence}
           onChange={(e)=> setSeq(e.target.value.replace(/[^ATCGatcgNn]/g, ''))}
         />
-        
+        <div style={{marginTop: 20}}>
+        {
+          seq !== sequenceSrc &&
+          (alignmentVisible ?
+            <div>
+              alignment
+              <div style={{width:'100%',overflowX:"scroll", whiteSpace: "nowrap"}}>
+                <GeneralSequenceAlignmentDiv sequence1={sequenceSrc} sequence2={seq}/>
+              </div>
+            </div>
+          :
+            <Button type='link' onClick={()=>showAlignment(true)}>alignment</Button>
+          )
+        }
+        </div>
       </div>
     )
     }
