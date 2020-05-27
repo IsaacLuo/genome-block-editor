@@ -213,8 +213,9 @@ function* exportProjectToGenbank(action:IAction) {
 }
 
 export function* sequenceEdit(action:IAction) { 
-  const {projectId, srcStart, srcEnd, newSeqeunce} = action.data;
-  const response = yield call(axios.post, `${conf.backendURL}/api/project/${projectId}/sequence/${srcStart}/${srcEnd}`,{sequence:newSeqeunce});
+  const {projectId, srcStart, srcEnd, newSequence} = action.data;
+  const response = yield call(axios.post, `${conf.backendURL}/api/project/${projectId}/sequence/${srcStart}/${srcEnd}`,{sequence:newSequence});
+  yield put({type:'LOAD_SOURCE_FILE', data: response.data.projectId});
   console.log(response.data);
 }
 

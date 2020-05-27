@@ -8,10 +8,10 @@ import middleware from './middleware'
 import Router from 'koa-router';
 import log4js from 'log4js';
 import conf from './conf';
-import {Project, User, AnnotationPart} from './models';
+import {Project, User, AnnotationPart, IAnnotationPartModel} from './models';
 import jwt from 'jsonwebtoken';
 import cors from 'koa-cors';
-import mongoose from 'mongoose';
+import mongoose, { Mongoose } from 'mongoose';
 // import { graphqlKoa, graphiqlKoa } from 'graphql-server-koa'
 import {useApolloServer} from './graphql';
 import serve from 'koa-static';
@@ -31,8 +31,9 @@ import { replaceCodon } from './projectGlobalTasks/replaceCodon';
 import { removeIntron } from './projectGlobalTasks/removeIntron';
 
 import axios from 'axios';
+import crypto from 'crypto';
 import { runExe } from './runExe';
-import { reverseComplement, readSequenceFromSequenceRef } from './sequenceRef';
+import { reverseComplement, readSequenceFromSequenceRef, generateSequenceRef } from './sequenceRef';
 import { insertPartsAfterFeatures } from './projectGlobalTasks/insertPartsAfterFeatures';
 
 require('dotenv').config()
@@ -490,10 +491,83 @@ router.post('/api/project/:id/sequence/:start/:end',
 userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
   const {sequence} = ctx.request.body;
-  const {id, start, end} = ctx.params;
-  const project = await Project.findById(id).populate('parts').exec();
+  let {id, start, end} = ctx.params;
+  start = parseInt(start);
+  end = parseInt(end);
+  const project = await Project.findById(id).exec();
+  const originalSequence = await readSequenceFromSequenceRef(project.sequenceRef);
+  
+  if(originalSequence.substring(start, end) === sequence) {
+    // the same, do nothing
+    ctx.body = {message:'same sequence, nothing changed'}
+    await next();
+    return;
+  }
 
-  ctx.body = {message:'OK'}
+  let newSequence = originalSequence.substring(0, start) + sequence + originalSequence.substring(end);
+  let newSequenceRef = await generateSequenceRef(newSequence);
+  let parts;
+  if (sequence.length === end - start) {
+    // same length, replace the sequence, update parts in this area
+    let partsIdsOnLeft = await AnnotationPart.find({_id:{$in:project.parts}, end:{$lte:start}}).select('_id').exec();
+    partsIdsOnLeft = partsIdsOnLeft.map(v=>v._id);
+    let partsIdsOnRight = await AnnotationPart.find({_id:{$in:project.parts}, start:{$gte:end}}).select('_id').exec();
+    partsIdsOnRight = partsIdsOnRight.map(v=>v._id);
+
+    let partsInRange = await AnnotationPart.find({_id:{$in:project.parts}, $or:[{start:{$gte:start, $lt:end}}, {end:{$gt:start, $lte:end}}, {start:{$lt: start}, end:{$gt: end}}]}).exec();
+    const newPartIds = await Promise.all(partsInRange.map(async (v:IAnnotationPartModel)=>{
+      const part:IAnnotationPart = v.toObject();
+      part.sequenceRef = {fileName:newSequenceRef.fileName, start: part.start, end: part.end, strand: part.strand};
+      part.history = [{_id:part._id, updatedAt:part.updatedAt, chagnelog:part.changelog},...part.history];
+      part.original = false;
+      part.built = true;
+      part.changelog = 'freestyle edited';
+      delete part._id;
+      const newPart = await AnnotationPart.create(part);
+      return newPart._id;
+    }));
+    parts = [...partsIdsOnLeft, ...newPartIds, ...partsIdsOnRight];
+  } else {
+    // differenct length, remove overlapped feature, and create new one
+    let partsOnLeft = await AnnotationPart.find({_id:{$in:project.parts}, end:{$lte:start}}).select('_id').exec();
+    let partOfEdited = await AnnotationPart.create({
+      pid: new mongoose.Types.ObjectId(),
+      featureType: 'region',
+      start,
+      end: start+sequence.length,
+      strand: 0,
+      name: 'Edited Region',
+      original: false,
+      history: [],
+      sequenceHash: crypto.createHash('md5').update(sequence).digest("hex"),
+    });
+    // then, shift featrues after
+    let partsOnRight = await AnnotationPart.find({_id:{$in:project.parts}, start:{$gte:end}}).exec();
+    const movedPartsOnRight = await Promise.all(partsOnRight.map(async (v:IAnnotationPartModel)=>{
+      const part:IAnnotationPart = v.toObject();
+      part.history = [{_id:part._id, updatedAt:part.updatedAt, chagnelog:part.changelog},...part.history];
+      part.original = false;
+      part.built = false;
+      part.changelog = 'moved because freestyle edtied';
+      delete part._id;
+      return await AnnotationPart.create(part);
+    }))
+
+    parts = [...partsOnLeft.map(v=>v._id), partOfEdited._id, ...movedPartsOnRight.map(v=>v._id)];
+  }
+
+  const projectObject = project.toObject();
+  projectObject.parts = parts;
+  projectObject.sequenceRef = newSequenceRef;
+  projectObject.history = [{_id:projectObject._id, updatedAt:projectObject.updatedAt, chagnelog:projectObject.changelog},...projectObject.history];
+  projectObject.changelog = `sequence changed at ${start} - ${end}`;
+  delete projectObject._id;
+
+  let newProject = await Project.create(projectObject);
+
+  await Project.updateOne({_id:project._id}, {ctype:'history'});
+
+  ctx.body = {message:'OK', projectId: newProject._id.toString()};
 }
 )
 
