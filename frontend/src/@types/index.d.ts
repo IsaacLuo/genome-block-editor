@@ -21,6 +21,7 @@ declare interface IFeature extends IBlock{
 declare interface IAnnotationPart {
   _id: any;
   pid: any;
+  parent: any;
   featureType: string;
   species: string;
   chrId: number;

@@ -76,12 +76,12 @@ def import_project(file_path, project_name):
     project_name_id_dict = {}
     chr_count = 0
     seq_dict = {}
+    unused_ids = set()
 
     gff_reader = GFFReader(file_path, fasta_file_name, sequence_dir=sequence_dir, db=db)
     count = 0
 
     now = datetime.datetime.utcnow()
-
 
     for record in gff_reader.read_gff(True):
         count+=1
@@ -94,6 +94,18 @@ def import_project(file_path, project_name):
             name = record['attribute']['Name']
         if 'Alias' in record['attribute']:
             name = record['attribute']['Alias']
+
+        if 'Parent' in record['attribute']:
+            parent_name = record['attribute']['Parent']
+            if parent_name in project_name_id_dict:
+                parent_id = project_name_id_dict[parent_name]
+            else:
+                parent_id = ObjectId()
+                print('creating parent id <<<<<<<<<<<<<<<<<<<<<<<')
+                project_name_id_dict[parent_name] = parent_id
+                unused_ids.add(parent_id)
+        else:
+            parent_id = None
 
         sequenceHash = ''
         if 'sequence' in record:
@@ -117,50 +129,75 @@ def import_project(file_path, project_name):
             print('new seq_dict', record['seqName'])
         
         if record['feature'] not in black_list_feature and record['start'] != 0:
-            insert_result = Parts.insert_one({
-                "pid":ObjectId(),
-                "featureType":record['feature'],
-                "chrName": record['seqName'],
-                "chrId": seq_dict[record['seqName']]['chrId'],
-                "start": record['start'],
-                "end": record['end'],
-                "strand": strand_dict[record['strand']],
-                "attribute": record['attribute'],
-                "name": name,
+            
+            if 'ID' in record['attribute'] and record['attribute']['ID'] in project_name_id_dict:
+                part_id = project_name_id_dict[record['attribute']['ID']]
+                # print('reuse existing id>>>>>>>>>>>>>>>>>>>>>>>>>>> ', record['attribute']['ID'])
+                if part_id in unused_ids:
+                    unused_ids.remove(part_id)
+                else:
+                    part_id = ObjectId()
                 
-                "original": True,
-                "history": [],
+            else:
+                part_id = ObjectId()
 
-                "sequenceHash": seqeunceHash,
-                "sequenceRef": {
-                    "fileName": record['chrFileName'],
-                    "start": record['start'],
-                    "end": record['end'],
-                    "strand": strand_dict[record['strand']],
-                },
-
-                "changelog": default_changelog,
-
-                "createdAt": now,
-                "updatedAt": now,
-            })
-            if insert_result.acknowledged:
-                seq_dict[record['seqName']]['parts_raw'].append({
-                    "_id":insert_result.inserted_id,
+            # print(name)
+            try:
+                # find_result = Parts.find_one({"_id":part_id})
+                # if find_result:
+                #     # print('re assign a new id')
+                #     part_id = ObjectId()
+                insert_result = Parts.insert_one({
+                    "_id":part_id,
+                    "pid":ObjectId(),
+                    "parent":parent_id,
+                    "featureType":record['feature'],
                     "chrName": record['seqName'],
                     "chrId": seq_dict[record['seqName']]['chrId'],
                     "start": record['start'],
                     "end": record['end'],
+                    "strand": strand_dict[record['strand']],
+                    "attribute": record['attribute'],
                     "name": name,
-                    "chrFileName": record['chrFileName'],
+                    
+                    "original": True,
+                    "history": [],
+
+                    "sequenceHash": seqeunceHash,
+                    "sequenceRef": {
+                        "fileName": record['chrFileName'],
+                        "start": record['start'],
+                        "end": record['end'],
+                        "strand": strand_dict[record['strand']],
+                    },
+
+                    "changelog": default_changelog,
+
+                    "createdAt": now,
+                    "updatedAt": now,
                 })
-                # insert name->id to dict
-                if 'ID' in record['attribute']:
-                    project_name_id_dict[record['attribute']['ID']] = insert_result.inserted_id
-            else:
-                raise Exception('failed insert parts')
+                if insert_result.acknowledged:
+                    seq_dict[record['seqName']]['parts_raw'].append({
+                        "_id":insert_result.inserted_id,
+                        "chrName": record['seqName'],
+                        "chrId": seq_dict[record['seqName']]['chrId'],
+                        "start": record['start'],
+                        "end": record['end'],
+                        "name": name,
+                        "chrFileName": record['chrFileName'],
+                    })
+                    # insert name->id to dict
+                    if 'ID' in record['attribute']:
+                        project_name_id_dict[record['attribute']['ID']] = insert_result.inserted_id
+                else:
+                    # raise Exception('failed insert parts')
+                    print('insert failed', str(insert_result))
+            except Exception as err:
+                print(err)
 
     # set parent id if exists:
+
+
     for k in seq_dict.keys():
         project = seq_dict[k]
         parts_raw = project['parts_raw']
@@ -185,6 +222,7 @@ def import_project(file_path, project_name):
                 end = p['start']
                 insert_result = Parts.insert_one({
                     "pid":ObjectId(),
+                    "parent": None,
                     "featureType": 'unknown',
                     "chrName": p['chrName'],
                     "chrId": p['chrId'],
@@ -193,6 +231,7 @@ def import_project(file_path, project_name):
                     "strand": 0,
                     "name": 'unknown',
                     "original": True,
+                    
 
                     "history": [],
 
@@ -230,6 +269,7 @@ def import_project(file_path, project_name):
             end = project['len']
             insert_result = Parts.insert_one({
                 "pid":ObjectId(),
+                "parent": None,
                 "featureType": 'unknown',
                 "chrName": p['chrName'],
                 "chrId": p['chrId'],

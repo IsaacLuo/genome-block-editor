@@ -9,7 +9,7 @@ import {
 } from '../redisCache';
 import fs from 'fs';
 import FormData from 'form-data';
-import {Project, User, AnnotationPart, IProjectModel, IProjectFolderModel} from '../models';
+import {Project, User, AnnotationPart, IProjectModel, IProjectFolderModel, IAnnotationPartModel} from '../models';
 
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
@@ -25,10 +25,59 @@ export interface IRange {
   end: number,
 }
 
-// export const deleteFilesSequenceRef = async (sequenceRef: ISequenceRef, strand?:number) => {
-//   // find if there is any project or part is using this sequenceRef
+export const updatePart = async (part:string|mongoose.Types.ObjectId|IAnnotationPartModel|IAnnotationPart, partForm:any) => {
+  if (typeof(part) === 'string' || part instanceof mongoose.Types.ObjectId) {
+    part = await AnnotationPart.findById(part);
+  }
+  if (part.constructor.name === 'model') {
+    part = (part as IAnnotationPartModel).toObject();
+  }
 
-// }
+  part = part as IAnnotationPart;
+
+  const history = [{
+    _id: part._id,
+    updatedAt: part.updatedAt,
+    changelog: part.changelog,
+  }, ...part.history];
+
+  delete part._id;
+
+  partForm = {...part, ...partForm, history, updatedAt: new Date()};
+
+  const newPart = await AnnotationPart.create(partForm);
+
+  return newPart;
+}
+
+export const updateProject = async (project:string|mongoose.Types.ObjectId|IProjectModel|IProject, projectForm:any, setOldProjectAsHistory:boolean = true) => {
+  if (typeof(project) === 'string' || project instanceof mongoose.Types.ObjectId) {
+    project = await Project.findById(project);
+  }
+  if (project.constructor.name === 'model') {
+    project = (project as IProjectModel).toObject();
+  }
+
+  project = project as IProject;
+
+  const history = [{
+    _id: project._id,
+    updatedAt: project.updatedAt,
+    changelog: project.changelog,
+  }, ...project.history];
+
+  delete project._id;
+
+  projectForm = {...project, ...projectForm, history, updatedAt: new Date()};
+
+  const newProject = await Project.create(projectForm);
+
+  if (setOldProjectAsHistory && project.ctype !== 'source') {
+    await Project.updateOne({_id:project._id}, {ctype:'history'});
+  }
+
+  return newProject;
+}
 
 export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId, keepUnknown=false)=>{
   const project = await Project
@@ -38,8 +87,6 @@ export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId, keepU
   })
   .exec();
 
-  // rebuild sequence 
-
   let projectSequence = '';
 
   if(project.sequenceRef && project.sequenceRef.fileName) {
@@ -47,8 +94,6 @@ export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId, keepU
   }
 
   const newRecord = project.toObject().parts.map(part=>({...part, chrName: project.name}));
-
-  // console.log('keepUnknown=',keepUnknown);
 
   const gffJson:IGFFJSON = {
     mimetype: 'application/gffjson',
@@ -113,6 +158,39 @@ export const projectToGFFJSONPartial = async (_id:string|mongoose.Types.ObjectId
   return gffJson;
 }
 
+const updateParents = async (partIds:string[]|mongoose.Types.ObjectId[], 
+                              upgradePartIdDict: {[key: string]:mongoose.Types.ObjectId},
+                              upgradedPartIds: Set<string>,
+                            )=>{
+  let candidates = await AnnotationPart.find({_id:{$in:partIds}}).exec();
+  while(true) {
+    // const ids = Array.from(upgradedPartIds);
+    let breakLoop = true;
+    // for (const part of candidates) {
+    for (let i=0;i<candidates.length;i++) {
+      const part = candidates[i];
+      const partIdStr = part._id.toString();
+      const partParentStr = part.parent?.toString();
+      if (upgradePartIdDict[partParentStr]) {
+        if (upgradedPartIds.has(partIdStr)) {
+          // newly created parts, directly update it.
+          part.parent = upgradePartIdDict[part.parent.toString()];
+          await part.save();
+          upgradedPartIds.add(partIdStr);
+        } else {
+          // existing parts, create an updated part
+          const savedPart = await updatePart(part, {parent:upgradePartIdDict[part.parent.toString()]});
+          upgradePartIdDict[partIdStr] = savedPart._id;
+          upgradedPartIds.add(savedPart._id.toString());
+          candidates[i] = savedPart;
+        }
+        breakLoop = false;
+      }      
+    }
+    if (breakLoop) break;
+  }
+  return candidates;
+}
 
 export const updateProjectByGFFJSON = async ( project:IProjectModel,
                                               gffJson:IGFFJSON,
@@ -124,7 +202,7 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
   if (gffJson.mimetype !== 'application/gffjson' && gffJson.mimetype !== 'application/gffjson-head' ) {
     throw new Error('cannot hanle mimetype '+ gffJson.mimetype);
   }
-  const newParts = [];
+  let newParts = [];
   let reuseSequence = false;
   // save sequence to file
   let projectSequenceRef:ISequenceRef;
@@ -139,6 +217,17 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
 
   const recordLength = gffJson.records.length;
   let recordCount = 0;
+
+  const upgradePartIdDict = {};
+  const upgradedPartIds = new Set<string>();
+
+  // traverse the records, preset newId for every modified part
+  for(const record of gffJson.records) {
+    if (record.__modified && record._id) {
+      upgradePartIdDict[record._id] = new mongoose.Types.ObjectId();
+    }
+  }
+
   for(const record of gffJson.records) {
     recordCount++;
     if (progressCallBack) {
@@ -163,8 +252,7 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
       }
       let sequenceHash = record.sequenceHash;
       if (!sequenceHash) sequenceHash = crypto.createHash('md5').update(partSeq).digest("hex");
-      const newPartTable = {
-        history: [],
+      const newPartForm:any = {
         ...record,
         original: false,
         createdAt: dateNow,
@@ -174,26 +262,34 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
         changelog: record.__changelog,
       };
 
+      let newAnnotation;
+
       if (record._id) {
-        const oldRecord = await AnnotationPart.findById(record._id).exec();
-        newPartTable.history = [{
-          _id: oldRecord._id,
-          updatedAt: oldRecord.updatedAt,
-          changelog: oldRecord.changelog,
-        }, ...newPartTable.history];
-        delete newPartTable._id;
-      }
-      // create new feature
-      const newAnnotation = await AnnotationPart.create(newPartTable);
+        const oldPart = await AnnotationPart.findById(record._id).exec();
+
+        if (oldPart.parent) {
+          if (upgradePartIdDict[oldPart.parent.toString()]) {
+            newPartForm.parent = upgradePartIdDict[oldPart.parent.toString()];
+          } else {
+            console.error('unable to find new parent in dict')
+          }
+        }
+        newPartForm._id = upgradePartIdDict[record._id];
+        newAnnotation = await updatePart(oldPart, newPartForm);
+      } else {
+        newPartForm.history = [];
+        newAnnotation = await AnnotationPart.create(newPartForm);
+      };
+      upgradedPartIds.add(newAnnotation._id.toString());
       newParts.push(newAnnotation._id);
     } else {
       newParts.push(record._id);
       // the sequenceRef hasn't change, but I don't think it does a matter (for now)
     }
   }
-  // create new unknown parts
-  // const unknownParts = await AnnotationPart.find({_id:{$in:project.parts}, featureType:'unknown'});
-  
+
+  // update all parents
+  newParts = (await updateParents(newParts,upgradePartIdDict, upgradedPartIds)).map(v=>v._id);
 
   // create new project, save current one as history
   let newObj = project;
@@ -229,7 +325,8 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
   let reuseSequence = false;
   // save sequence to file
   let projectSequenceRef:ISequenceRef;
-  // console.log(gffJson);
+  
+  // build sequence if gff has sequence
   if (gffJson.mimetype === 'application/gffjson') {
     const originalSequence = await readSequenceFromSequenceRef(project.sequenceRef);
     const partialSequence = gffJson.sequence[gffJson.defaultChr];
@@ -250,22 +347,37 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
   const recordLength = gffJson.records.length;
   let recordCount = 0;
 
-  // copy old features here if it's out of range
+  // calculate what part should be updated
+  const upgradePartIdDict = {};
+  const upgradedPartIds = new Set<string>();
 
+  // traverse the records, set newId for every modified part
+  for(const record of gffJson.records) {
+    if (record.__modified && record._id) {
+      upgradePartIdDict[record._id] = new mongoose.Types.ObjectId();
+    }
+  }
+
+  // copy old features here if it's out of range
   let partsOnLeft = await AnnotationPart.find({
     _id:{$in:project.parts},
     start: {$lt: range.start},
     featureType: {$ne: 'unknown'},
   }).sort({start:1}).exec();
-  newParts = partsOnLeft.map(v=>v._id);
 
-  const partsOnRight = await AnnotationPart.find({
+  let partsOnLeftIds = partsOnLeft.map(v=>v._id);
+
+  let partsOnRight = await AnnotationPart.find({
     _id:{$in:project.parts},
     start: {$gte: range.start},
     end: {$gt: range.end},
     featureType: {$ne: 'unknown'}
   }).sort({start:1}).exec();
 
+  let partsOnRightIds;
+
+  const partsInMiddle = [];
+  let partsInMiddleIds;
   for(const record of gffJson.records) {
     // add offset because it's an partial
     record.start += range.start;
@@ -294,8 +406,7 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
       }
       let sequenceHash = record.sequenceHash;
       if (!sequenceHash) sequenceHash = crypto.createHash('md5').update(partSeq).digest("hex");
-      const newPartTable = {
-        history: [],
+      const newPartForm:any = {
         ...record,
         original: false,
         createdAt: dateNow,
@@ -305,34 +416,42 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
         changelog: record.__changelog,
       };
 
+      let newAnnotation;
       if (record._id) {
-        const oldRecord = await AnnotationPart.findById(record._id).exec();
-        newPartTable.history = [{
-          _id: oldRecord._id,
-          updatedAt: oldRecord.updatedAt,
-          changelog: oldRecord.changelog,
-        }, ...newPartTable.history];
-        delete newPartTable._id;
+        const oldPart = await AnnotationPart.findById(record._id).exec();
+        if (oldPart.parent) {
+          if (upgradePartIdDict[oldPart.parent.toString()]) {
+            newPartForm.parent = upgradePartIdDict[oldPart.parent.toString()];
+          } else {
+            console.error('unable to find new parent in dict')
+          }
+        }
+        newPartForm._id = upgradePartIdDict[record._id];
+        newAnnotation = await updatePart(oldPart, newPartForm);
+      } else {
+        newPartForm.history = [];
+        newAnnotation = await AnnotationPart.create(newPartForm);
       }
-      // create new feature
-      const newAnnotation = await AnnotationPart.create(newPartTable);
-      newParts.push(newAnnotation._id);
+      upgradedPartIds.add(newAnnotation._id.toString());
+      partsInMiddle.push(newAnnotation._id);
     } else {
-      newParts.push(record._id);
+      partsInMiddle.push(record._id);
       // the sequenceRef hasn't change, but I don't think it does a matter (for now)
     }
   }
-  
+
+  partsInMiddleIds = partsInMiddle.map(v=>v._id);
+
   // if the length of gffJson = range, we don't change the parts on the right
   if( gffJson.mimetype === 'application/gffjson-head' ||
       gffJson.mimetype === 'application/gffjson' &&
       gffJson.seqInfo[gffJson.defaultChr].length === range.end - range.start
     ) {
-    newParts = newParts.concat(partsOnRight.map(v=>v._id));
+    partsOnRightIds = partsOnRight.map(v=>v._id);
   } else {
     const offset =  gffJson.seqInfo[gffJson.defaultChr].length - (range.end - range.start);
     // shift all parts on the right
-    newParts = newParts.concat(await Promise.all(partsOnRight.map(async (part)=>{
+    partsOnRightIds = await Promise.all(partsOnRight.map(async (part)=>{
       const partObj = part.toObject();
 
       const newAnnotation = await AnnotationPart.create({
@@ -348,9 +467,16 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
         changelog: 'moved because ' + gffJson.__changelog,
       });
 
+      upgradePartIdDict[part._id.toString()] = newAnnotation._id;
+      upgradedPartIds.add(newAnnotation._id.toString());
+
       return newAnnotation._id;
-    })))
+    }));
   }
+
+  // update parents of sub features
+  newParts = [...partsOnLeftIds, ...partsInMiddleIds, ...partsOnRightIds];
+  newParts = await updateParents(newParts, upgradePartIdDict, upgradedPartIds);
 
   // create new project, save current one as history
   let newObj = project;

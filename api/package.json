@@ -37,9 +37,9 @@
     "uuid": "^7.0.3"
   },
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "node -r ts-node/register --max-old-space-size=4096 src/index.ts",
     "build": "cross-env NODE_ENV=production tsc",
-    "production": "cross-env NODE_ENV=production node build/src/index.js",
+    "production": "cross-env NODE_ENV=production node --max-old-space-size=4096 build/src/index.js",
     "dev": "node ./node_modules/nodemon/bin/nodemon.js",
     "debug": "node ./node_modules/nodemon/bin/nodemon.js --inspect",
     "importDB": "cd utility && pipenv run python import_data.py",

@@ -18,6 +18,7 @@ export function useApolloServer(app:any) {
   type Part {
     _id: ID
     pid: ID
+    parent: ID
     len: Int
     featureType: String
     start: Int

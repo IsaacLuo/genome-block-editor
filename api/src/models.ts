@@ -132,3 +132,29 @@ export const ProjectFolderSchema = new Schema({
 
 export interface IProjectFolderModel extends IProjectFolder, Document{}
 export const ProjectFolder:Model<IProjectFolderModel> = mongoose.model('ProjectFolder', ProjectFolderSchema, 'project_folders');
+
+const PartUpdateLogSchema = new Schema({
+  oldPart: {
+    type: Schema.Types.ObjectId,
+    ref: 'AnnotationPart',
+  },
+  newPart: {
+    type: Schema.Types.ObjectId,
+    ref: 'AnnotationPart',
+  },
+},{ _id : false });
+
+export const ProjectLogSchema = new Schema({
+  modifiedParts: [PartUpdateLogSchema],
+  newParts: [{
+    type: Schema.Types.ObjectId,
+    ref: 'AnnotationPart',
+  }],
+  deletedParts: [{
+    type: Schema.Types.ObjectId,
+    ref: 'AnnotationPart',
+  }],
+})
+
+export interface IProjectLogModel extends IProjectLog, Document{}
+export const ProjectLog:Model<IProjectLogModel> = mongoose.model('ProjectLog', ProjectLogSchema, 'project_logs');

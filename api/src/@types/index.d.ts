@@ -43,6 +43,7 @@ declare interface ISequenceRef {
 declare interface IAnnotationPart {
   _id: any;
   pid: any;
+  parent: any;
   featureType: string;
   chrId: number;
   chrName: string;
@@ -114,6 +115,13 @@ declare interface IProjectFolder {
   name: String;
   subFolders: any[];
   projects: IProject[];
+}
+
+declare interface IProjectLog {
+  _id: any;
+  modifiedParts: {oldPart:any, newPart:any}[];
+  newParts:any[];
+  deletedParts:any[];
 }
 
 declare interface IGFFJSONRecord {

@@ -230,8 +230,10 @@ async (ctx:Ctx, next:Next)=> {
 },
 async (ctx:Ctx, next:Next)=> {
   const resultStr = JSON.stringify(ctx.body);
+  console.log('write cache file', ctx.state.cacheFileName);
   saveProjectStr(ctx.body._id, resultStr);
-  fs.promises.writeFile(ctx.state.cacheFileName, resultStr);
+  fs.promises.writeFile(ctx.state.cacheFileName, resultStr).then(()=>{console.log('file write done')});
+  
 }
 )
 

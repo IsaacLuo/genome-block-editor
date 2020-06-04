@@ -37,6 +37,7 @@ function* loadPartDetail(action:IAction) {
         part (_id:"${_id}") {
           _id
           pid
+          parent
           len
           featureType
           start

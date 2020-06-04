@@ -258,7 +258,7 @@ const GenomeBrowserCore = (
                 x={x}
                 y={v.row*(rowHeight) + (v.featureType === 'unknown' ? rowHeight/3 : 0)}
                 width={width}
-                height={v.featureType === 'unknown' ? (featureHeight)/3 : (featureHeight)}
+                height={(v.parent? 0.6: 1 )* (v.featureType === 'unknown' ? (featureHeight)/3 : (featureHeight))}
                 blockId={v._id}
                 annotationPart={v}
                 shape={shape}
