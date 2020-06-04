@@ -158,11 +158,14 @@ export const projectToGFFJSONPartial = async (_id:string|mongoose.Types.ObjectId
   return gffJson;
 }
 
-const updateParents = async (partIds:string[]|mongoose.Types.ObjectId[], 
+const updateParents = async (partIds:(string|mongoose.Types.ObjectId)[], 
                               upgradePartIdDict: {[key: string]:mongoose.Types.ObjectId},
                               upgradedPartIds: Set<string>,
                             )=>{
   let candidates = await AnnotationPart.find({_id:{$in:partIds}}).exec();
+  // sort part ids by original order
+  const partIdStrs = partIds.map(v=>v.toString());
+  candidates.sort((a,b)=> partIdStrs.indexOf(a._id.toString()) - partIdStrs.indexOf(b._id.toString()));
   while(true) {
     // const ids = Array.from(upgradedPartIds);
     let breakLoop = true;
