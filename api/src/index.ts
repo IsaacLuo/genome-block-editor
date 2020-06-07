@@ -539,8 +539,9 @@ async (ctx:Ctx, next:Next)=> {
     const newParts = await Promise.all(partsInRange.map(async (v:IAnnotationPartModel)=>{
       const part:IAnnotationPart = v.toObject();
       const oldPartId = part._id;
-
       part.sequenceRef = {fileName:newSequenceRef.fileName, start: part.start, end: part.end, strand: part.strand};
+      const partSeq = await readSequenceFromSequenceRef(part.sequenceRef);
+      part.sequenceHash = crypto.createHash('md5').update(partSeq).digest("hex");
       part.history = [{_id:part._id, updatedAt:part.updatedAt, chagnelog:part.changelog},...part.history];
       part.original = false;
       part.built = true;
