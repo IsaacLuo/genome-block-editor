@@ -60,12 +60,16 @@ export const AnnotationPartSchema = new Schema({
   updatedAt: Date,
   changelog: String,
 })
+
 .pre<IAnnotationPartModel>('save', function (next) {
   if(this.pid === undefined) {
     this.pid = mongoose.Types.ObjectId();
   }
   next();
 })
+
+AnnotationPartSchema.virtual('level').get(function(){return this.parent?1:0;});
+AnnotationPartSchema.index({ start: 1, end: -1, level: 1 });
 
 export interface IAnnotationPartModel extends IAnnotationPart, Document {
 }

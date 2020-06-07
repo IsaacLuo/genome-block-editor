@@ -158,14 +158,19 @@ export const projectToGFFJSONPartial = async (_id:string|mongoose.Types.ObjectId
   return gffJson;
 }
 
-const updateParents = async (partIds:(string|mongoose.Types.ObjectId)[], 
+export const updateParentsByIds = async (partIds:(string|mongoose.Types.ObjectId)[], 
                               upgradePartIdDict: {[key: string]:mongoose.Types.ObjectId},
                               upgradedPartIds: Set<string>,
                             )=>{
-  let candidates = await AnnotationPart.find({_id:{$in:partIds}}).exec();
-  // sort part ids by original order
-  const partIdStrs = partIds.map(v=>v.toString());
-  candidates.sort((a,b)=> partIdStrs.indexOf(a._id.toString()) - partIdStrs.indexOf(b._id.toString()));
+  let candidates = await AnnotationPart.find({_id:{$in:partIds}}).sort({start:1, end:-1, level:1}).exec();
+  return await updateParents(candidates, upgradePartIdDict, upgradedPartIds);
+}
+
+export const updateParents = async (candidates:IAnnotationPartModel[], 
+                              upgradePartIdDict: {[key: string]:mongoose.Types.ObjectId},
+                              upgradedPartIds: Set<string>,
+                            )=>{
+  // let candidates = await AnnotationPart.find({_id:{$in:partIds}}).sort({start:1, end:-1, level:1}).exec();
   while(true) {
     // const ids = Array.from(upgradedPartIds);
     let breakLoop = true;
@@ -292,7 +297,7 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
   }
 
   // update all parents
-  newParts = (await updateParents(newParts,upgradePartIdDict, upgradedPartIds)).map(v=>v._id);
+  newParts = (await updateParentsByIds(newParts,upgradePartIdDict, upgradedPartIds)).map(v=>v._id);
 
   // create new project, save current one as history
   let newObj = project;
@@ -366,7 +371,7 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
     _id:{$in:project.parts},
     start: {$lt: range.start},
     featureType: {$ne: 'unknown'},
-  }).sort({start:1}).exec();
+  }).sort({start:1, end:-1, level:1}).exec();
 
   let partsOnLeftIds = partsOnLeft.map(v=>v._id);
 
@@ -375,7 +380,7 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
     start: {$gte: range.start},
     end: {$gt: range.end},
     featureType: {$ne: 'unknown'}
-  }).sort({start:1}).exec();
+  }).sort({start:1, end:-1, level:1}).exec();
 
   let partsOnRightIds;
 
@@ -479,7 +484,7 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
 
   // update parents of sub features
   newParts = [...partsOnLeftIds, ...partsInMiddleIds, ...partsOnRightIds];
-  newParts = await updateParents(newParts, upgradePartIdDict, upgradedPartIds);
+  newParts = await updateParentsByIds(newParts, upgradePartIdDict, upgradedPartIds);
 
   // create new project, save current one as history
   let newObj = project;

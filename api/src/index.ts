@@ -35,6 +35,7 @@ import crypto from 'crypto';
 import { runExe } from './runExe';
 import { reverseComplement, readSequenceFromSequenceRef, generateSequenceRef } from './sequenceRef';
 import { insertPartsAfterFeatures } from './projectGlobalTasks/insertPartsAfterFeatures';
+import {updateParents} from './projectGlobalTasks/projectImportExport';
 
 require('dotenv').config()
 
@@ -489,6 +490,24 @@ async (ctx:Ctx, next:Next)=> {
 }
 )
 
+const sortParts = (parts:IAnnotationPart[]) => {
+  return parts.sort((a,b)=>{
+    if (a.start < b.start) {
+      return -1;
+    }
+    if (a.start > b.start) {
+      return 1;
+    }
+    if (a.end > b.end) {
+      return -1;
+    }
+    if (a.end < b.end) {
+      return 1;
+    }
+    return a.level < b.level ? -1 : 1;
+  })
+}
+
 router.post('/api/project/:id/sequence/:start/:end',
 userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
@@ -509,16 +528,18 @@ async (ctx:Ctx, next:Next)=> {
   let newSequence = originalSequence.substring(0, start) + sequence + originalSequence.substring(end);
   let newSequenceRef = await generateSequenceRef(newSequence);
   let parts;
+  let upgradePartIdDict = {};
+  let upgradedPartIds = new Set<string>();
   if (sequence.length === end - start) {
     // same length, replace the sequence, update parts in this area
-    let partsIdsOnLeft = await AnnotationPart.find({_id:{$in:project.parts}, end:{$lte:start}}).select('_id').exec();
-    partsIdsOnLeft = partsIdsOnLeft.map(v=>v._id);
-    let partsIdsOnRight = await AnnotationPart.find({_id:{$in:project.parts}, start:{$gte:end}}).select('_id').exec();
-    partsIdsOnRight = partsIdsOnRight.map(v=>v._id);
+    let partsOnLeft = await AnnotationPart.find({_id:{$in:project.parts}, end:{$lte:start}}).sort({start:1, end:-1, level:1}).exec();
+    let partsOnRight = await AnnotationPart.find({_id:{$in:project.parts}, start:{$gte:end}}).sort({start:1, end:-1, level:1}).exec();
 
-    let partsInRange = await AnnotationPart.find({_id:{$in:project.parts}, $or:[{start:{$gte:start, $lt:end}}, {end:{$gt:start, $lte:end}}, {start:{$lt: start}, end:{$gt: end}}]}).exec();
-    const newPartIds = await Promise.all(partsInRange.map(async (v:IAnnotationPartModel)=>{
+    let partsInRange = await AnnotationPart.find({_id:{$in:project.parts}, $or:[{start:{$gte:start, $lt:end}}, {end:{$gt:start, $lte:end}}, {start:{$lt: start}, end:{$gt: end}}]}).sort({start:1, end:-1, level:1}).exec();
+    const newParts = await Promise.all(partsInRange.map(async (v:IAnnotationPartModel)=>{
       const part:IAnnotationPart = v.toObject();
+      const oldPartId = part._id;
+
       part.sequenceRef = {fileName:newSequenceRef.fileName, start: part.start, end: part.end, strand: part.strand};
       part.history = [{_id:part._id, updatedAt:part.updatedAt, chagnelog:part.changelog},...part.history];
       part.original = false;
@@ -526,12 +547,14 @@ async (ctx:Ctx, next:Next)=> {
       part.changelog = 'freestyle edited';
       delete part._id;
       const newPart = await AnnotationPart.create(part);
-      return newPart._id;
+      upgradePartIdDict[oldPartId.toString()] = newPart._id;
+      upgradedPartIds.add(newPart._id.toString());
+      return newPart;
     }));
-    parts = [...partsIdsOnLeft, ...newPartIds, ...partsIdsOnRight];
+    parts = [...partsOnLeft, ...newParts, ...partsOnRight];
   } else {
     // differenct length, remove overlapped feature, and create new one
-    let partsOnLeft = await AnnotationPart.find({_id:{$in:project.parts}, end:{$lte:start}}).select('_id').exec();
+    let partsOnLeft = await AnnotationPart.find({_id:{$in:project.parts}, end:{$lte:start}}).sort({start:1, end:-1, level:1}).exec();
     let partOfEdited = await AnnotationPart.create({
       pid: new mongoose.Types.ObjectId(),
       featureType: 'region',
@@ -544,19 +567,27 @@ async (ctx:Ctx, next:Next)=> {
       sequenceHash: crypto.createHash('md5').update(sequence).digest("hex"),
     });
     // then, shift featrues after
-    let partsOnRight = await AnnotationPart.find({_id:{$in:project.parts}, start:{$gte:end}}).exec();
+    let partsOnRight = await AnnotationPart.find({_id:{$in:project.parts}, start:{$gte:end}}).sort({start:1, end:-1, level:1}).exec();
     const movedPartsOnRight = await Promise.all(partsOnRight.map(async (v:IAnnotationPartModel)=>{
       const part:IAnnotationPart = v.toObject();
+      const oldPartId = part._id;
       part.history = [{_id:part._id, updatedAt:part.updatedAt, chagnelog:part.changelog},...part.history];
       part.original = false;
       part.built = false;
       part.changelog = 'moved because freestyle edtied';
       delete part._id;
-      return await AnnotationPart.create(part);
+      const newPart = await AnnotationPart.create(part);
+      upgradePartIdDict[oldPartId.toString()] = newPart._id;
+      upgradedPartIds.add(newPart._id.toString());
+      return newPart;
     }))
 
-    parts = [...partsOnLeft.map(v=>v._id), partOfEdited._id, ...movedPartsOnRight.map(v=>v._id)];
+    parts = [...partsOnLeft, partOfEdited, ...partsOnRight];
   }
+  //sort parts
+  parts = sortParts(parts)
+  parts = await updateParents(parts, upgradePartIdDict, upgradedPartIds);
+  parts = parts.map(v=>v._id);
 
   const projectObject = project.toObject();
   projectObject.parts = parts;

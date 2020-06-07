@@ -88,7 +88,7 @@ export const buildWholeProject = async (_id:string|mongoose.Types.ObjectId) => {
   // now verify if all parts has the same fileName
   const partIds = project.parts;
   const replaceDict:any = {};
-  const parts = await AnnotationPart.find({_id:{$in:partIds}, 'sequenceRef.fileName':fileName}).exec();
+  const parts = await AnnotationPart.find({_id:{$in:partIds}, 'sequenceRef.fileName':fileName}).sort({start:1, end:-1, level:1}).exec();
   if (parts === []) {
     return _id;
   }

@@ -59,6 +59,7 @@ declare interface IAnnotationPart {
   updatedAt: Date;
   changelog: string;
   built: boolean;
+  level: number;
 }
 
 declare interface IProject {
