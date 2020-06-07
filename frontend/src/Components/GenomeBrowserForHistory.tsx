@@ -37,6 +37,7 @@ const GenomeBrowserForHistory = () => {
     selectionStart,
     selectionEnd,
     selectionEnabled,
+    subFeatureVisible,
     } = useMappedState((state:IStoreState)=>({
     projectId: (state.sourceFile && state.sourceFile.projectId),
     historyBrowserVisible: state.componentVisible.historyBrowserVisible,
@@ -60,6 +61,7 @@ const GenomeBrowserForHistory = () => {
     selectionStart: state.genomeBrowser.selectionStart,
     selectionEnd: state.genomeBrowser.selectionEnd,
     selectionEnabled: state.genomeBrowser.selectionEnabled,
+    subFeatureVisible: state.componentVisible.subFeatureVisible,
   }));
 
   const dispatch = useDispatch();
@@ -115,6 +117,7 @@ const GenomeBrowserForHistory = () => {
           highLightedParts = {highLightedParts}
           selectionStart = {selectionEnabled ? (selectionStart + (locationStartOffset || 0)): undefined}
           selectionEnd = {selectionEnabled ? (selectionEnd + (locationEndOffset || 0)): undefined}
+          subFeatureVisible = {subFeatureVisible}
         />
         </div>
       </React.Fragment>

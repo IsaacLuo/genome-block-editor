@@ -201,11 +201,11 @@ async (ctx:Ctx, next:Next)=> {
     result = await Project.findById(id)
       .exec();
     let cacheFileName = `./${conf.rootStorageFolder}/sourceFileCaches/${id}`;
-    if (result.ctype !== 'source') {
-      cacheFileName+= result.updatedAt.getTime();
-    }
-    cacheFileName+='.'
-    cacheFileName+=result.ctype
+    // if (result.ctype !== 'source') {
+    //   cacheFileName+= result.updatedAt.getTime();
+    // }
+    // cacheFileName+='.'
+    // cacheFileName+=result.ctype
     console.debug(cacheFileName)
     if(await fs_exists(cacheFileName)) {
       console.debug('cache file exists')

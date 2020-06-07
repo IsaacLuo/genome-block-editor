@@ -76,6 +76,7 @@ const DEFAULT_COMPONENT_VISIBLE_STATE:IComponentVisibleState = {
   insertFeatureDialogVisible: false,
   removeIntronDialogVisible: false,
   sequenceEditorDialogVisible: false,
+  subFeatureVisible: true,
 }
 
 const DEFAULT_HISTORY_STATE:IHistoryState = {
@@ -202,7 +203,20 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
       return {...state, removeIntronDialogVisible: false};
     }
     case 'HIDE_ALL_DIALOG':
-      return DEFAULT_COMPONENT_VISIBLE_STATE;
+      return {...state, 
+        openFileDialogVisible: false,
+        saveFileDialogVisible: false,
+        exportGenbankDialogVisible: false,
+        generatePromoterTerminatorDialogVisible: false,
+        removeCreatedFeaturesDialogVisible: false,
+        forkProjectDialogVisible: false,
+        historyBrowserVisible: false,
+        replaceCodonDialogVisible: false,
+        partDetailDialogVisible: false,
+        insertFeatureDialogVisible: false,
+        removeIntronDialogVisible: false,
+        sequenceEditorDialogVisible: false,
+      };
     case 'SHOW_HIDE_HISTORY_VERSIONS':
       return {...state, historyBrowserVisible: !state.historyBrowserVisible}
 
@@ -211,6 +225,9 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
     }
     case 'HIDE_SEQUENCE_EDITOR_DIALOG': {
       return {...state, sequenceEditorDialogVisible: false};
+    }
+    case 'SHOW_SUB_FEATURES': {
+      return {...state, subFeatureVisible: action.data};
     }
     default:
       return state;

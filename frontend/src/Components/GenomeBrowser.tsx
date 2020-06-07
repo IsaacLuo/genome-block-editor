@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {useDispatch, useMappedState} from 'redux-react-hook';
 import GenomeBrowserCore from './GenomeBrowserCore';
-import { Input, InputNumber, Button } from 'antd';
+import { Input, InputNumber, Button, Switch } from 'antd';
 import { CloseCircleOutlined, CloseCircleFilled } from '@ant-design/icons';
 
 const GenomeBrowser = () => {
@@ -18,6 +18,7 @@ const GenomeBrowser = () => {
     selectionStart,
     selectionEnd,
     selectionEnabled,
+    subFeatureVisible,
     } = useMappedState((state:IStoreState)=>({
     sourceFile: state.sourceFile,
     zoomLevel: state.genomeBrowser.zoomLevel,
@@ -35,6 +36,7 @@ const GenomeBrowser = () => {
     selectionStart: state.genomeBrowser.selectionStart,
     selectionEnd: state.genomeBrowser.selectionEnd,
     selectionEnabled: state.genomeBrowser.selectionEnabled,
+    subFeatureVisible: state.componentVisible.subFeatureVisible,
   }));
 
   const dispatch = useDispatch();
@@ -52,8 +54,13 @@ const GenomeBrowser = () => {
         highLightedParts = {historyBrowserVisible ? historyDiffParts.diffSetSource: undefined}
         selectionStart = {selectionEnabled ? selectionStart: undefined}
         selectionEnd = {selectionEnabled ? selectionEnd: undefined}
+        subFeatureVisible = {subFeatureVisible}
       />
       {sourceFile && <div>
+        <span style={{marginRight:20}}>
+        show sub-features
+        <Switch checked={subFeatureVisible} onChange={(value)=> dispatch({type:'SHOW_SUB_FEATURES', data:value})} />
+        </span>
         from:
         <InputNumber 
           min={1} 

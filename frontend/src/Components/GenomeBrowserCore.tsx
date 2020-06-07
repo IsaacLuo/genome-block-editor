@@ -44,6 +44,7 @@ interface IProps {
   
   selectionStart?: number,
   selectionEnd?: number,
+  subFeatureVisible: boolean,
 
 }
 
@@ -59,6 +60,7 @@ const GenomeBrowserCore = (
     highLightedParts,
     selectionStart,
     selectionEnd,
+    subFeatureVisible,
   }:IProps
 ) => {
   const dispatch = useDispatch();
@@ -109,7 +111,8 @@ const GenomeBrowserCore = (
   const features = sourceFile!.parts
     .filter((v)=>
       v.start <= viewWindowEnd &&
-      v.end >= viewWindowStart 
+      v.end >= viewWindowStart &&
+      (subFeatureVisible || v.parent === null || v.parent === undefined)
     )
     .map(v=>({...v, row:0}));
   let featuresLen = features.length;
@@ -153,8 +156,6 @@ const GenomeBrowserCore = (
       }
     }
   }
-
-
 
   // const svgWidth = zoom(sourceFile.len);
   const svgWidth = windowWidth;

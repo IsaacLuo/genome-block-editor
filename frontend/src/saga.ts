@@ -65,6 +65,7 @@ export function* loadSourceFile(action:IAction) {
     yield put({type:'SET_GENOME_BROWSER_LOADING', data:false});
     yield put({type: 'SET_SOURCE_FILE', data:result.data});
     yield put({type: 'HIDE_ALL_DIALOG', data:result.data});
+    yield put({type: 'CLEAR_GB_SELECTION'})
   } catch (error) {
     console.warn('failed in loadSourceFile');
   }

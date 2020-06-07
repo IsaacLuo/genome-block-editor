@@ -37,6 +37,7 @@ declare interface IAnnotationPart {
   createdAt: Date;
   updatedAt: Date;
   sequenceHash: string;
+  level: number;
 }
 
 declare interface IHistory {
@@ -90,9 +91,10 @@ declare interface IComponentVisibleState {
   historyBrowserVisible: boolean;
   replaceCodonDialogVisible: boolean;
   partDetailDialogVisible: boolean;
-  insertFeatureDialogVisible: boolean,
-  removeIntronDialogVisible: boolean,
-  sequenceEditorDialogVisible: boolean,
+  insertFeatureDialogVisible: boolean;
+  removeIntronDialogVisible: boolean;
+  sequenceEditorDialogVisible: boolean;
+  subFeatureVisible: boolean;
 }
 
 declare interface IGenomBrowserState {
