@@ -1,0 +1,50 @@
+version: '3.0'
+services:
+  redis:
+    image: "isaacluo/redis:lru-2g"
+    container_name: gbe-redis
+    networks:
+      - gbe
+    restart: always
+
+  webexe:
+    container_name: gbe-webexe
+    ports:
+      - "10202:10202"
+    build: ../webexe/api
+    working_dir: /app
+    command: ['yarn', 'run', 'production']
+    networks:
+      - gbe
+    restart: always
+
+  api:
+    container_name: gbe-api
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    build: ./api
+    working_dir: /app
+    volumes: 
+        - "./api/public:/app/public"
+    command: ['yarn', 'run', 'production']
+    networks:
+      - gbe
+    restart: always
+
+  frontend:
+    container_name: gbe-frontend
+    build: ./frontend
+    restart: always
+    ports:
+      - "${FRONTEND_PORT}:80"
+    # links:
+    #   - api
+    depends_on:
+      - api
+    networks:
+      - gbe
+    command: ['nginx', '-g', 'daemon off;']
+
+networks:
+  gbe:
+    driver: bridge

@@ -3,9 +3,6 @@ import {Project, AnnotationPart} from '../models';
 import { 
     saveProject, 
     deleteProject, 
-    loadProjectStr, 
-    saveProjectStr, 
-    loadProjectIdStr, 
     saveProjectIdStr,
 } from '../redisCache';
 import createError from 'http-errors';
@@ -60,8 +57,8 @@ export const revertProject = async (_id:string|mongoose.Types.ObjectId) => {
     if (historyProject.ctype === 'history') {
       historyProject.ctype = project.ctype;
       historyProject.save();
-      saveProject(historyProject);
-      saveProjectIdStr(historyProject.projectId.toString(), historyProject._id.toString());
+      // saveProject(historyProject);
+      // saveProjectIdStr(historyProject.projectId.toString(), historyProject._id.toString());
     } else {
       throw createError(403, 'cannot revert because it is the first version since forking');
     }

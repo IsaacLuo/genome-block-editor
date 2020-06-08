@@ -61,9 +61,9 @@ const ProjectFunctions: React.FC = (props:any) => {
           <GenomeBrowser/>
         </div>
 
-        <div>
+        {process.env.NODE_ENV === 'development' && <div>
           <GenomeOperationPanel/>
-        </div>
+        </div>}
         <CreatePromoterTermiatorDlg/>
         <RemoveCreatedFeatureDlg/>
         <ForkProjectDlg/>
@@ -77,7 +77,7 @@ const ProjectFunctions: React.FC = (props:any) => {
 
         <PartDetailDlg/>
         <SequenceEditorDlg/>
-        <DebugPanel/>
+        {process.env.NODE_ENV === 'development' && <DebugPanel/>}
       </div>
   );
 }

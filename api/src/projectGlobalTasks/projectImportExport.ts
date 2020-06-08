@@ -1,17 +1,6 @@
 import mongoose from 'mongoose';
-import { 
-    saveProject, 
-    deleteProject, 
-    loadProjectStr, 
-    saveProjectStr, 
-    loadProjectIdStr,
-    saveProjectIdStr,
-} from '../redisCache';
-import fs from 'fs';
 import FormData from 'form-data';
-import {Project, User, AnnotationPart, IProjectModel, IProjectFolderModel, IAnnotationPartModel} from '../models';
-
-import { v4 as uuidv4 } from 'uuid';
+import {Project, AnnotationPart, IProjectModel, IAnnotationPartModel} from '../models';
 import crypto from 'crypto';
 import { pushHistory } from './project';
 import conf from '../conf';
