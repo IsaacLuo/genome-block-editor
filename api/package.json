@@ -12,7 +12,7 @@
     "@types/redis": "^2.8.16",
     "@types/socket.io": "^2.1.4",
     "@types/uuid": "^7.0.2",
-    "apollo-server-koa": "^2.9.12",
+    "apollo-server-koa": "^2.14.2",
     "axios": "^0.19.2",
     "cross-env": "^6.0.0",
     "crypto": "^1.0.1",
