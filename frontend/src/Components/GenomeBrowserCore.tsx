@@ -186,7 +186,7 @@ const GenomeBrowserCore = (
   const sourceFileLen = sourceFile.len;
   const maxAllowedScollPos = sourceFileLen+100*zoomLevel;
 
-  const selectionRect = selectionStart && selectionEnd && <rect
+  const selectionRect = selectionStart!== undefined && selectionEnd !== undefined && <rect
     x={zoom(selectionStart)}
     y={0}
     width={zoom(selectionEnd-selectionStart)}

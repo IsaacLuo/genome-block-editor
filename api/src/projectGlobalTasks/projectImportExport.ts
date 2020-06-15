@@ -432,7 +432,7 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
       upgradedPartIds.add(newAnnotation._id.toString());
       partsInMiddle.push(newAnnotation._id);
     } else {
-      partsInMiddle.push(record._id);
+      partsInMiddle.push({_id:record._id});
       // the sequenceRef hasn't change, but I don't think it does a matter (for now)
     }
   }

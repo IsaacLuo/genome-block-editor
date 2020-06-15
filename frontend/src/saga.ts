@@ -2,7 +2,7 @@ import { LOAD_SOURCE_FILE_BY_PROJECT_ID } from './actions';
 
 // redux saga
 import { eventChannel } from 'redux-saga'
-import {call, all, fork, put, take, takeLatest, select, actionChannel, takeEvery} from 'redux-saga/effects';
+import {call, all, fork, put, take, takeLatest, select, takeEvery} from 'redux-saga/effects';
 
 import watchFolders from './sagas/folders';
 
@@ -15,7 +15,7 @@ import watchProjects from 'sagas/projects';
 import watchGlobalProcessTasks from 'sagas/globalProcessTasks';
 
 function getFuncName() {
-   return getFuncName.caller.name
+  return getFuncName.caller.name
 }
 
 export function* cailabInstanceLogin(action: IAction) {

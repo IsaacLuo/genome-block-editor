@@ -5,7 +5,7 @@ import SaveFileDialog from 'Components/SaveFileDialog'
 import ExportGenbankDialog from 'Components/ExportGenbankDialog'
 
 const OperationPanel = () => {
-  const {project, projectCorsor, openFileDialogVisible, saveFileDialogVisible, exportGenbankDialogVisible} = useMappedState((state:IStoreState)=>({
+  const {project, openFileDialogVisible, saveFileDialogVisible, exportGenbankDialogVisible} = useMappedState((state:IStoreState)=>({
     project: state.currentProject,
     projectCorsor: state.projectCorsor,
     openFileDialogVisible: state.componentVisible.openFileDialogVisible,

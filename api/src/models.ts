@@ -60,8 +60,7 @@ export const AnnotationPartSchema = new Schema({
   updatedAt: Date,
   changelog: String,
 })
-
-.pre<IAnnotationPartModel>('save', function (next) {
+AnnotationPartSchema.pre<IAnnotationPartModel>('save', function (next) {
   if(this.pid === undefined) {
     this.pid = mongoose.Types.ObjectId();
   }
@@ -73,7 +72,7 @@ AnnotationPartSchema.index({ start: 1, end: -1, level: 1 });
 
 export interface IAnnotationPartModel extends IAnnotationPart, Document {
 }
-export const AnnotationPart:Model<IAnnotationPartModel> = mongoose.model('AnnotationPart', AnnotationPartSchema, 'annotation_parts');
+export const AnnotationPart = mongoose.model<IAnnotationPartModel>('AnnotationPart', AnnotationPartSchema, 'annotation_parts');
 
 export const ProjectSchema = new Schema({
   name: String,

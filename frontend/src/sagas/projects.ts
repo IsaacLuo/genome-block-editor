@@ -1,15 +1,12 @@
-import { HIDE_ALL_DIALOG } from './../actions';
-import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-saga/effects'
-import conf from '../conf.json'
-import { eventChannel } from 'redux-saga'
-import {delay} from 'redux-saga/effects'
+import {call, select, put, take, takeLatest, takeEvery} from 'redux-saga/effects';
+import conf from '../conf.json';
+import { eventChannel } from 'redux-saga';
 import axios from 'axios';
 import apolloClient from '../apolloClient';
 import { gql } from "apollo-boost";
-import { InMemoryCache } from 'apollo-cache-inmemory';
 import {saveAs} from 'file-saver';
-import { Modal, Button } from 'antd';
-import { ExclamationCircleOutlined, ProjectFilled } from '@ant-design/icons';
+import { Modal} from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 import * as React from 'react';
 import io from 'socket.io-client';
 

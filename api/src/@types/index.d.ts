@@ -49,6 +49,7 @@ declare interface IAnnotationPart {
   chrName: string;
   start: number;
   end: number;
+  len: number;
   strand: number;
   name: string;
   original: boolean;

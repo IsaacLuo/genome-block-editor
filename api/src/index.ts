@@ -556,17 +556,31 @@ async (ctx:Ctx, next:Next)=> {
   } else {
     // differenct length, remove overlapped feature, and create new one
     let partsOnLeft = await AnnotationPart.find({_id:{$in:project.parts}, end:{$lte:start}}).sort({start:1, end:-1, level:1}).exec();
+    let newPartEnd:number = start+sequence.length;
+
     let partOfEdited = await AnnotationPart.create({
       pid: new mongoose.Types.ObjectId(),
       featureType: 'region',
       start,
-      end: start+sequence.length,
+      end: newPartEnd,
+      len: sequence.length,
       strand: 0,
       name: 'Edited Region',
-      original: false,
-      history: [],
+      // history: [] as any[],
       sequenceHash: crypto.createHash('md5').update(sequence).digest("hex"),
-    });
+      sequenceRef: {
+        fileName:newSequenceRef.fileName, 
+        start: start,
+        end: newPartEnd, 
+        strand: 0,
+      },
+      built:true,
+      changelog:'free style edited',
+      parent: null,
+      level:0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     // then, shift featrues after
     let partsOnRight = await AnnotationPart.find({_id:{$in:project.parts}, start:{$gte:end}}).sort({start:1, end:-1, level:1}).exec();
     const movedPartsOnRight = await Promise.all(partsOnRight.map(async (v:IAnnotationPartModel)=>{
