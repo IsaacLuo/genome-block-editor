@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import FormData from 'form-data';
-import {Project, AnnotationPart, IProjectModel, IAnnotationPartModel} from '../models';
+import {Project, AnnotationPart, IProjectModel, IAnnotationPartModel, ProjectLog} from '../models';
 import crypto from 'crypto';
 import { pushHistory } from './project';
 import conf from '../conf';
@@ -150,14 +150,16 @@ export const projectToGFFJSONPartial = async (_id:string|mongoose.Types.ObjectId
 export const updateParentsByIds = async (partIds:(string|mongoose.Types.ObjectId)[], 
                               upgradePartIdDict: {[key: string]:mongoose.Types.ObjectId},
                               upgradedPartIds: Set<string>,
+                              onUpdatedCallback?: (part:any, ctype:string)=>void,
                             )=>{
   let candidates = await AnnotationPart.find({_id:{$in:partIds}}).sort({start:1, end:-1, level:1}).exec();
-  return await updateParents(candidates, upgradePartIdDict, upgradedPartIds);
+  return await updateParents(candidates, upgradePartIdDict, upgradedPartIds, onUpdatedCallback);
 }
 
 export const updateParents = async (candidates:IAnnotationPartModel[], 
                               upgradePartIdDict: {[key: string]:mongoose.Types.ObjectId},
                               upgradedPartIds: Set<string>,
+                              onUpdatedCallback?: (part:any, ctype:string)=>void,
                             )=>{
   // let candidates = await AnnotationPart.find({_id:{$in:partIds}}).sort({start:1, end:-1, level:1}).exec();
   while(true) {
@@ -174,12 +176,14 @@ export const updateParents = async (candidates:IAnnotationPartModel[],
           part.parent = upgradePartIdDict[part.parent.toString()];
           await part.save();
           upgradedPartIds.add(partIdStr);
+          if(onUpdatedCallback) onUpdatedCallback(part, 'in-place-update');
         } else {
           // existing parts, create an updated part
           const savedPart = await updatePart(part, {parent:upgradePartIdDict[part.parent.toString()]});
           upgradePartIdDict[partIdStr] = savedPart._id;
           upgradedPartIds.add(savedPart._id.toString());
           candidates[i] = savedPart;
+          if(onUpdatedCallback) onUpdatedCallback(part, 'modified');
         }
         breakLoop = false;
       }      
@@ -204,6 +208,16 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
   // save sequence to file
   let projectSequenceRef:ISequenceRef;
   // console.log(gffJson);
+
+  let projectLog:IProjectLog = {
+    _id:undefined,
+    modifiedParts: [] as IPartUpdateLog[],
+    createdParts: [] as IPartUpdateLog[],
+    deletedParts: [] as IPartUpdateLog[],
+    shiftedParts: [] as IPartUpdateLog[],
+  }
+
+
   if (gffJson.mimetype === 'application/gffjson') {
     projectSequenceRef = await generateSequenceRef(gffJson.sequence[gffJson.defaultChr]);
   } else {
@@ -322,6 +336,13 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
   let reuseSequence = false;
   // save sequence to file
   let projectSequenceRef:ISequenceRef;
+  let projectLog:IProjectLog = {
+    _id: undefined,
+    modifiedParts: [] as IPartUpdateLog[],
+    createdParts: [] as IPartUpdateLog[],
+    deletedParts: [] as IPartUpdateLog[],
+    shiftedParts: [] as IPartUpdateLog[],
+  }
   
   // build sequence if gff has sequence
   if (gffJson.mimetype === 'application/gffjson') {
@@ -425,9 +446,23 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
         }
         newPartForm._id = upgradePartIdDict[record._id];
         newAnnotation = await updatePart(oldPart, newPartForm);
+        projectLog.modifiedParts.push({
+          ctype: 'modified', 
+          part: newAnnotation._id, 
+          name: newAnnotation.name, 
+          changelog: newAnnotation.changelog, 
+          location: newAnnotation.start, 
+          oldPart: oldPart._id});
       } else {
         newPartForm.history = [];
         newAnnotation = await AnnotationPart.create(newPartForm);
+        projectLog.createdParts.push({
+          ctype: 'new', 
+          part: newAnnotation._id, 
+          name: newAnnotation.name, 
+          changelog: newAnnotation.changelog, 
+          location: newAnnotation.start, 
+          oldPart: null});
       }
       upgradedPartIds.add(newAnnotation._id.toString());
       partsInMiddle.push(newAnnotation._id);
@@ -467,13 +502,30 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
       upgradePartIdDict[part._id.toString()] = newAnnotation._id;
       upgradedPartIds.add(newAnnotation._id.toString());
 
+      projectLog.shiftedParts.push({
+        ctype: 'moved', 
+        part: newAnnotation._id, 
+        name: newAnnotation.name, 
+        changelog: newAnnotation.changelog, 
+        location: newAnnotation.start, 
+        oldPart: null});
+
       return newAnnotation._id;
     }));
   }
 
   // update parents of sub features
   newParts = [...partsOnLeftIds, ...partsInMiddleIds, ...partsOnRightIds];
-  newParts = await updateParentsByIds(newParts, upgradePartIdDict, upgradedPartIds);
+  newParts = await updateParentsByIds(newParts, upgradePartIdDict, upgradedPartIds, 
+    (part, ctype)=>{
+      projectLog.shiftedParts.push({
+        ctype: 'moved', 
+        part: part._id, 
+        name: part.name, 
+        changelog: 'parent updated',
+        location: part.start, 
+        oldPart: ctype==='modified' ? part.history[0]._id: null});
+    });
 
   // create new project, save current one as history
   let newObj = project;
@@ -491,6 +543,9 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
   const newItem = await Project.create(newObj);
   // old project become history
   await Project.update({_id:project._id}, {ctype:'history'});
+  // save detail in log
+  projectLog._id = newItem._id;
+  await ProjectLog.create(projectLog);
 
   return newItem;
 }

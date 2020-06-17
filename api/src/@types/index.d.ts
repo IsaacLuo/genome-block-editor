@@ -119,11 +119,21 @@ declare interface IProjectFolder {
   projects: IProject[];
 }
 
+declare interface IPartUpdateLog {
+  ctype: string,
+  part?: any,
+  name?: string,
+  changelog?: string,
+  location?: number,
+  oldPart?: any,
+}
+
 declare interface IProjectLog {
   _id: any;
-  modifiedParts: {oldPart:any, newPart:any}[];
-  newParts:any[];
-  deletedParts:any[];
+  modifiedParts: IPartUpdateLog[],
+  createdParts: IPartUpdateLog[],
+  deletedParts: IPartUpdateLog[],
+  shiftedParts: IPartUpdateLog[],
 }
 
 declare interface IGFFJSONRecord {

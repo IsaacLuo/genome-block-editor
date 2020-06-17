@@ -137,11 +137,15 @@ export interface IProjectFolderModel extends IProjectFolder, Document{}
 export const ProjectFolder:Model<IProjectFolderModel> = mongoose.model('ProjectFolder', ProjectFolderSchema, 'project_folders');
 
 const PartUpdateLogSchema = new Schema({
-  oldPart: {
+  ctype: String,
+  part: {
     type: Schema.Types.ObjectId,
     ref: 'AnnotationPart',
   },
-  newPart: {
+  name: String,
+  changelog: String,
+  location: Number,
+  oldPart: {
     type: Schema.Types.ObjectId,
     ref: 'AnnotationPart',
   },
@@ -149,14 +153,9 @@ const PartUpdateLogSchema = new Schema({
 
 export const ProjectLogSchema = new Schema({
   modifiedParts: [PartUpdateLogSchema],
-  newParts: [{
-    type: Schema.Types.ObjectId,
-    ref: 'AnnotationPart',
-  }],
-  deletedParts: [{
-    type: Schema.Types.ObjectId,
-    ref: 'AnnotationPart',
-  }],
+  createdParts: [PartUpdateLogSchema],
+  deletedParts: [PartUpdateLogSchema],
+  shiftedParts: [PartUpdateLogSchema],
 })
 
 export interface IProjectLogModel extends IProjectLog, Document{}
