@@ -8,7 +8,7 @@ import middleware from './middleware'
 import Router from 'koa-router';
 import log4js from 'log4js';
 import conf from './conf';
-import {Project, User, AnnotationPart, IAnnotationPartModel} from './models';
+import {Project, User, AnnotationPart, IAnnotationPartModel, ProjectLog} from './models';
 import jwt from 'jsonwebtoken';
 import cors from 'koa-cors';
 import mongoose, { Mongoose } from 'mongoose';
@@ -618,6 +618,28 @@ async (ctx:Ctx, next:Next)=> {
   ctx.body = {message:'OK', projectId: newProject._id.toString()};
 }
 )
+
+// get log of a project operation
+router.get('/api/project/:id/operationLog',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {id} = ctx.params;
+  // console.debug('loading');
+  let result = await ProjectLog.findById(id).exec();
+  if(result === null) {
+    ctx.body = {
+      _id: id,
+      parts: []
+    }
+  } else {
+    result = result.toObject();
+    ctx.body = {
+      _id: result._id,
+      parts: [...result.conflictParts, ...result.modifiedParts, ...result.createdParts, ...result.deletedParts, ...result.shiftedParts],
+    }
+  }
+  // console.debug('done');
+})
 
 app.use(router.routes());
 

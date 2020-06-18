@@ -42,7 +42,7 @@ const GenomeBrowser = () => {
   const dispatch = useDispatch();
 
   return (
-    <React.Fragment>
+    <div>
       <GenomeBrowserCore
         sourceFile = {sourceFile}
         zoomLevel = {zoomLevel}
@@ -79,7 +79,7 @@ const GenomeBrowser = () => {
           <CloseCircleFilled onClick={()=>dispatch({type:'CLEAR_GB_SELECTION'})}/>
         {/* </Button> */}
       </div>}
-    </React.Fragment>
+    </div>
   )
 };
 

@@ -195,6 +195,10 @@ interface ISequenceEditorDialogState{
   end: number,
 }
 
+interface IProjectLogState {
+  log: any,
+}
+
 declare interface IStoreState {
   app: IAppState;
   generalTask: IGeneralTaskState;
@@ -208,6 +212,7 @@ declare interface IStoreState {
   history: IHistoryState;
   partDetailDialog: IPartDetailDialogState;
   sequenceEditorDialog: ISequenceEditorDialogState;
+  projectLog: IProjectLogState;
 }
 
 declare module 'react-use-dimensions'

@@ -20,6 +20,7 @@ import GenomeOperationMenu from 'Components/GenomeOperationMenu';
 import { Collapse } from 'antd';
 import RemoveIntronDlg from 'Components/dialogs/taskDialogs/RemoveIntronDlg';
 import SequenceEditorDlg from 'Components/dialogs/SequenceEditorDlg';
+import ProjectLogPanel from 'Components/ProjectLogPanel';
 
 const ProjectFunctions: React.FC = (props:any) => {
   const {projectId} = useMappedState((state:IStoreState)=>({
@@ -58,12 +59,15 @@ const ProjectFunctions: React.FC = (props:any) => {
           </Collapse.Panel>
         </Collapse>
         <div className="basket-panel">
-          <GenomeBrowser/>
+        <GenomeBrowser/>
         </div>
 
         {process.env.NODE_ENV === 'development' && <div>
           <GenomeOperationPanel/>
         </div>}
+
+        <ProjectLogPanel/>
+
         <CreatePromoterTermiatorDlg/>
         <RemoveCreatedFeatureDlg/>
         <ForkProjectDlg/>

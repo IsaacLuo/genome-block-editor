@@ -102,6 +102,10 @@ const DEFAULT_SEQUENCE_EDITOR_DIALOG_STATE = {
   end: 0,
 }
 
+const DEFAULT_PROJECT_LOG_STATE = {
+  log: {}
+}
+
 const DEFAULT_STORE_STATE:IStoreState = {
   app: DEFAULT_APP_STATE,
   generalTask: DEFAULT_GENERAL_TASK_STATE,
@@ -116,6 +120,7 @@ const DEFAULT_STORE_STATE:IStoreState = {
   history: DEFAULT_HISTORY_STATE,
   partDetailDialog: DEFAULT_PART_DETAIL_DIALOG_STATE,
   sequenceEditorDialog: DEFAULT_SEQUENCE_EDITOR_DIALOG_STATE,
+  projectLog: DEFAULT_PROJECT_LOG_STATE,
 };
 
 
@@ -573,11 +578,28 @@ export const sequenceEditorDialogReducer = (state:ISequenceEditorDialogState, ac
 }
 
 
+
+export const projectLogReducer = (state:IProjectLogState, action:IAction) => {
+  if (state === undefined) {
+    state = DEFAULT_PROJECT_LOG_STATE;
+  }
+  switch(action.type) {
+    case 'SET_PROJECT_OPERATION_LOG':
+      return {...state, log:action.data}
+    case 'LOAD_SOURCE_FILE':
+      case 'LOAD_SOURCE_FILE_BY_PROJECT_ID':
+      case 'FORK_PROJECT':
+      return DEFAULT_PROJECT_LOG_STATE;
+  }
+  return state;
+}
+
 export const reducer = reCombineReducers({
   app: appReducer,
   generalTask: generalTaskReducer,
   componentVisible: componentVisibleReducer,
   currentProject: projectReducer,
+  projectLog: projectLogReducer,
   genomeBrowser: genomeBrowserReducer,
   fileExplorer: fileExplorerReducer,
   history:historyReducer,

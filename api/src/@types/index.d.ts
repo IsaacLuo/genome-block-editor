@@ -130,6 +130,7 @@ declare interface IPartUpdateLog {
 
 declare interface IProjectLog {
   _id: any;
+  conflictParts: IPartUpdateLog[],
   modifiedParts: IPartUpdateLog[],
   createdParts: IPartUpdateLog[],
   deletedParts: IPartUpdateLog[],

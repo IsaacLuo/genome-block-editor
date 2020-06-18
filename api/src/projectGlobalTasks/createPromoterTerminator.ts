@@ -6,6 +6,9 @@ import axios from 'axios';
 import conf from '../conf.json';
 import FormData from 'form-data';
 import { projectToGFFJSON, projectToGFFJSONPartial } from './projectImportExport';
+import bigjson from 'big-json';
+import fs from 'fs/promises';
+
 type Ctx = koa.ParameterizedContext<ICustomState>;
 type Next = ()=>Promise<any>;
 
@@ -22,22 +25,33 @@ export default (router) => {
     // first get project genes and generate gff json
     let gffJson;
     if (selectedRange) {
-      gffJson = await projectToGFFJSONPartial(_id, selectedRange);
+      gffJson = await projectToGFFJSONPartial(_id, selectedRange, );
     } else {
-      gffJson = await projectToGFFJSON(_id);
+      gffJson = await projectToGFFJSON(_id, );
     }
     // call webexe
     // uploading file
     try {
     const formData = new FormData();
     formData.append('file', Buffer.from(JSON.stringify(gffJson), 'utf-8'), 'gene.gff.json');
+    // const stringifyStream = bigjson.createStringifyStream(gffJson);
+    // formData.append('file', stringifyStream, 'gene.gff.json');
+    // const tempFname = Date.now().toString();
+    // stringifyStream.on('data', function(strChunk) {
+    //   // => BIG_POJO will be sent out in JSON chunks as the object is traversed
+    //   fs.open(tempFname,'w');
+    // });
+
     const result = await axios.post(`${conf.webexe.internalUrl}/api/fileParam/`,
       formData.getBuffer(),
+      // formData,
       {
         headers: {
           ...formData.getHeaders(),
           'Cookie': `token=${clientToken}`,
-        }
+        },
+        maxContentLength: 500000000,
+        // maxBodyLength: 1000000000,
       });
     const gffJsonFilePath = result.data.filePath;
     // call webexe again to start mission
@@ -66,6 +80,7 @@ export default (router) => {
     ctx.body = {debugData: result.data, taskInfo: {...result2.data, serverURL: conf.webexe.url, processId: result2.data.processId},};
   } catch (err) {
     console.error(err);
+    ctx.throw(500, 'unable to process');
   }
   })   
 }

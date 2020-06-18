@@ -61,11 +61,13 @@ export function* watchUsers() {
 export function* loadSourceFile(action:IAction) {
   try {
     yield put({type:'SET_GENOME_BROWSER_LOADING', data:true});
-    const result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/${action.data}`, {withCredentials: true});
+    const projectId = action.data;
+    const result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/${projectId}`, {withCredentials: true});
     yield put({type:'SET_GENOME_BROWSER_LOADING', data:false});
     yield put({type: 'SET_SOURCE_FILE', data:result.data});
+    yield put({type: 'LOAD_PROJECT_OPERATION_LOG', data: {projectId}});
     yield put({type: 'HIDE_ALL_DIALOG', data:result.data});
-    yield put({type: 'CLEAR_GB_SELECTION'})
+    yield put({type: 'CLEAR_GB_SELECTION'});
   } catch (error) {
     console.warn('failed in loadSourceFile');
   }

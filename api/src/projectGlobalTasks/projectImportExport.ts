@@ -68,12 +68,25 @@ export const updateProject = async (project:string|mongoose.Types.ObjectId|IProj
   return newProject;
 }
 
-export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId, keepUnknown=false)=>{
+interface IProjectToGFFJSONOptions {
+  keepUnknown?: boolean,
+  essentialOnly?: boolean,
+}
+
+const DEFAULT_PROJECT_TO_GFF_OPTIONS:IProjectToGFFJSONOptions = {
+  keepUnknown: false,
+  essentialOnly: false,
+}
+
+export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId, options:IProjectToGFFJSONOptions = DEFAULT_PROJECT_TO_GFF_OPTIONS)=>{
+  const populateOptions = options.essentialOnly ? {
+    path:'parts', 
+    select: '_id pid featureType chrId chrName start end len strand name parent'
+  } : 
+  {path:'parts'};
   const project = await Project
   .findById(_id)
-  .populate({
-    path:'parts',
-  })
+  .populate(populateOptions)
   .exec();
 
   let projectSequence = '';
@@ -90,7 +103,7 @@ export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId, keepU
     seqInfo: {
       [project.name]: {length: project.len}
     },
-    records: keepUnknown ? newRecord : newRecord.filter(part=>part.featureType !== 'unknown'),
+    records: options.keepUnknown ? newRecord : newRecord.filter(part=>part.featureType !== 'unknown'),
     sequence: {
       [project.name]: projectSequence
     },
@@ -101,18 +114,22 @@ export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId, keepU
   return gffJson;
 }
 
-export const projectToGFFJSONPartial = async (_id:string|mongoose.Types.ObjectId, range:IRange)=>{
+export const projectToGFFJSONPartial = async (_id:string|mongoose.Types.ObjectId, range:IRange, options:IProjectToGFFJSONOptions = DEFAULT_PROJECT_TO_GFF_OPTIONS)=>{
   const {start, end} = range;
+  const populateOptions = options.essentialOnly ? {
+    select: '_id pid featureType chrId chrName start end len strand name parent'
+  } : {};
 
   const project = await Project
   .findById(_id)
   .populate({
     path:'parts',
-    match: { 
+    match: {
       start: { $gte: range.start },
       end: { $lte: range.end },
       featureType: {$ne:'unknown'},
     },
+    ...populateOptions,
   })
   .exec();
 
@@ -211,6 +228,7 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
 
   let projectLog:IProjectLog = {
     _id:undefined,
+    conflictParts: [] as IPartUpdateLog[],
     modifiedParts: [] as IPartUpdateLog[],
     createdParts: [] as IPartUpdateLog[],
     deletedParts: [] as IPartUpdateLog[],
@@ -287,9 +305,23 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
         }
         newPartForm._id = upgradePartIdDict[record._id];
         newAnnotation = await updatePart(oldPart, newPartForm);
+        projectLog.modifiedParts.push({
+          ctype: 'modified', 
+          part: newAnnotation._id, 
+          name: newAnnotation.name, 
+          changelog: newAnnotation.changelog, 
+          location: newAnnotation.start, 
+          oldPart: oldPart._id});
       } else {
         newPartForm.history = [];
         newAnnotation = await AnnotationPart.create(newPartForm);
+        projectLog.createdParts.push({
+          ctype: 'new', 
+          part: newAnnotation._id, 
+          name: newAnnotation.name, 
+          changelog: newAnnotation.changelog, 
+          location: newAnnotation.start, 
+          oldPart: null});
       };
       upgradedPartIds.add(newAnnotation._id.toString());
       newParts.push(newAnnotation._id);
@@ -300,7 +332,15 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
   }
 
   // update all parents
-  newParts = (await updateParentsByIds(newParts,upgradePartIdDict, upgradedPartIds)).map(v=>v._id);
+  newParts = (await updateParentsByIds(newParts,upgradePartIdDict, upgradedPartIds, (part, ctype)=>{
+    projectLog.shiftedParts.push({
+      ctype: 'moved', 
+      part: part._id, 
+      name: part.name, 
+      changelog: 'parent updated',
+      location: part.start, 
+      oldPart: ctype==='modified' ? part.history[0]._id: null});
+  })).map(v=>v._id);
 
   // create new project, save current one as history
   let newObj = project;
@@ -318,6 +358,9 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
   const newItem = await Project.create(newObj);
   // old project become history
   await Project.update({_id:project._id}, {ctype:'history'});
+  // save detail in log
+  projectLog._id = newItem._id;
+  await ProjectLog.create(projectLog);
 
   return newItem;
 }
@@ -338,6 +381,7 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
   let projectSequenceRef:ISequenceRef;
   let projectLog:IProjectLog = {
     _id: undefined,
+    conflictParts: [] as IPartUpdateLog[],
     modifiedParts: [] as IPartUpdateLog[],
     createdParts: [] as IPartUpdateLog[],
     deletedParts: [] as IPartUpdateLog[],

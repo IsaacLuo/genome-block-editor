@@ -152,6 +152,7 @@ const PartUpdateLogSchema = new Schema({
 },{ _id : false });
 
 export const ProjectLogSchema = new Schema({
+  conflictParts: [PartUpdateLogSchema],
   modifiedParts: [PartUpdateLogSchema],
   createdParts: [PartUpdateLogSchema],
   deletedParts: [PartUpdateLogSchema],

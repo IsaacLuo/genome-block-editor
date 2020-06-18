@@ -9,6 +9,7 @@ import { Modal} from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import * as React from 'react';
 import io from 'socket.io-client';
+import { profileEnd } from 'console';
 
 const client = apolloClient();
 
@@ -217,6 +218,13 @@ export function* sequenceEdit(action:IAction) {
   console.log(response.data);
 }
 
+export function* loadProjectOperationLog(action:IAction) {
+  const {projectId} = action.data;
+  const response = yield call(axios.get, `${conf.backendURL}/api/project/${projectId}/operationLog`);
+  yield put({type:'SET_PROJECT_OPERATION_LOG', data: response.data});
+  console.log(response.data);
+}
+
 export default function* watchProjects() {
   yield takeLatest('EXPORT_SOURCE_FILE_TO_GFF_JSON', exportSourceFileToGffJson);
   yield takeLatest('SHOW_PART_DETAIL_DIALOG', loadPartDetail);
@@ -226,4 +234,5 @@ export default function* watchProjects() {
   yield takeLatest('LOAD_SEQUENCE_SEGMENT', loadSequence);
   yield takeLatest('EXPORT_PROJECT_TO_GENBANK', exportProjectToGenbank);
   yield takeEvery('SEQUENCE_EDIT', sequenceEdit);
+  yield takeLatest('LOAD_PROJECT_OPERATION_LOG', loadProjectOperationLog);
 }
