@@ -2,7 +2,7 @@ import * as childProcess from 'child_process'
 import readline from 'readline'
 
 export function runExe (
-  process: IProcess, 
+  process: IExeProcess, 
   dataIn?: any, 
   onOutput?: (outputObj:any, stdin?:any)=>void, 
   onStdErr?: (message: string)=>void,

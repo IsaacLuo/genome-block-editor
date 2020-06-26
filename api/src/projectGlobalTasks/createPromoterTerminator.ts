@@ -1,86 +1,172 @@
 /// <reference path="../@types/index.d.ts" />
-import { userMust, beUser } from '../userMust'
-import {User, Project, AnnotationPart} from '../models'
-import koa from 'koa';
-import axios from 'axios';
-import conf from '../conf.json';
-import FormData from 'form-data';
-import { projectToGFFJSON, projectToGFFJSONPartial } from './projectImportExport';
-import bigjson from 'big-json';
-import fs from 'fs/promises';
+import {Project, AnnotationPart, ProjectLog} from '../models'
+const mongoose = require('mongoose');
 
-type Ctx = koa.ParameterizedContext<ICustomState>;
-type Next = ()=>Promise<any>;
+const createPromoterTerminator = async ({_id, 
+  promoterLength=500, 
+  terminatorLength=200, 
+  selectedRange,
+}: {_id:any, promoterLength:number, terminatorLength:number, selectedRange?:IRange}, 
+onProgress?:(progress, message)=>void,
+) => {
+  if (onProgress) {onProgress(5, 'task started')}
+  const exists = await Project.exists({_id,})
+  console.log(_id, exists);
+  if(! exists) throw new Error(JSON.stringify({status:404, message: 'unable to find project'}));
 
-export default (router) => {
+const project = await Project
+.findById(_id)
+.exec();
 
-  router.put('/api/mapping_project/gen_pro_ter/from/:id', 
-  userMust(beUser),
-  async (ctx:Ctx, next:Next)=> {
-    const _id = ctx.params.id;
-    const clientToken = ctx.cookies.get('token');
-    const {promoterLength, terminatorLength, selectedRange} = ctx.request.body;
-    let startTime = Date.now();
-    console.log('query project', selectedRange);
-    // first get project genes and generate gff json
-    let gffJson;
-    if (selectedRange) {
-      gffJson = await projectToGFFJSONPartial(_id, selectedRange, );
-    } else {
-      gffJson = await projectToGFFJSON(_id, );
-    }
-    // call webexe
-    // uploading file
-    try {
-    const formData = new FormData();
-    formData.append('file', Buffer.from(JSON.stringify(gffJson), 'utf-8'), 'gene.gff.json');
-    // const stringifyStream = bigjson.createStringifyStream(gffJson);
-    // formData.append('file', stringifyStream, 'gene.gff.json');
-    // const tempFname = Date.now().toString();
-    // stringifyStream.on('data', function(strChunk) {
-    //   // => BIG_POJO will be sent out in JSON chunks as the object is traversed
-    //   fs.open(tempFname,'w');
-    // });
+const partsLen = await AnnotationPart.find({
+  _id:{$in:project.parts},
+  featureType: 'gene'
+  })
+  .count();
 
-    const result = await axios.post(`${conf.webexe.internalUrl}/api/fileParam/`,
-      formData.getBuffer(),
-      // formData,
-      {
-        headers: {
-          ...formData.getHeaders(),
-          'Cookie': `token=${clientToken}`,
-        },
-        maxContentLength: 500000000,
-        // maxBodyLength: 1000000000,
-      });
-    const gffJsonFilePath = result.data.filePath;
-    // call webexe again to start mission
-    // console.log('file uploaded', project.len, Date.now() - startTime);
-    const result2 = await axios.post(`${conf.webexe.internalUrl}/api/task/generate_promoter_terminator`,
-    {
-      params: {
-        srcFileName:[gffJsonFilePath],
-        promoterLength,
-        terminatorLength,
-      },
-      comments: {
-        taskName: 'generate_promoter_terminator',
-        _id,
-        promoterLength,
-        terminatorLength,
-        selectedRange,
-      }
-    },
-    {
-      headers: {
-        'Cookie': `token=${clientToken}`,
-      }
-    });
-    // console.log('task created', project.len, Date.now() - startTime);
-    ctx.body = {debugData: result.data, taskInfo: {...result2.data, serverURL: conf.webexe.url, processId: result2.data.processId},};
-  } catch (err) {
-    console.error(err);
-    ctx.throw(500, 'unable to process');
-  }
-  })   
+const parts = await AnnotationPart.find({
+_id:{$in:project.parts},
+featureType: 'gene'
+})
+.sort({start:1, end:-1})
+.cursor();
+
+const replaceMap = {};
+
+const projectLog:IProjectLog = {
+_id:undefined,
+conflictParts: [] as IPartUpdateLog[],
+modifiedParts: [] as IPartUpdateLog[],
+createdParts: [] as IPartUpdateLog[],
+deletedParts: [] as IPartUpdateLog[],
+shiftedParts: [] as IPartUpdateLog[],
 }
+let partsCount=0;
+let lastPercentage = 0;
+await parts.eachAsync(async (part)=>{
+  partsCount++;
+  if(onProgress) {
+    const percentage = 5 + Math.floor(90 * partsCount/partsLen);
+    if(percentage >= lastPercentage + 1) {
+      onProgress(percentage, `now doing ${partsCount}/${partsLen}`);
+      lastPercentage = percentage;
+    }
+  }
+  let proStart:number;
+  let proEnd:number;
+  let terStart:number;
+  let terEnd:number;
+  const proName = part.name + '_P';
+  const terName = part.name + '_T';
+  const now = new Date();
+  if (part.strand === -1) {
+    proStart = part.end;
+    proEnd = part.end + promoterLength;
+    if (proEnd > project.len) proEnd = project.len;
+    terEnd = part.start;
+    terStart = part.start - terminatorLength;
+    if (terStart < 0) terStart = 0;
+  } else {
+    proStart = part.start - promoterLength;
+    proEnd = part.start;
+    if (proStart < 0) proStart = 0;
+    terStart = part.end;
+    terEnd = part.end + terminatorLength;
+    if (terEnd > project.len) terEnd = project.len;
+  }
+  const promoter = await AnnotationPart.create({
+    pid: mongoose.Types.ObjectId(),
+    featureType: 'promoter',
+    chrId: part.chrId,
+    chrName: part.chrName,
+    start: proStart,
+    end: proEnd,
+    len: proEnd-proStart,
+    strand: part.strand,
+    name: proName,
+    original: false,
+    history: [],
+    sequenceRef: {
+      fileName: part.sequenceRef.fileName, 
+      start: proStart, 
+      end: proEnd, 
+      strand: part.strand
+    },
+    built: false,
+    parent: null,
+    attribute: {ID:proName},
+    createdAt:now,
+    updatedAt:now,
+    changelog: `created ${promoterLength}bp promoter for ${part.name}`,
+  });
+
+  projectLog.createdParts.push(promoter._id);
+
+  const terminator = await AnnotationPart.create({
+    pid: mongoose.Types.ObjectId(),
+    featureType: 'terminator',
+    chrId: part.chrId,
+    chrName: part.chrName,
+    start: terStart,
+    end: terEnd,
+    len: terEnd-terStart,
+    strand: part.strand,
+    name: terName,
+    original: false,
+    history: [],
+    sequenceRef: {
+      fileName: part.sequenceRef.fileName, 
+      start: terStart, 
+      end: terEnd, 
+      strand: part.strand
+    },
+    built: false,
+    parent: null,
+    attribute: {ID:terName},
+    createdAt:now,
+    updatedAt:now,
+    changelog: `created ${terminatorLength}bp terminator for ${part.name}`,
+  });
+
+  projectLog.createdParts.push(terminator._id);
+
+  replaceMap[part._id.toString()] = part.strand === -1 ? [terminator._id, part._id, promoter._id] : [promoter._id, part._id, terminator._id];
+});
+
+const newPartIds = [];
+// project.parts.forEach(v=>newPartIds.push(v));
+
+project.parts.forEach(v=>{
+  const replaceTarget = replaceMap[v.toString()];
+  if(replaceTarget) {
+    replaceTarget.forEach(vv=>newPartIds.push(vv));    
+  } else {
+    newPartIds.push(v);
+  }
+});
+
+onProgress(95, `saving history`);
+
+const projectObj = project.toObject();
+const history = [{
+  _id: projectObj._id,
+  updatedAt: projectObj.updatedAt,
+  changelog: projectObj.changelog,
+}, ...projectObj.history];
+delete projectObj._id;
+const projectForm = {...projectObj, 
+  parts: newPartIds,
+  changelog: 'created promoter and terminators',
+  history, updatedAt: new Date()};
+const newProject = await Project.create(projectForm);
+if (project.ctype !== 'source') {
+  await Project.updateOne({_id:project._id}, {ctype:'history'});
+}
+
+projectLog._id = newProject._id;
+await ProjectLog.create(projectLog);
+
+return newProject;
+}
+
+export default createPromoterTerminator;

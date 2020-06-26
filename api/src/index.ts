@@ -16,9 +16,10 @@ import mongoose, { Mongoose } from 'mongoose';
 import {useApolloServer} from './graphql';
 import serve from 'koa-static';
 import { userMust, beUser } from './userMust';
-import createPromoterTerminators from './projectGlobalTasks/createPromoterTerminator'
+// import createPromoterTerminators from './projectGlobalTasks/createPromoterTerminator'
 import removeGeneratedFeatures from './projectGlobalTasks/removeGeneratedFeatures'
 import redis from 'redis'
+import path from 'path';
 
 import http from 'http';
 import socket from 'socket.io';
@@ -36,6 +37,8 @@ import { runExe } from './runExe';
 import { reverseComplement, readSequenceFromSequenceRef, generateSequenceRef } from './sequenceRef';
 import { insertPartsAfterFeatures } from './projectGlobalTasks/insertPartsAfterFeatures';
 import {updateParents} from './projectGlobalTasks/projectImportExport';
+import gbeWorkerHost from './gbeWorkerHost';
+import taskProcessor from './taskProcessor';
 
 require('dotenv').config()
 
@@ -271,8 +274,36 @@ async (ctx:Ctx, next:Next)=> {
 
 
 
-createPromoterTerminators(router);
-removeGeneratedFeatures(router);
+// createPromoterTerminators(router);
+router.put('/api/mapping_project/gen_pro_ter/from/:id', 
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {id} = ctx.params;
+  const {promoterLength, terminatorLength, selectedRange} = ctx.request.body;
+  if (! await Project.exists({_id:id}) || !(promoterLength >= 0) || !(terminatorLength >= 0)) {
+    ctx.throw(404);
+  }
+  // call createPromoterTerminator worker
+  try {
+    //${__dirname}
+    console.log(`${__dirname.replace(/\\/g, '/')}/projectGlobalTasks/createPromoterTerminator_worker`);
+  const resultData = await gbeWorkerHost(`${__dirname.replace(/\\/g, '/')}/projectGlobalTasks/createPromoterTerminator_worker`, 
+                  {_id:id, promoterLength, terminatorLength, selectedRange},
+                  (progress, message)=>console.log(progress, message)
+                );
+  ctx.body = {message:'OK', newProjectId: resultData.newProjectId};
+  } catch (err) {
+    if (err.message && err.message.length > 0  && err.message[0] === '{') {
+      const {status, message} = JSON.parse(err.message);
+      ctx.throw(status, message);
+    } else {
+      ctx.throw(500, err.message);
+    }
+  }
+  
+})
+
+removeGeneratedFeatures(router); 
 
 router.get('/api/webexe/file/:fileUrl/as/:fileName',
 userMust(beUser),
@@ -308,7 +339,7 @@ async (ctx:Ctx, next:Next)=> {
     }
   });
   const gffObj = result.data;
-
+  console.debug('file downloaded');
   let newItem;
   if (partialUpdate) {
     newItem = await updateProjectByGFFJSONPartial(project, gffObj, range);
@@ -655,8 +686,7 @@ useApolloServer(app);
 
 // ----------------------------------socket.io part----------------------------------------------
 export const server = http.createServer(app.callback());
-const io = socket(server);
-
+taskProcessor(server);
 
 // -----------------------------------------------------------------------------------------------
 app.use(router.routes());

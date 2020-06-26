@@ -1,5 +1,6 @@
 import { Project, AnnotationPart } from "../../models";
 import { v4 as uuidv4 } from 'uuid';
+import mongoose from "mongoose";
 
 const seqRef = require("../../sequenceRef");
 
@@ -161,11 +162,13 @@ export async function prepareTestProject(obj?:any) {
       sequenceRef = await mock_generateSequenceRef(sequence, 0, sequence.length, strand);
     }
     const savedPart = await AnnotationPart.create({
+      pid: mongoose.Types.ObjectId(),
       featureType,
       chrId,
       chrName,
       start,
       end,
+      len: end-start,
       strand,
       name,
       original,
@@ -175,7 +178,7 @@ export async function prepareTestProject(obj?:any) {
       updatedAt,
       changelog,
       sequenceRef,
-    });
+    } as any);
     partIds.push(savedPart._id);
   }
   let sequenceRef = undefined;
@@ -198,7 +201,7 @@ export async function prepareTestProject(obj?:any) {
     history,
     len,
     sequenceRef,
-  });
+  }  as any );
   return project;
 } catch (err) {
   console.error(err);

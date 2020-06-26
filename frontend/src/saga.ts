@@ -1,4 +1,4 @@
-import { LOAD_SOURCE_FILE_BY_PROJECT_ID } from './actions';
+import { LOAD_SOURCE_FILE_BY_PROJECT_ID, SET_SOURCE_FILE, LOAD_SOURCE_FILE } from './actions';
 
 // redux saga
 import { eventChannel } from 'redux-saga'
@@ -161,6 +161,54 @@ function generateSocketAction(serverAction:IAction, extraPayload?:any):IAction {
   }
 }
 
+function generateLocalSocketAction(serverAction:IAction, extraPayload?:any):IAction {
+  switch (serverAction.type) {
+    case 'message':
+        return {
+          type: 'SERVER_MESSAGE',
+          data: serverAction.data,
+          payload: extraPayload,
+        };
+    case 'progress':
+        return{
+          type: 'PROGRESS',
+          data: serverAction.data,
+          payload: extraPayload,
+        };
+    case 'state':
+      return {
+        type: 'SET_PROCESS_STATE',
+        data: serverAction.data,
+        payload: extraPayload,
+      };
+    case 'result':
+      return {
+        type: 'SERVER_RESULT',
+        data: serverAction.data,
+        payload: extraPayload,
+      };
+    case 'stderr':
+      return {
+        type: 'SERVER_LOG',
+        data: serverAction.data,
+        payload: extraPayload,
+      };
+    case 'abort':
+      return {
+        type: 'ABORT_TASK',
+        data: serverAction.data,
+        payload: extraPayload,
+      };
+    default:
+      return {
+        type: 'UNKOWN_SOCKET_ACTION',
+        data: serverAction.data,
+        payload: extraPayload,
+      }
+  }
+}
+
+
 export function* removeCreatedFeatures (aciton:IAction) {
   // 1. call api to start webexe process at back-end
   try {
@@ -201,7 +249,7 @@ function* handleServerResult(action:IAction) {
   
 }
 
-export function* createPromoterTerminator(aciton:IAction) {
+export function* createPromoterTerminatorHttp(aciton:IAction) {
   // 1. call api to start webexe process at back-end
   try {
     console.log('createPromoterTerminator')
@@ -237,6 +285,36 @@ export function* createPromoterTerminator(aciton:IAction) {
         break;
       } else {
         const reduxAction = generateSocketAction(serverAction);
+        yield put(reduxAction);
+      }
+    }
+    
+  } catch (error) {
+    yield call(notification.error, {message:error});
+  }
+}
+
+export function* createPromoterTerminator(aciton:IAction) {
+  // 1. call api to start webexe process at back-end
+  try {
+    console.log('createPromoterTerminator')
+    const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
+    const {promoterLength, terminatorLength, selectedRange} = aciton.data;
+    // 2. use socket.io
+    const socket = io(conf.backendURL);
+    const channel = yield call(monitorSocket, socket);
+    socket.emit('startTask', {taskName: 'createPromoterTerminator', taskParams: {_id:id, promoterLength, terminatorLength, selectedRange}});
+
+    while (true) {
+      const serverAction = yield take(channel)
+      console.debug('messageType', serverAction.type)
+      console.log(serverAction);
+      
+      if (serverAction.type === 'result') {
+        yield put({type:LOAD_SOURCE_FILE, data: serverAction.data.newProjectId});
+        break;
+      } else {
+        const reduxAction = generateLocalSocketAction(serverAction);
         yield put(reduxAction);
       }
     }

@@ -21,7 +21,7 @@ class FastaDB:
         for line_raw in self.file_obj:
             line = line_raw.decode('utf-8').strip()
             if line[0] == '>':
-                seq_name = line[1:]
+                seq_name = line[1:].split()[0].strip()
             elif seq_name not in self.seq_index:
                 self.seq_index[seq_name] = it
                 print(seq_name, it)

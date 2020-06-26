@@ -60,7 +60,8 @@ declare interface IAnnotationPart {
   updatedAt: Date;
   changelog: string;
   built: boolean;
-  level: number;
+  attribute: any;
+  level?: number;
 }
 
 declare interface IProject {
@@ -94,7 +95,7 @@ declare interface ISourceChomosome {
   updatedAt: Date,
 }
 
-declare interface IProcess {
+declare interface IExeProcess {
   // processId: string;
   // subProcessInst?: ChildProcessWithoutNullStreams;
   program: string;
@@ -174,4 +175,28 @@ declare interface IGFFJSON {
   createdAt?: Date,
   updatedAt?: Date,
   __changelog?: string,
+}
+
+declare interface IRange {
+  start: number,
+  end: number,
+}
+
+declare interface IProcess {
+  processId: string;
+  subProcessInst?: any;
+  program: string;
+  params: string[];
+  comments: any;
+  dataIn: any;
+  taskName: string;
+  state: 'ready'| 'running' | 'done' | 'error' | 'aborted';
+  result: any;
+  createdAt?: Date;
+  startedAt?: Date;
+  doneAt?: Date;
+}
+
+declare interface IProcessDict {
+  [key: string]: IProcess;
 }

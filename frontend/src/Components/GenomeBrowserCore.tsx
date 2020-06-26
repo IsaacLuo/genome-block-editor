@@ -81,12 +81,12 @@ const GenomeBrowserCore = (
 
   useEffect(() => {
     if(svgRef.current){
-      console.log('test1');
+      // console.log('test1');
       svgRef.current.addEventListener('wheel', onSVGWheel, { passive: false });
     }
     return ()=>{
       if(svgRef.current) {
-        console.log('test2');
+        // console.log('test2');
         svgRef.current.removeEventListener('wheel', onSVGWheel);
       }
     }

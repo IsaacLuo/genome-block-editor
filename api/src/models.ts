@@ -1,6 +1,6 @@
 /// <reference path="@types/index.d.ts" />
-import mongoose, { Model, Document, Mongoose } from 'mongoose'
-import {Schema} from 'mongoose'
+export {}
+import mongoose, { Model, Document, Schema } from 'mongoose';
 
 export const UserSchema = new Schema({
   email: String,

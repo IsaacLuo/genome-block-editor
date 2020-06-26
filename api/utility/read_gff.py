@@ -7,7 +7,7 @@ from fasta_db import FastaDB
 import uuid
 
 def rc(seq):
-    d = {'a':'t', 't':'a', 'c':'g', 'g':'c', 'A':'T', 'T':'A', 'C':'G', 'G':'C', 'n':'n', 'N':'N'}
+    d = {'a':'t', 't':'a', 'c':'g', 'g':'c', 'A':'T', 'T':'A', 'C':'G', 'G':'C', 'n':'n', 'N':'N', 'V':'B', 'D':'H', 'B':'V', 'H':'D', 'W':'S', 'S':'W', 'K':'M', 'M':'K', 'Y':'R', 'R':'Y'}
     return ''.join([d[x] for x in list(seq[::-1])])
 
 class GFFReader:
@@ -62,7 +62,7 @@ class GFFReader:
                             fpw.write(s)
                     file_dict[seq_name] = file_name
                     seq = []
-                seq_name = line[1:].strip()
+                seq_name = line[1:].split()[0].strip()
                 count+=1
                 print('imported {} fasta records                          '.format(count), end='\r')
             else:
@@ -95,6 +95,7 @@ class GFFReader:
                 strand = segment[6]
 
                 self.used_chr.add(seq_name)
+                chr_file_name = self.file_dict[seq_name]
                 record = {
                     'seqName': segment[0],
                     'source': segment[1],
@@ -105,7 +106,7 @@ class GFFReader:
                     'strand': strand,
                     'frame': segment[7],
                     'attribute': attributes,
-                    'chrFileName': self.file_dict[seq_name],
+                    'chrFileName': chr_file_name
                     }
 
                 if readSequence:

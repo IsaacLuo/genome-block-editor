@@ -215,4 +215,12 @@ declare interface IStoreState {
   projectLog: IProjectLogState;
 }
 
+declare interface IRange {
+  start: number;
+  end: number;
+}
+
+
+
+
 declare module 'react-use-dimensions'

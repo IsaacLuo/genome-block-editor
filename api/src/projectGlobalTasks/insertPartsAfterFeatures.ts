@@ -4,7 +4,7 @@ import { readSequenceFromSequenceRef, generateSequenceRef } from '../sequenceRef
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import conf from '../conf';
-import { projectToGFFJSON, IRange, projectToGFFJSONPartial } from './projectImportExport';
+import { projectToGFFJSON, projectToGFFJSONPartial } from './projectImportExport';
 import FormData from 'form-data';
 import Axios from 'axios';
 

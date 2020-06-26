@@ -203,6 +203,8 @@ def import_project(file_path, project_name):
         parts_raw = project['parts_raw']
 
     # insert "unknown" features between marked segements
+    insert_unknown_parts = False
+
     for k in seq_dict.keys():
         project = seq_dict[k]
         parts_raw = project['parts_raw']
@@ -217,49 +219,50 @@ def import_project(file_path, project_name):
         end_pos_of_unknown = 0
 
         for i, p in enumerate(parts_raw):
-            if p['start']> end_pos_of_unknown:
-                start = end_pos_of_unknown
-                end = p['start']
-                insert_result = Parts.insert_one({
-                    "pid":ObjectId(),
-                    "parent": None,
-                    "featureType": 'unknown',
-                    "chrName": p['chrName'],
-                    "chrId": p['chrId'],
-                    "start": start,
-                    "end": end,
-                    "strand": 0,
-                    "name": 'unknown',
-                    "original": True,
-                    
+                if p['start']> end_pos_of_unknown:
+                    start = end_pos_of_unknown
+                    end = p['start']
+                    if insert_unknown_parts:
+                        insert_result = Parts.insert_one({
+                            "pid":ObjectId(),
+                            "parent": None,
+                            "featureType": 'unknown',
+                            "chrName": p['chrName'],
+                            "chrId": p['chrId'],
+                            "start": start,
+                            "end": end,
+                            "strand": 0,
+                            "name": 'unknown',
+                            "original": True,
+                            
 
-                    "history": [],
+                            "history": [],
 
-                    "sequenceHash": seqeunceHash,
-                    "sequenceRef": {
-                        "fileName": p['chrFileName'],
-                        "start": start,
-                        "end": end,
-                        "strand": 0,
-                    },
+                            "sequenceHash": seqeunceHash,
+                            "sequenceRef": {
+                                "fileName": p['chrFileName'],
+                                "start": start,
+                                "end": end,
+                                "strand": 0,
+                            },
 
-                    "changelog": default_changelog,
+                            "changelog": default_changelog,
 
-                    "createdAt": now,
-                    "updatedAt": now,
-                })
-                if insert_result.acknowledged:
-                    parts.append(insert_result.inserted_id)
-                    
-                else:
-                    raise Exception('failed insert parts')
-                count+=1
-                if count%100 == 0:
-                    print('generated {} records                          '.format(count), end='\r')
-            
-            parts.append(p['_id'])
-            if end_pos_of_unknown < p['end']:
-                end_pos_of_unknown = p['end']
+                            "createdAt": now,
+                            "updatedAt": now,
+                        })
+                        if insert_result.acknowledged:
+                            parts.append(insert_result.inserted_id)
+                            
+                        else:
+                            raise Exception('failed insert parts')
+                    count+=1
+                    if count%100 == 0:
+                        print('generated {} records                          '.format(count), end='\r')
+                
+                parts.append(p['_id'])
+                if end_pos_of_unknown < p['end']:
+                    end_pos_of_unknown = p['end']
 
         wholeSequence = gff_reader.get_fasta_db().find(project['seqName'])
         project['len'] = len(wholeSequence)

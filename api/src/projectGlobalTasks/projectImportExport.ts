@@ -1,4 +1,6 @@
-import mongoose from 'mongoose';
+/// <reference path="../@types/index.d.ts" />
+// import mongoose from 'mongoose';
+
 import FormData from 'form-data';
 import {Project, AnnotationPart, IProjectModel, IAnnotationPartModel, ProjectLog} from '../models';
 import crypto from 'crypto';
@@ -6,20 +8,17 @@ import { pushHistory } from './project';
 import conf from '../conf';
 import axios from 'axios';
 
+const mongoose = require('mongoose');
+
 
 import {readSequenceFromSequenceRef, generateSequenceRef} from '../sequenceRef';
 
-export interface IRange {
-  start: number,
-  end: number,
-}
+export const updatePart = async (part:string|IAnnotationPartModel|IAnnotationPart, partForm:any) => {
 
-export const updatePart = async (part:string|mongoose.Types.ObjectId|IAnnotationPartModel|IAnnotationPart, partForm:any) => {
-  if (typeof(part) === 'string' || part instanceof mongoose.Types.ObjectId) {
-    part = await AnnotationPart.findById(part);
-  }
   if (part.constructor.name === 'model') {
     part = (part as IAnnotationPartModel).toObject();
+  } else {
+    part = await (await AnnotationPart.findById(part)).toObject();
   }
 
   part = part as IAnnotationPart;
@@ -39,12 +38,14 @@ export const updatePart = async (part:string|mongoose.Types.ObjectId|IAnnotation
   return newPart;
 }
 
-export const updateProject = async (project:string|mongoose.Types.ObjectId|IProjectModel|IProject, projectForm:any, setOldProjectAsHistory:boolean = true) => {
-  if (typeof(project) === 'string' || project instanceof mongoose.Types.ObjectId) {
-    project = await Project.findById(project);
-  }
+export const updateProject = async (project:string|IProjectModel|IProject, projectForm:any, setOldProjectAsHistory:boolean = true) => {
+  // if (typeof(project) === 'string' || project instanceof mongoose.Types.ObjectId) {
+  //   project = await Project.findById(project);
+  // }
   if (project.constructor.name === 'model') {
     project = (project as IProjectModel).toObject();
+  } else if (typeof (project) === 'string') {
+    project = await (await Project.findById(project)).toObject();
   }
 
   project = project as IProject;
@@ -78,7 +79,7 @@ const DEFAULT_PROJECT_TO_GFF_OPTIONS:IProjectToGFFJSONOptions = {
   essentialOnly: false,
 }
 
-export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId, options:IProjectToGFFJSONOptions = DEFAULT_PROJECT_TO_GFF_OPTIONS)=>{
+export const projectToGFFJSON = async (_id:any, options:IProjectToGFFJSONOptions = DEFAULT_PROJECT_TO_GFF_OPTIONS)=>{
   const populateOptions = options.essentialOnly ? {
     path:'parts', 
     select: '_id pid featureType chrId chrName start end len strand name parent'
@@ -114,7 +115,7 @@ export const projectToGFFJSON = async (_id:string|mongoose.Types.ObjectId, optio
   return gffJson;
 }
 
-export const projectToGFFJSONPartial = async (_id:string|mongoose.Types.ObjectId, range:IRange, options:IProjectToGFFJSONOptions = DEFAULT_PROJECT_TO_GFF_OPTIONS)=>{
+export const projectToGFFJSONPartial = async (_id:any, range:IRange, options:IProjectToGFFJSONOptions = DEFAULT_PROJECT_TO_GFF_OPTIONS)=>{
   const {start, end} = range;
   const populateOptions = options.essentialOnly ? {
     select: '_id pid featureType chrId chrName start end len strand name parent'
@@ -164,8 +165,8 @@ export const projectToGFFJSONPartial = async (_id:string|mongoose.Types.ObjectId
   return gffJson;
 }
 
-export const updateParentsByIds = async (partIds:(string|mongoose.Types.ObjectId)[], 
-                              upgradePartIdDict: {[key: string]:mongoose.Types.ObjectId},
+export const updateParentsByIds = async (partIds:(string)[], 
+                              upgradePartIdDict: {[key: string]:any},
                               upgradedPartIds: Set<string>,
                               onUpdatedCallback?: (part:any, ctype:string)=>void,
                             )=>{
@@ -174,7 +175,7 @@ export const updateParentsByIds = async (partIds:(string|mongoose.Types.ObjectId
 }
 
 export const updateParents = async (candidates:IAnnotationPartModel[], 
-                              upgradePartIdDict: {[key: string]:mongoose.Types.ObjectId},
+                              upgradePartIdDict: {[key: string]:any},
                               upgradedPartIds: Set<string>,
                               onUpdatedCallback?: (part:any, ctype:string)=>void,
                             )=>{
@@ -257,8 +258,10 @@ export const updateProjectByGFFJSON = async ( project:IProjectModel,
     }
   }
 
+  console.debug('begin save records');
   for(const record of gffJson.records) {
     recordCount++;
+    process.stdout.write(`${recordCount}/${gffJson.records.length}\r`);
     if (progressCallBack) {
       progressCallBack(recordCount/recordLength, `${recordCount}/${recordLength}`);
     }
@@ -595,7 +598,7 @@ export const updateProjectByGFFJSONPartial = async (project:IProjectModel,
 }
 
 // /api/project/${id}/genbank
-export const projectToGenbank = async (_id:string|mongoose.Types.ObjectId, selectedRange:IRange, clientToken:string) => {
+export const projectToGenbank = async (_id:string|any, selectedRange:IRange, clientToken:string) => {
   let gffJson;
   if (selectedRange!==undefined && selectedRange.start!==undefined && selectedRange.end!==undefined) {
     gffJson = await projectToGFFJSONPartial(_id, selectedRange);

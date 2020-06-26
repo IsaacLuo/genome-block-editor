@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import {Project} from '../models';
-import {projectToGFFJSON, projectToGFFJSONPartial, IRange} from './projectImportExport';
+import {projectToGFFJSON, projectToGFFJSONPartial} from './projectImportExport';
 import axios from 'axios';
 import FormData from 'form-data';
 import conf from '../conf.json';

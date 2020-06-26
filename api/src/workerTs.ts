@@ -8,18 +8,26 @@ const workerTs = (filename: string, wkOpts: WorkerOptions) => {
     if (!wkOpts.workerData) {
         wkOpts.workerData = {};
     }
-    const file = `${filename}.ts`;
-    wkOpts.workerData.__filename = file;
+    let file = `${filename}.ts`;
+    file = file.replace(/\\/g, '/');
+    console.debug(file);
+    // wkOpts.workerData.__filename = file;
     return new Worker(`
-            const wk = require('worker_threads');
-            require('ts-node').register();
-            let file = wk.workerData.__filename;
-            delete wk.workerData.__filename;
-            require(file);
-        `,
-        wkOpts
-    );
+    require('ts-node').register();
+    require('${file}');
+    `, wkOpts);
   }
 }
 
 export default workerTs;
+/*
+return new Worker(`
+            const wk = require('worker_threads');
+            require('ts-node').register();
+            let file = wk.workerData.__filename;
+            console.log(file);
+            delete wk.workerData.__filename;
+            require(file);
+        `,
+        wkOpts
+    ); //*/
