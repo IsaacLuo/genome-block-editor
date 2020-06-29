@@ -7,7 +7,7 @@ const createPromoterTerminator = async ({_id,
   terminatorLength=200, 
   selectedRange,
 }: {_id:any, promoterLength:number, terminatorLength:number, selectedRange?:IRange}, 
-onProgress?:(progress, message)=>void,
+onProgress?:(progress:number, message:string)=>void,
 ) => {
   if (onProgress) {onProgress(5, 'task started')}
   const exists = await Project.exists({_id,})
@@ -43,13 +43,18 @@ shiftedParts: [] as IPartUpdateLog[],
 }
 let partsCount=0;
 let lastPercentage = 0;
+
+let timeStamp = Date.now();
 await parts.eachAsync(async (part)=>{
   partsCount++;
   if(onProgress) {
     const percentage = 5 + Math.floor(90 * partsCount/partsLen);
-    if(percentage >= lastPercentage + 1) {
+    const now = Date.now();
+    // only send every second and every percentage.
+    if(percentage >= lastPercentage + 1 && now - timeStamp >= 1000) {
       onProgress(percentage, `now doing ${partsCount}/${partsLen}`);
       lastPercentage = percentage;
+      timeStamp = now;
     }
   }
   let proStart:number;
@@ -100,7 +105,14 @@ await parts.eachAsync(async (part)=>{
     changelog: `created ${promoterLength}bp promoter for ${part.name}`,
   });
 
-  projectLog.createdParts.push(promoter._id);
+  projectLog.createdParts.push({
+    ctype: 'new',
+    part: promoter._id,
+    name: promoter.name,
+    changelog: promoter.changelog,
+    location: promoter.start,
+    oldPart: null,
+  });
 
   const terminator = await AnnotationPart.create({
     pid: mongoose.Types.ObjectId(),
@@ -128,7 +140,14 @@ await parts.eachAsync(async (part)=>{
     changelog: `created ${terminatorLength}bp terminator for ${part.name}`,
   });
 
-  projectLog.createdParts.push(terminator._id);
+  projectLog.createdParts.push({
+    ctype: 'new',
+    part: terminator._id,
+    name: terminator.name,
+    changelog: terminator.changelog,
+    location: terminator.start,
+    oldPart: null,
+  });
 
   replaceMap[part._id.toString()] = part.strand === -1 ? [terminator._id, part._id, promoter._id] : [promoter._id, part._id, terminator._id];
 });

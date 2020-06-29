@@ -1,5 +1,5 @@
 import { HIDE_ALL_DIALOG } from './../actions';
-import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-saga/effects'
+import {call, select, all, fork, put, take, takeLatest, takeEvery, takeLeading} from 'redux-saga/effects'
 import conf from '../conf.json'
 import { eventChannel } from 'redux-saga'
 import {delay} from 'redux-saga/effects'
@@ -157,11 +157,24 @@ export function* sequenceEdit(action:IAction) {
   
 }
 
+// let lastTimer = Date.now();
+
+// export function* setProgress(action:IAction) {
+//   // set timer, only send 'PROGRESS' every 1 second
+//   const now = Date.now();
+//   // if(lastTimer)
+//   // lastTimer = now;
+//   yield put({type:'SET_PROGRESS', data:action.data});
+//   console.log('saga_progress', action.data.progress);
+//   yield delay(1000);
+// }
+
 export default function* watchGlobalProcessTasks() {
   yield takeLatest('REPLACE_CODON_TASK', replaceCodonTask);
   yield takeLatest('INSERT_PART_AFTER_FEATURE', insertPartAfterFeature);
   yield takeLatest('START_REMOVE_INTRON_TASK', startRemoveIntronTask);
   yield takeEvery('SEQUENCE_EDIT', sequenceEdit);
+  // yield takeLeading('PROGRESS', setProgress);
 }
 
 

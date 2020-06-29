@@ -306,15 +306,17 @@ export function* createPromoterTerminator(aciton:IAction) {
     socket.emit('startTask', {taskName: 'createPromoterTerminator', taskParams: {_id:id, promoterLength, terminatorLength, selectedRange}});
 
     while (true) {
-      const serverAction = yield take(channel)
-      console.debug('messageType', serverAction.type)
-      console.log(serverAction);
-      
+      const serverAction = yield take(channel);
       if (serverAction.type === 'result') {
         yield put({type:LOAD_SOURCE_FILE, data: serverAction.data.newProjectId});
+        yield call(notification.success, {
+          message: 'success',
+          description:
+            'promoters and terminators are created',
+        });        
         break;
       } else {
-        const reduxAction = generateLocalSocketAction(serverAction);
+        const reduxAction = yield call(generateLocalSocketAction, serverAction);
         yield put(reduxAction);
       }
     }

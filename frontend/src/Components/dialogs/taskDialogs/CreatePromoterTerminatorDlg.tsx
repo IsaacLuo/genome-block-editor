@@ -33,6 +33,7 @@ const CreatePromoterTermiatorDlg = () => {
   const [terminatorLength, setTerminatorLen] = useState<number>(200);
   const [selectedSegmentOnly, setSelectedSegmentOnly] = useState<boolean>(selectionEnabled);
   const [confirming, setConfirming] = useState<boolean>(false);
+  const [progressBarStatus, setProgressBarStaus] = useState<"normal" | "exception" | "active" | "success" | undefined>('normal')
 
   // const selectionValid = selectionStart !== 0 && selectionEnd !== 0 && selectionEnd > selectionStart;
 
@@ -54,6 +55,7 @@ const CreatePromoterTermiatorDlg = () => {
     visible={showDialog}
     onOk={()=>{
       setConfirming(true);
+      setProgressBarStaus('active');
       dispatch({
         type:'CREATE_PROMOTER_TERMINATOR', 
         data:{
@@ -64,6 +66,7 @@ const CreatePromoterTermiatorDlg = () => {
     confirmLoading={confirming}
     onCancel={()=>{
       setConfirming(false);
+      setProgressBarStaus('normal');
       dispatch({type:'HIDE_CREATE_PROMOTER_TERMINATOR_DIALOG'})}
     }
   >
@@ -92,8 +95,8 @@ const CreatePromoterTermiatorDlg = () => {
       selectionEnabled &&
       <Checkbox checked={selectedSegmentOnly} onChange={(e)=>{setSelectedSegmentOnly(e.target.checked)}}>for selected segment only</Checkbox>
     }
-    <Progress percent={progress} />
-    <div>{message}</div>
+    <Progress percent={progress} status={progressBarStatus}/>
+    <div>{progress}{message}</div>
   {/* <LogList>{outputLog}</LogList> */}
     {/* <Button type="primary" onClick={()=>dispatch({type:'CREATE_PROMOTER_TERMINATOR', data:{promoterLength, terminatorLength}})}>start</Button> */}
   </Modal>

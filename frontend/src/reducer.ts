@@ -501,7 +501,6 @@ export const historyReducer = (state:IHistoryState, action:IAction) => {
     case 'SHOW_HIDE_HISTORY_VERSIONS':
       return DEFAULT_HISTORY_STATE;
     case 'SET_GB_SELECTION_START':
-    case 'SET_GB_SELECTION_START':
       return {...state, locationStartOffset: 0, locationEndOffset: 0, focusedPartId: null}
     case 'GB_SELECT_ANNOTATION_PART': {
       const {start, end, pid} = action.data;

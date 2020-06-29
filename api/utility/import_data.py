@@ -266,39 +266,40 @@ def import_project(file_path, project_name):
 
         wholeSequence = gff_reader.get_fasta_db().find(project['seqName'])
         project['len'] = len(wholeSequence)
-        # use last blank space
-        if end_pos_of_unknown < project['len']:
-            start = end_pos_of_unknown
-            end = project['len']
-            insert_result = Parts.insert_one({
-                "pid":ObjectId(),
-                "parent": None,
-                "featureType": 'unknown',
-                "chrName": p['chrName'],
-                "chrId": p['chrId'],
-                "start": start,
-                "end": end,
-                "strand": 0,
-                "name": 'unknown',
-                "original": True,
-
-                "sequenceHash": seqeunceHash,
-                "sequenceRef": {
-                    "fileName": p['chrFileName'],
+        if insert_unknown_parts:
+            # use last blank space
+            if end_pos_of_unknown < project['len']:
+                start = end_pos_of_unknown
+                end = project['len']
+                insert_result = Parts.insert_one({
+                    "pid":ObjectId(),
+                    "parent": None,
+                    "featureType": 'unknown',
+                    "chrName": p['chrName'],
+                    "chrId": p['chrId'],
                     "start": start,
                     "end": end,
                     "strand": 0,
-                },
+                    "name": 'unknown',
+                    "original": True,
 
-                "changelog": default_changelog,
+                    "sequenceHash": seqeunceHash,
+                    "sequenceRef": {
+                        "fileName": p['chrFileName'],
+                        "start": start,
+                        "end": end,
+                        "strand": 0,
+                    },
 
-                "createdAt": now,
-                "updatedAt": now,
-            })
-            if insert_result.acknowledged:
-                parts.append(insert_result.inserted_id)
-            else:
-                raise Exception('failed insert parts')
+                    "changelog": default_changelog,
+
+                    "createdAt": now,
+                    "updatedAt": now,
+                })
+                if insert_result.acknowledged:
+                    parts.append(insert_result.inserted_id)
+                else:
+                    raise Exception('failed insert parts')
 
         print('generated {} records                          '.format(count))
 
