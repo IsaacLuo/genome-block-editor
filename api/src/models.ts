@@ -30,7 +30,6 @@ export const AnnotationPartSchema = new Schema({
   chrName: String,
   start: Number,
   end: Number,
-  len: Number,
   strand: Number,
   // extendted attributes
   name: String,
@@ -50,11 +49,18 @@ export const AnnotationPartSchema = new Schema({
   
   // if built, all parts must share the same sequenceRef from project.
   built: Boolean,
-  
   parent: {
     type: Schema.Types.ObjectId,
     ref: 'AnnotationPart',
   },
+  cdses: [{
+    type: Schema.Types.ObjectId,
+    ref: 'AnnotationPart',
+  }],
+  subFeatures: [{
+    type: Schema.Types.ObjectId,
+    ref: 'AnnotationPart',
+  }],
   attribute: Schema.Types.Mixed,
   createdAt: Date,
   updatedAt: Date,
@@ -68,6 +74,7 @@ AnnotationPartSchema.pre<IAnnotationPartModel>('save', function (next) {
 })
 
 AnnotationPartSchema.virtual('level').get(function(){return this.parent?1:0;});
+AnnotationPartSchema.virtual('len').get(function(){return this.end-this.start});
 AnnotationPartSchema.index({ start: 1, end: -1, level: 1 });
 
 export interface IAnnotationPartModel extends IAnnotationPart, Document {

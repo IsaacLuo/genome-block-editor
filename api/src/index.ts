@@ -28,7 +28,7 @@ import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProject
 import workerTs from './workerTs';
 import { forkProject, hideProject, revertProject } from './projectGlobalTasks/project';
 import { projectToGFFJSON, updateProjectByGFFJSON, updateProjectByGFFJSONPartial, projectToGFFJSONPartial, projectToGenbank } from './projectGlobalTasks/projectImportExport';
-import { replaceCodon } from './projectGlobalTasks/replaceCodon';
+import { replaceCodonOld } from './projectGlobalTasks/replaceCodonOld';
 import { removeIntron } from './projectGlobalTasks/removeIntron';
 
 import axios from 'axios';
@@ -39,6 +39,7 @@ import { insertPartsAfterFeatures } from './projectGlobalTasks/insertPartsAfterF
 import {updateParents} from './projectGlobalTasks/projectImportExport';
 import gbeWorkerHost from './gbeWorkerHost';
 import taskProcessor from './taskProcessor';
+import taskProcessorST from './taskProcessorST';
 
 require('dotenv').config()
 
@@ -371,7 +372,7 @@ async (ctx:Ctx, next:Next)=> {
   const {rules, selectedRange} = ctx.request.body;
   const clientToken = ctx.cookies.get('token');
   
-  ctx.body = await replaceCodon(user, id, rules, selectedRange, clientToken);
+  ctx.body = await replaceCodonOld(user, id, rules, selectedRange, clientToken);
   // console.log(ctx.body);
 });
 
@@ -686,7 +687,8 @@ useApolloServer(app);
 
 // ----------------------------------socket.io part----------------------------------------------
 export const server = http.createServer(app.callback());
-taskProcessor(server);
+// taskProcessor(server);
+taskProcessorST(server);
 
 // -----------------------------------------------------------------------------------------------
 app.use(router.routes());

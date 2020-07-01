@@ -62,6 +62,7 @@ declare interface IAnnotationPart {
   built: boolean;
   attribute: any;
   level?: number;
+  cdses?: any[];
 }
 
 declare interface IProject {
@@ -70,7 +71,7 @@ declare interface IProject {
   ctype: string;
   name: string,
   version: string,
-  parts: Array<IAnnotationPart>,
+  parts: Array<IAnnotationPart>|any,
   owner: IUser,
   group: string[],
   permission: Number,
@@ -186,7 +187,7 @@ declare interface IProcess {
   processId: string;
   subProcessInst?: any;
   program: string;
-  params: string[];
+  params: any;
   comments: any;
   dataIn: any;
   taskName: string;
@@ -199,4 +200,13 @@ declare interface IProcess {
 
 declare interface IProcessDict {
   [key: string]: IProcess;
+}
+
+
+declare global {
+  namespace NodeJS {
+    interface Global {
+      taskDict: TaskDict;
+    }
+  }
 }

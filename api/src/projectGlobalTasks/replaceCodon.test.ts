@@ -1,4 +1,4 @@
-import {replaceCodon} from './replaceCodon'
+import replaceCodon from './replaceCodon'
 import request from 'supertest'
 import mongoose from 'mongoose';
 import {Project} from '../models';
@@ -31,32 +31,32 @@ describe('test of forkProject', ()=>{
   }, 10000);
 
   test('start replace codon task', async ()=>{
-    const result = await replaceCodon(user, project._id, "TAG:TAA TGA:TAA", "");
+    const result = await replaceCodon({_id:project._id, rules:["TAG:TAA", "TGA:TAA"]});
     console.log(result);
     expect(result).not.toBeUndefined();
     expect(result).toHaveProperty('taskInfo');
-    expect(result.taskInfo).toHaveProperty('processId');
-    expect(result.taskInfo).toHaveProperty('serverURL');
-    const {processId, serverURL} = result.taskInfo;
+    // expect(result.taskInfo).toHaveProperty('processId');
+    // expect(result.taskInfo).toHaveProperty('serverURL');
+    // const {processId, serverURL} = result.taskInfo;
 
-    // 2. use socket.io
-    const socket = io(serverURL);
-    await new Promise(resolve=>{
-      // const types = ['message', 'progress', 'state', 'result', 'stderr', 'abort'];
-      const gneratedResult = jest.fn();
-      // types.forEach(type=>{
-        socket.on('result',(data:any)=>{
-          console.log('received result', data);
-          gneratedResult();
-        })
-      // })
-      socket.emit('startTask', processId, (data)=>{
-        expect(gneratedResult).toHaveBeenCalled();
-        resolve();
-      });
-    });
+  //   // 2. use socket.io
+  //   const socket = io(serverURL);
+  //   await new Promise(resolve=>{
+  //     // const types = ['message', 'progress', 'state', 'result', 'stderr', 'abort'];
+  //     const gneratedResult = jest.fn();
+  //     // types.forEach(type=>{
+  //       socket.on('result',(data:any)=>{
+  //         console.log('received result', data);
+  //         gneratedResult();
+  //       })
+  //     // })
+  //     socket.emit('startTask', processId, (data)=>{
+  //       expect(gneratedResult).toHaveBeenCalled();
+  //       resolve();
+  //     });
+  //   });
 
-    socket.disconnect();
+  //   socket.disconnect();
   }, 30000);
 
   afterAll(async()=>{

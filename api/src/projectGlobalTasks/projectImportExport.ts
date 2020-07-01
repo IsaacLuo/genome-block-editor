@@ -49,6 +49,8 @@ export const updateProject = async (project:string|IProjectModel|IProject, proje
   }
 
   project = project as IProject;
+  
+  const orignialProjectId = project._id;
 
   const history = [{
     _id: project._id,
@@ -63,7 +65,7 @@ export const updateProject = async (project:string|IProjectModel|IProject, proje
   const newProject = await Project.create(projectForm);
 
   if (setOldProjectAsHistory && project.ctype !== 'source') {
-    await Project.updateOne({_id:project._id}, {ctype:'history'});
+    await Project.updateOne({_id:orignialProjectId}, {ctype:'history'});
   }
 
   return newProject;

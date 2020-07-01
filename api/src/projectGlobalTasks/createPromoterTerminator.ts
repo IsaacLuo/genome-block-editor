@@ -10,7 +10,7 @@ const createPromoterTerminator = async ({_id,
 onProgress?:(progress:number, message:string)=>void,
 ) => {
   if (onProgress) {onProgress(5, 'task started')}
-  const exists = await Project.exists({_id,})
+  const exists = await Project.exists({_id,});
   console.log(_id, exists);
   if(! exists) throw new Error(JSON.stringify({status:404, message: 'unable to find project'}));
 
@@ -18,16 +18,18 @@ const project = await Project
 .findById(_id)
 .exec();
 
-const partsLen = await AnnotationPart.find({
+let partCondition:any = {
   _id:{$in:project.parts},
-  featureType: 'gene'
-  })
-  .count();
+  featureType: 'gene',
+};
+if (selectedRange) {
+  partCondition = {...partCondition, start:{$gte: selectedRange.start}, end:{$lt: selectedRange.end}}
+}
 
-const parts = await AnnotationPart.find({
-_id:{$in:project.parts},
-featureType: 'gene'
-})
+const partsLen = await AnnotationPart.find(partCondition)
+.count();
+
+const parts = await AnnotationPart.find(partCondition)
 .sort({start:1, end:-1})
 .cursor();
 

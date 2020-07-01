@@ -1,4 +1,4 @@
-import { HIDE_ALL_DIALOG } from './../actions';
+import { HIDE_ALL_DIALOG, LOAD_SOURCE_FILE } from './../actions';
 import {call, select, all, fork, put, take, takeLatest, takeEvery, takeLeading} from 'redux-saga/effects'
 import conf from '../conf.json'
 import { eventChannel } from 'redux-saga'
@@ -8,6 +8,7 @@ import ApolloClient from 'apollo-boost';
 import { gql } from "apollo-boost";
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import io from 'socket.io-client';
+import { notification } from 'antd';
 
 function monitorSocket(socket:SocketIOClient.Socket) {
   return eventChannel( emitter => {
@@ -71,7 +72,7 @@ function generateSocketAction(serverAction:IAction, extraPayload?:any):IAction {
 }
 
 
-function* replaceCodonTask(action:IAction) {
+function* replaceCodonTaskHttp(action:IAction) {
   try {
     const {id, rules, selectedRange} = action.data;
     const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/replace_codons/from/${id}`, {rules, selectedRange})
@@ -97,8 +98,36 @@ function* replaceCodonTask(action:IAction) {
   } catch (err) {
     console.error(err);
   }
-
 }
+
+export function* replaceCodonTask(action:IAction) {
+  try {
+    const {id, rules, selectedRange} = action.data;
+    // use socket.io
+    const socket = io(conf.backendURL);
+    const channel = yield call(monitorSocket, socket);
+    socket.emit('startTask', {taskName: 'replaceCodon', taskParams: {_id:id, rules:rules.split(' '), selectedRange}});
+    while (true) {
+      const serverAction = yield take(channel);
+      if (serverAction.type === 'result') {
+        yield put({type:LOAD_SOURCE_FILE, data: serverAction.data.newProjectId});
+        yield call(notification.success, {
+          message: 'success',
+          description:
+            'codon are created',
+        });        
+        break;
+      } else {
+        const reduxAction = yield call(generateSocketAction, serverAction);
+        yield put(reduxAction);
+      }
+    }
+    
+  } catch (error) {
+    yield call(notification.error, {message:error});
+  }
+}
+
 
 function* insertPartAfterFeature(action:IAction) {
   try {
