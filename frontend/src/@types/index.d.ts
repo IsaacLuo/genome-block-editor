@@ -95,6 +95,10 @@ declare interface IComponentVisibleState {
   removeIntronDialogVisible: boolean;
   sequenceEditorDialogVisible: boolean;
   subFeatureVisible: boolean;
+
+  projectLogPanelVisible: boolean;
+
+  activeSummaryTabKey: string;
 }
 
 declare interface IGenomBrowserState {

@@ -4,7 +4,14 @@ import findOverlappedFeatures from './helper/findOverlappedFeatures';
 import getExtronSequence from './helper/getExtronSequence';
 import replaceExtronSequence from './helper/replaceExtronSequence';
 import { updateProject } from './projectImportExport';
+import { readSequenceFromSequenceRef, readSequenceBufferFromSequenceRef, generateSequenceRef, generateSequenceFilePath } from '../sequenceRef';
+import { v1 as uuidv1 } from 'uuid';
+import fs from 'fs';
 const mongoose = require('mongoose');
+
+
+// change sequence: yes
+// shift parts: no
 
 const replaceCodon = async ({_id, 
   rules=[],
@@ -30,7 +37,6 @@ onProgress?:(progress:number, message:string)=>void,
   shiftedParts: [] as IPartUpdateLog[],
   }
   let partsCount=0;
-  let lastPercentage = 0;
 
   let timeStamp = Date.now();
 
@@ -54,18 +60,26 @@ onProgress?:(progress:number, message:string)=>void,
 
   let replaceDict:any = {};
 
+  // get project sequence;
+  // let projectSequence = Buffer.from(await readSequenceFromSequenceRef(project.sequenceRef), 'ascii');
+  let projectSequenceBuf = await readSequenceBufferFromSequenceRef(project.sequenceRef);
+  let newSequenceReferenceFileName = uuidv1();
+
+  // apply changes to each part
   await AnnotationPart.find(partCondition)
   .sort({start:1, end:-1})
   .cursor()
   .eachAsync(async (part)=>{
+    let tg;
+    // tg = Date.now();
     partsCount++;
+    // console.debug(partsCount);
     if(onProgress) {
       const percentage = 5 + Math.floor(90 * partsCount/partsLen);
       const now = Date.now();
       // only send every second and every percentage.
-      if(percentage >= lastPercentage + 1 && now - timeStamp >= 1000) {
+      if(now - timeStamp >= 1000) {
         onProgress(percentage, `now doing ${partsCount}/${partsLen}`);
-        lastPercentage = percentage;
         timeStamp = now;
       }
     }
@@ -82,9 +96,11 @@ onProgress?:(progress:number, message:string)=>void,
       })
       return;
     }
-
-    const extronSequence = await getExtronSequence(project, part);
-    
+    // console.debug(`before extron time =${Date.now()-tg}`)
+    // tg = Date.now();
+    const extronSequence = await getExtronSequence(part, projectSequenceBuf);
+    // console.debug(`get extron time =${Date.now()-tg} ${part.strand}`)
+    // tg = Date.now();
     const rulesDict:any = {};
     rules.forEach(ruleStr=>{
       const [src, dst] = ruleStr.toUpperCase().split(':');
@@ -102,38 +118,50 @@ onProgress?:(progress:number, message:string)=>void,
         newExtronSequence.push(codon);
       }
     }
-    
-
+    // console.debug(`apply rules time =${Date.now()-tg}`)
+    tg = Date.now();
     if(modified) {
       newExtronSequence = newExtronSequence.join('');
-      replaceDict = {...replaceDict, ...(await replaceExtronSequence(project, part, newExtronSequence, `replaced codons ${rules.join(' ')}`))};
+      const subReplaceDict = await replaceExtronSequence(project, part, newExtronSequence, projectSequenceBuf, newSequenceReferenceFileName, `replaced codons ${rules.join(' ')}`);
+      replaceDict = {
+        ...replaceDict, 
+        ...subReplaceDict, 
+      };
     }
+    // console.debug(`replace time =${Date.now()-tg}`)
   });
+
+  // now the sequence is updated, write to file
+
+  fs.promises.writeFile(generateSequenceFilePath(newSequenceReferenceFileName), projectSequenceBuf);
 
   // update project
 
   if(onProgress) onProgress(95, `saving history`);
-
   const newParts = project.parts.map(part=>{
     if(replaceDict[part.toString()]) {
       const target = replaceDict[part.toString()];
 
-      projectLog.modifiedParts.push({
-        ctype: 'modified',
-        part: replaceDict[part.toString()]._id,
-        name: target.name,
-        changelog: target.changelog,
-        location: target.start,
-        oldPart: part,
-      });
+      if (!target.parent) {
+        projectLog.modifiedParts.push({
+          ctype: 'modified',
+          part: replaceDict[part.toString()]._id,
+          name: target.name,
+          changelog: target.changelog,
+          location: target.start,
+          oldPart: part,
+        });
+      }
       return target._id;
     } else {
       return part;
     }
   });
-  const newProject = await updateProject(project, {parts: newParts, changelog:`replaced codons ${rules.join(' ')}`});
+  const newSequenceRef:ISequenceRef = {fileName: newSequenceReferenceFileName, start:0, end: project.len, strand:0};
+  const newProject = await updateProject(project, {parts: newParts, sequenceRef: newSequenceRef, changelog:`replaced codons ${rules.join(' ')}`});
   projectLog._id = newProject._id;
   await ProjectLog.create(projectLog);
+  if (onProgress) onProgress(100, `project saved`);
   return newProject;
 }
 

@@ -2,7 +2,7 @@ import { LOAD_SOURCE_FILE_BY_PROJECT_ID, SET_SOURCE_FILE, LOAD_SOURCE_FILE } fro
 
 // redux saga
 import { eventChannel } from 'redux-saga'
-import {call, all, fork, put, take, takeLatest, select, takeEvery} from 'redux-saga/effects';
+import {call, all, fork, put, take, takeLatest, select, takeEvery, delay} from 'redux-saga/effects';
 
 import watchFolders from './sagas/folders';
 
@@ -355,12 +355,15 @@ export function* watchGenomeOperations() {
 
 export function* fetchAvailableHistory(action:IAction) {
   try {
-    const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
+    const {id, historyFile, historyLoading} = yield select((state:IStoreState)=>({id:state.sourceFile!._id, historyFile: state.history.historyFile, historyLoading: state.history.loading}));
     const result = yield call(
       axios.get, 
       `${conf.backendURL}/api/sourceFile/${id}/history`, 
       {withCredentials: true});
     yield put({type: 'SET_AVAILABLE_HISTORY', data:result.data.history});
+    if (!historyFile && !historyLoading && result?.data?.history[0]?._id) {
+      yield put({type: 'FETCH_HISTORY_SOURCE_FILE', data:result.data.history[0]._id})
+    }
   } catch (error) {
     yield call(notification.error, {message:error});
   }

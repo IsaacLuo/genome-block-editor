@@ -21,7 +21,12 @@ export const SequenceRefSchema = new Schema({
   start: Number,
   end: Number,
   strand: Number,
-})
+});
+
+export const RangeSchema = new Schema({
+  start: Number,
+  end: Number,
+},{ _id : false })
 
 export const AnnotationPartSchema = new Schema({
   pid: Schema.Types.ObjectId, // part id, it will const equal the original pid
@@ -53,10 +58,7 @@ export const AnnotationPartSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'AnnotationPart',
   },
-  cdses: [{
-    type: Schema.Types.ObjectId,
-    ref: 'AnnotationPart',
-  }],
+  cdsRange: [RangeSchema],
   subFeatures: [{
     type: Schema.Types.ObjectId,
     ref: 'AnnotationPart',
@@ -149,13 +151,20 @@ const PartUpdateLogSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'AnnotationPart',
   },
+  partPid: {
+    type: Schema.Types.ObjectId,
+    ref: 'AnnotationPart',
+    filed: 'pid',
+  },
   name: String,
   changelog: String,
   location: Number,
-  oldPart: {
+  oldPartPid: {
     type: Schema.Types.ObjectId,
     ref: 'AnnotationPart',
+    filed: 'pid',
   },
+  oldLocation: Number,
 },{ _id : false });
 
 export const ProjectLogSchema = new Schema({

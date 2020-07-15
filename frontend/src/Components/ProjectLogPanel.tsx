@@ -10,6 +10,8 @@ import conf from 'conf.json';
 const ProjectLogPanel = () => {
   const log = useMappedState((state:IStoreState)=>(state.projectLog.log));
 
+  const dispatch = useDispatch();
+
   // const dataSource = log.parts?.map((v:any,i:number)=>({...v, key:i}));
   const dataSource = log.parts;
 
@@ -34,8 +36,8 @@ const ProjectLogPanel = () => {
           value: 'deleted',
         },
         {
-          text: 'moved',
-          value: 'moved',
+          text: 'shifted',
+          value: 'shifted',
         },
         {
           text: 'conflict',
@@ -57,7 +59,7 @@ const ProjectLogPanel = () => {
       dataIndex: 'location',
       key: 'location',
       sorter: (a:any, b:any) => a.location - b.location,
-      // sortDirections: ['descend'],
+      render: (location:number)=><a onClick={(event)=>{dispatch({type:'GENOME_BROWSER_SET_CURSOR_POS', data:location})}}>{location}</a>
     },
     {
       title: 'changelog',
@@ -68,7 +70,7 @@ const ProjectLogPanel = () => {
   
   // 'descend' | 'ascend' | null;
   return (
-    <div style={{width:'80%'}}>
+    <div style={{width:'100%'}}>
       <Table rowKey={record=>record.part} dataSource={dataSource} columns={columns}/>      
     </div>
   );

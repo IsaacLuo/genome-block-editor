@@ -78,6 +78,8 @@ const GenomeBrowserForHistory = () => {
     }
   },[projectId, historyBrowserVisible])
 
+  
+
   const menu = (
     <Menu onClick={onClick}>
       {

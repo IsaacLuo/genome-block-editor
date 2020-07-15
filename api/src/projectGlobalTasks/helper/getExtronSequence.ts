@@ -1,36 +1,26 @@
-import { AnnotationPart, IAnnotationPartModel, IProjectModel } from '../../models';
-import { readSequenceFromSequenceRef } from '../../sequenceRef';
-import getCDSes from './getPartCDSes';
-export default async function getExtronSequence(project:IProjectModel, part:IAnnotationPartModel) {
-  let cdses = await getCDSes(project, part);
-  if (cdses) {
-    // has cds, merge cds and return
-    let sequence = (await Promise.all(cdses.map(cds=>readSequenceFromSequenceRef(cds.sequenceRef)))).join('');
-    return sequence;
+import { IAnnotationPartModel, IProjectModel } from '../../models';
+import { readSequenceFromSequenceBuffer } from '../../sequenceRef';
+export default async function getExtronSequence(part:IAnnotationPartModel, sequenceBuffer:Buffer) {
+  if (part.cdsRange && part.cdsRange.length > 0) {
+    return (await Promise.all(part.cdsRange.map(range=>readSequenceFromSequenceBuffer(sequenceBuffer, range.start, range.end, part.strand)))).join('');
   } else {
-    // no cds, return gene sequence
-    let sequence = await readSequenceFromSequenceRef(part.sequenceRef);
-    return sequence;
+    return await readSequenceFromSequenceBuffer(sequenceBuffer, part.start, part.end, part.strand);
   }
 
-  // const introns = await AnnotationPart.find({
-  //   _id:{$in:allSubFeatures}, 
-  //   featureType:{$in:['intron', 'five_prime_UTR_intron']},
-  // }).exec();
-
-  // let sequence = await readSequenceFromSequenceRef(part.sequenceRef);
-  // if(introns) {
-  //   // delete intron's sequence;
-  //   const arr = sequence.split('');
-  //   introns.forEach(intron=>{
-  //     for (let i=intron.start - part.start; i< intron.end - part.start; i++) {
-  //       arr[i] = undefined;
-  //     }
-  //   })
-  //   sequence = arr.filter(v=>v!==undefined).join('');
+  // let dn = Date.now();
+  // let cdses = await getCDSes(project, part);
+  // console.log('get cds time=', Date.now() - dn);
+  // dn = Date.now();
+  // if (cdses && cdses.length>0) {
+  //   // has cds, merge cds and return
+  //   let sequence = (await Promise.all(cdses.map(cds=>readSequenceFromSequenceBuffer(sequenceBuffer, cds.start, cds.end, cds.strand)))).join('');
+  //   console.log('get multi cds seq time=', Date.now() - dn,part.strand);
   //   return sequence;
   // } else {
-  //   // no introns, use part's sequence
+  //   // no cds, return gene sequence
+  //   let sequence = await readSequenceFromSequenceBuffer(sequenceBuffer, part.start, part.end, part.strand);
+  //   console.log('get single seq time=', Date.now() - dn, part.strand);
   //   return sequence;
   // }
+  
 }

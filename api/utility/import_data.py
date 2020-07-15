@@ -77,6 +77,7 @@ def import_project(file_path, project_name):
     chr_count = 0
     seq_dict = {}
     unused_ids = set()
+    parent_dict = {}
 
     gff_reader = GFFReader(file_path, fasta_file_name, sequence_dir=sequence_dir, db=db)
     count = 0
@@ -106,7 +107,6 @@ def import_project(file_path, project_name):
                 unused_ids.add(parent_id)
         else:
             parent_id = None
-
         sequenceHash = ''
         if 'sequence' in record:
             seq = record['sequence']
@@ -189,6 +189,26 @@ def import_project(file_path, project_name):
                     # insert name->id to dict
                     if 'ID' in record['attribute']:
                         project_name_id_dict[record['attribute']['ID']] = insert_result.inserted_id
+
+                    parent_dict[insert_result.inserted_id] = parent_id
+
+
+                    #set all sub features to the most top feature's subfeature field
+                    if parent_id:
+                        cur_id = insert_result.inserted_id
+                        par_id = parent_id
+                        while parent_dict[par_id]:
+                            par_id = parent_dict[par_id]
+                        Parts.update_one({'_id': par_id}, {'$push': {'subFeatures': cur_id}})
+
+                    #modify parent's CDS
+                    if parent_id and record['feature'] == 'CDS':
+                        cur_id = insert_result.inserted_id
+                        par_id = parent_id
+                        Parts.update_one({'_id': par_id}, {'$push': {'cdsRange':{'start':record['start'], 'end':record['end']}}})
+                        while parent_dict[par_id]:
+                            par_id = parent_dict[par_id]
+                            Parts.update_one({'_id': par_id}, {'$push': {'cdsRange':{'start':record['start'], 'end':record['end']}}})
                 else:
                     # raise Exception('failed insert parts')
                     print('insert failed', str(insert_result))

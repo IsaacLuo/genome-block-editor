@@ -32,6 +32,8 @@
   width: 90%;
   border: solid 1px;
   padding: 20px;
+  margin-left:auto;
+  margin-right:auto;
   /* height: 470px; */
 }
 .file-panel {

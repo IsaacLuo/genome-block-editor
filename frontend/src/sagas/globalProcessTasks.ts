@@ -156,7 +156,35 @@ function* insertPartAfterFeature(action:IAction) {
   }
 }
 
-function* startRemoveIntronTask(action:IAction) {
+export function* startRemoveIntronTask(action:IAction) {
+  try {
+    const {id, intronTypes, selectedRange} = action.data;
+    // use socket.io
+    const socket = io(conf.backendURL);
+    const channel = yield call(monitorSocket, socket);
+    socket.emit('startTask', {taskName: 'removeIntron', taskParams: {_id:id, intronTypes, selectedRange}});
+    while (true) {
+      const serverAction = yield take(channel);
+      if (serverAction.type === 'result') {
+        yield put({type:LOAD_SOURCE_FILE, data: serverAction.data.newProjectId});
+        yield call(notification.success, {
+          message: 'success',
+          description:
+            'codon are created',
+        });        
+        break;
+      } else {
+        const reduxAction = yield call(generateSocketAction, serverAction);
+        yield put(reduxAction);
+      }
+    }
+    
+  } catch (error) {
+    yield call(notification.error, {message:error});
+  }
+}
+
+function* startRemoveIntronTaskWebexe(action:IAction) {
   try {
     const {id, intronTypes, selectedRange} = action.data;
     const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/remove_introns/from/${id}`, {intronTypes, selectedRange})

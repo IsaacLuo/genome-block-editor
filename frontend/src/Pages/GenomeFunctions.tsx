@@ -17,14 +17,15 @@ import PartDetailDlg from 'Components/dialogs/PartDetailDlg';
 import InsertFeatureDlg from 'Components/dialogs/taskDialogs/InsertFeatureDlg';
 import DebugPanel from 'Components/DebugPanel';
 import GenomeOperationMenu from 'Components/GenomeOperationMenu';
-import { Collapse } from 'antd';
+import { Collapse, Tabs } from 'antd';
 import RemoveIntronDlg from 'Components/dialogs/taskDialogs/RemoveIntronDlg';
 import SequenceEditorDlg from 'Components/dialogs/SequenceEditorDlg';
 import ProjectLogPanel from 'Components/ProjectLogPanel';
 
 const ProjectFunctions: React.FC = (props:any) => {
-  const {projectId} = useMappedState((state:IStoreState)=>({
+  const {projectId, activeSummaryTabKey} = useMappedState((state:IStoreState)=>({
     projectId: (state.sourceFile && state.sourceFile.projectId),
+    activeSummaryTabKey: state.componentVisible.activeSummaryTabKey,
   }));
 
   const dispatch = useDispatch();
@@ -66,13 +67,32 @@ const ProjectFunctions: React.FC = (props:any) => {
           <GenomeOperationPanel/>
         </div>}
 
-        <ProjectLogPanel/>
-
+        <Collapse defaultActiveKey={['1']} style={{width:'100%'}} onChange={(keys)=>{
+          if (keys.length === 0) {
+            dispatch({type:'GF_SET_TAB', data:'summaryTab'});
+          }
+        }}>
+          <Collapse.Panel header="more deails" key="1">
+            <Tabs activeKey={activeSummaryTabKey} onChange={(key)=>{
+            dispatch({type:'GF_SET_TAB', data:key});
+          }}>
+            <Tabs.TabPane tab="Summary" key="summaryTab">
+                <div>summary</div>
+              </Tabs.TabPane>
+              <Tabs.TabPane tab="History" key="historyTab">
+                <GenomeBrowserForHistory/>
+              </Tabs.TabPane>
+              <Tabs.TabPane tab="Changelog" key="projectLogTab">
+                <ProjectLogPanel/>
+              </Tabs.TabPane>
+          </Tabs>
+          </Collapse.Panel>
+        </Collapse>
         <CreatePromoterTermiatorDlg/>
         <RemoveCreatedFeatureDlg/>
         <ForkProjectDlg/>
 
-        <GenomeBrowserForHistory/>
+        
         <ReplaceCodonDlg/>
         <InsertFeatureDlg/>
         <RemoveIntronDlg/>

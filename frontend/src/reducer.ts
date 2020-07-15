@@ -77,6 +77,9 @@ const DEFAULT_COMPONENT_VISIBLE_STATE:IComponentVisibleState = {
   removeIntronDialogVisible: false,
   sequenceEditorDialogVisible: false,
   subFeatureVisible: true,
+  projectLogPanelVisible: false,
+
+  activeSummaryTabKey: 'summaryTab',
 }
 
 const DEFAULT_HISTORY_STATE:IHistoryState = {
@@ -234,6 +237,13 @@ export const componentVisibleReducer = (state:IComponentVisibleState, action:IAc
     case 'SHOW_SUB_FEATURES': {
       return {...state, subFeatureVisible: action.data};
     }
+
+    case 'GF_SET_TAB':
+      return {...state, 
+        activeSummaryTabKey: action.data,
+        historyBrowserVisible: action.data === 'historyTab',
+        projectLogPanelVisible: action.data === 'projectLogTab',
+      };
     default:
       return state;
   }

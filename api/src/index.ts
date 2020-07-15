@@ -29,7 +29,7 @@ import workerTs from './workerTs';
 import { forkProject, hideProject, revertProject } from './projectGlobalTasks/project';
 import { projectToGFFJSON, updateProjectByGFFJSON, updateProjectByGFFJSONPartial, projectToGFFJSONPartial, projectToGenbank } from './projectGlobalTasks/projectImportExport';
 import { replaceCodonOld } from './projectGlobalTasks/replaceCodonOld';
-import { removeIntron } from './projectGlobalTasks/removeIntron';
+import { removeIntron } from './projectGlobalTasks/removeIntronWebExe';
 
 import axios from 'axios';
 import crypto from 'crypto';
@@ -687,8 +687,13 @@ useApolloServer(app);
 
 // ----------------------------------socket.io part----------------------------------------------
 export const server = http.createServer(app.callback());
-// taskProcessor(server);
-taskProcessorST(server);
+if(process.env.NODE_ENV === 'production') {
+  taskProcessor(server);
+} else {
+  taskProcessorST(server);
+}
+
+
 
 // -----------------------------------------------------------------------------------------------
 app.use(router.routes());

@@ -5,6 +5,7 @@ import TaskDict from './taskDict';
 import gbeWorkerHost from './gbeWorkerHost';
 import replaceCodon from './projectGlobalTasks/replaceCodon';
 import createPromoterTerminator from './projectGlobalTasks/createPromoterTerminator';
+import removeIntron from './projectGlobalTasks/removeIntron';
 
 
 global.taskDict = new TaskDict();
@@ -30,6 +31,10 @@ export default function taskProcessorST(server:http.Server) {
         case 'replaceCodon':
           fn = replaceCodon;
           break;
+        case 'removeIntron':
+          fn = removeIntron;
+          break;
+      
         default:
           console.error(`${task.program} is not a task`);
           io.in(taskId).emit('abort', `${task.program} is not a task`);

@@ -62,7 +62,8 @@ declare interface IAnnotationPart {
   built: boolean;
   attribute: any;
   level?: number;
-  cdses?: any[];
+  subFeatures?: any[];
+  cdsRange?: IRange[];
 }
 
 declare interface IProject {
@@ -124,10 +125,12 @@ declare interface IProjectFolder {
 declare interface IPartUpdateLog {
   ctype: string,
   part?: any,
+  partPid?: any,
   name?: string,
   changelog?: string,
   location?: number,
   oldPart?: any,
+  oldLocation?: number,
 }
 
 declare interface IProjectLog {
@@ -200,6 +203,10 @@ declare interface IProcess {
 
 declare interface IProcessDict {
   [key: string]: IProcess;
+}
+
+declare interface IPartReplaceDict {
+  [key: string]: any;
 }
 
 

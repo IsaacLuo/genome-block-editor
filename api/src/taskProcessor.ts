@@ -2,9 +2,7 @@
 import http from 'http';
 import socket from "socket.io";
 import TaskDict from './taskDict';
-import uuid from 'uuid';
 import gbeWorkerHost from './gbeWorkerHost';
-import replaceCodon from './projectGlobalTasks/replaceCodon';
 
 declare global {
   namespace NodeJS {
