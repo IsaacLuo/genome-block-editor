@@ -65,6 +65,16 @@ export function* loadSourceFile(action:IAction) {
     const result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/${projectId}`, {withCredentials: true});
     yield put({type:'SET_GENOME_BROWSER_LOADING', data:false});
     yield put({type: 'SET_SOURCE_FILE', data:result.data});
+    if (result.data) {
+      const {windowWidth} = yield select((state:IStoreState)=>({windowWidth:state.genomeBrowser.windowWidth}));
+      let zoomLevel = 64;
+      const len = result.data.len;
+      while (len / zoomLevel < windowWidth/2 && zoomLevel >1 ) {
+        zoomLevel/=2;
+      }
+      yield put({type: 'SET_ZOOM_LEVEL', data:zoomLevel});
+    }
+    
     yield put({type: 'LOAD_PROJECT_OPERATION_LOG', data: {projectId}});
     yield put({type: 'HIDE_ALL_DIALOG', data:result.data});
     yield put({type: 'CLEAR_GB_SELECTION'});
@@ -79,6 +89,15 @@ export function* loadSourceFileByProjectId(action:IAction) {
     const result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/byProjectId/${action.data}`, {withCredentials: true});
     yield put({type:'SET_GENOME_BROWSER_LOADING', data:false});
     yield put({type: 'SET_SOURCE_FILE', data:result.data});
+    if (result.data) {
+      const {windowWidth} = yield select((state:IStoreState)=>({windowWidth:state.genomeBrowser.windowWidth}));
+      let zoomLevel = 64;
+      const len = result.data.len;
+      while (len / zoomLevel < windowWidth/2 && zoomLevel >1 ) {
+        zoomLevel/=2;
+      }
+      yield put({type: 'SET_ZOOM_LEVEL', data:zoomLevel});
+    }
     yield put({type: 'HIDE_ALL_DIALOG', data:result.data});
     yield put({type:'GOTO_AND_FETCH_PROJECT_FILES'});
   } catch (error) {

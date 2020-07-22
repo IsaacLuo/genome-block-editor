@@ -171,7 +171,7 @@ async (ctx:Ctx, next:Next)=> {
   if (_id) {
     ctx.redirect(`/api/sourceFile/${_id}`);
   } else {
-    const result = await Project.findOne({projectId:pid, $or:[{ctype:'project'}, {ctype:'flatProject'}]}).exec();
+    const result = await Project.findOne({projectId:pid, $or:[{ctype:'source'}, {ctype:'project'}, {ctype:'flatProject'}]}).exec();
     if(result) {
       saveProjectIdStr(result.projectId.toString(), result._id.toString());
       ctx.redirect(`/api/sourceFile/${result._id}`);

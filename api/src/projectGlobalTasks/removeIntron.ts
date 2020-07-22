@@ -163,7 +163,8 @@ onProgress?:(progress:number, message:string)=>void,
       {_id:{$in:project.parts}},
       {_id:{$nin:Object.keys(conflictDict)}},
     ],
-    featureType:'gene',
+    // featureType:'gene',
+    parent: null,
     subFeatures:{$elemMatch: {$in:intronIds}},
     start:{$gte: selectedRange.start}, 
     end:{$lt: selectedRange.end},
@@ -198,7 +199,7 @@ onProgress?:(progress:number, message:string)=>void,
     let modified = false;
     // remove intron
     let newProjectLen = project.len;
-    introns.filter(v=>v.start>=part.start&&v.end<=part.end).forEach(intron=>{
+    introns.filter(v=>part.subFeatures.find(sf=>v._id.equals(sf))).forEach(intron=>{
       modified = true;
       const intronLen = intron.end-intron.start;
       newProjectLen -= intronLen;
@@ -274,6 +275,7 @@ onProgress?:(progress:number, message:string)=>void,
 
     if(partToBeDeleted.has(part._id.toString()) || replaceDict[part._id.toString()]) {
       // newProjectParts.push(replaceDict[part._id.toString()]._id);
+      console.log(`part ${part.name} already changed`)
     } else {
       const oldLocation = part.start;
       let ruler = shiftRuler.find(v=>part.start >= v.start && part.start < v.end);
