@@ -35,7 +35,7 @@ import axios from 'axios';
 import crypto from 'crypto';
 import { runExe } from './runExe';
 import { reverseComplement, readSequenceFromSequenceRef, generateSequenceRef } from './sequenceRef';
-import { insertPartsAfterFeatures } from './projectGlobalTasks/insertPartsAfterFeatures';
+import { insertPartsAfterFeatures } from './projectGlobalTasks/insertPartsAfterFeatures/insertPartsAfterFeatures';
 import {updateParents} from './projectGlobalTasks/projectImportExport';
 import gbeWorkerHost from './gbeWorkerHost';
 import taskProcessor from './taskProcessor';

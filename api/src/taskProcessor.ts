@@ -13,6 +13,13 @@ declare global {
 }
 global.taskDict = new TaskDict();
 
+
+/**
+ * run tasks using node.js workers for production, may not suit for debugging
+ * @socket.io.param taskName: the task name need to be called, see the switch blcok
+ * @socket.io.param taskParams: the parameter of the task, varies in different tasks
+ * @param server the http.server object
+ */
 export default function taskProcessor(server:http.Server) {
   const io = socket(server);
   io.on('connection', async (socket)=>{

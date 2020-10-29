@@ -1,7 +1,17 @@
-/// <reference path="../@types/index.d.ts" />
-import {Project, AnnotationPart, ProjectLog} from '../models'
+/// <reference path="../../@types/index.d.ts" />
+import {Project, AnnotationPart, ProjectLog} from '../../models'
 const mongoose = require('mongoose');
 
+/**
+ * start the create promoter termiator task.
+ * @param _id: the project id in mongodb
+ * @param promoterLength the promoter length, in bp
+ * @param terminatorLength the terminator legnth, in bp
+ * @param slectedRange: only the genes in the selected range will be processed
+ * @param onProgress: callback function, shows the progress percentage and messages if any
+ * @param progress: percentage, 0 - 100
+ * @param message: the message in plain text
+ */
 const createPromoterTerminator = async ({_id, 
   promoterLength=500, 
   terminatorLength=200, 

@@ -10,6 +10,13 @@ import removeIntron from './projectGlobalTasks/removeIntron';
 
 global.taskDict = new TaskDict();
 
+/**
+ * run tasks directly (not using workers), which is better for debugging, do not use it in production
+ * @socket.io.param taskName: the task name need to be called, see the switch blcok
+ * @socket.io.param taskParams: the parameter of the task, varies in different tasks
+ * @param server the http.server object
+ */
+
 export default function taskProcessorST(server:http.Server) {
   const io = socket(server);
   io.on('connection', async (socket)=>{

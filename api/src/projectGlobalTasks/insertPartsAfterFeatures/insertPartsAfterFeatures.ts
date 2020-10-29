@@ -1,13 +1,26 @@
 
-import { Project, AnnotationPart } from '../models';
-import { readSequenceFromSequenceRef, generateSequenceRef } from '../sequenceRef';
+import { Project, AnnotationPart } from '../../models';
+import { readSequenceFromSequenceRef, generateSequenceRef } from '../../sequenceRef';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
-import conf from '../conf';
-import { projectToGFFJSON, projectToGFFJSONPartial } from './projectImportExport';
+import conf from '../../conf';
+import { projectToGFFJSON, projectToGFFJSONPartial } from '../projectImportExport';
 import FormData from 'form-data';
 import Axios from 'axios';
 
+/**
+ * insert some fragement sequence after each gene in selected range
+ * TODO: it's an old process which still using webexe, should be updated
+ * @param user: not using for now
+ * @param _id: project id
+ * @param featureType the feature to locate the insertion position
+ * @param direct -1: insert at 5`, 1: insert at 3`
+ * @param offset how many bp before/after the maketed feature
+ * @param sequenceType the type of the new feature to be instered
+ * @param sequence the sequence in bp
+ * @param selectedRange ROI
+ * @param clientToken: the token to be passed to worker
+ */
 export async function insertPartsAfterFeatures( user:IUser, 
                                                 _id:string, 
                                                 featureType:string, 

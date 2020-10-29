@@ -4,6 +4,10 @@ import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import conf from '../conf';
 
+/**
+ * using the parts sequence to create the squence buffer file and put the reference in the project object.
+ * @param id the project id
+ */
 export async function buildProjectSequenceRefFromParts(id:IProject) {
   const project = await Project
     .findById(id)

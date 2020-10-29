@@ -1,13 +1,14 @@
 import mongoose from 'mongoose';
 import {Project, AnnotationPart} from '../models';
 import { 
-    saveProject, 
     deleteProject, 
-    saveProjectIdStr,
 } from '../redisCache';
 import createError from 'http-errors';
 
-// add current information in to history
+/**
+ * add current information in to history
+ * @param obj: current project
+ */ 
 export const pushHistory = (obj:IProject|IAnnotationPart) => {
   obj.history = [{
     _id: obj._id,
@@ -16,6 +17,12 @@ export const pushHistory = (obj:IProject|IAnnotationPart) => {
   }, ...obj.history];
 }
 
+/**
+ * fork a project, which creates a following project node but not change the mark of current project(keep it as history or project)
+ * @param user current user (for setting owner)
+ * @param _id project id
+ * @param name new project name
+ */
 export const forkProject = async (user:IUserEssential, _id:string|mongoose.Types.ObjectId, name?:string)=>{
   const projectObj = await Project.findById(_id).exec();
   const project = await projectObj.toObject();
@@ -43,12 +50,20 @@ export const forkProject = async (user:IUserEssential, _id:string|mongoose.Types
   return {_id:result._id, projectId:result.projectId};
 }
 
+/**
+ * when execute a "delete project" operation, it actually hide the project
+ * @param _id project id
+ */
 export const hideProject = async (_id:string|mongoose.Types.ObjectId) => {
   await Project.update({_id}, {ctype:'deletedProject', updatedAt: new Date()});
   // save to redis
   deleteProject(_id.toString());
 }
 
+/**
+ * mark current project as "deleted" and revert its history version.
+ * @param _id project id
+ */
 export const revertProject = async (_id:string|mongoose.Types.ObjectId) => {
   const project = await Project.findById(_id).exec();
   if(project.history && project.history[0]) {
@@ -73,8 +88,11 @@ export const revertProject = async (_id:string|mongoose.Types.ObjectId) => {
   }
 }
 
-// sometimes the project doesn't have a sequenceRef, or not all parts referencing the project
-// sequence. In this case, the project sequence needs to be updated before exporting
+/**
+ * sometimes the project doesn't have a sequenceRef, or not all parts referencing the project
+ * sequence. In this case, the project sequence needs to be updated before exporting
+ * @param _id project id
+ */
 export const buildWholeProject = async (_id:string|mongoose.Types.ObjectId) => {
   const project = await Project.findById(_id).exec();
   if(!project) {

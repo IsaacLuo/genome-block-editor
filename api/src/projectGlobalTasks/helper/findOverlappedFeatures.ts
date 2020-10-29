@@ -1,5 +1,10 @@
-import mongoose from 'mongoose';
 import { AnnotationPart } from '../../models';
+
+/**
+ * find overlapped parts by search condition
+ * @param partSelectCondition: mongodb search condition bocject e.g. {ctype:'gene', start:0, end:10000}
+ * @return conflict dict, in format {part1_id: part2_id, part2_id: part1_id}
+ */
 export default async function findOverlappedFeatures(partSelectCondition) {
   const conflictDict:any = {};
   const parts = await AnnotationPart.find(partSelectCondition)

@@ -1,7 +1,7 @@
-/// <reference path="../@types/index.d.ts" />
+/// <reference path="../../@types/index.d.ts" />
 import mongoose  from 'mongoose';
-import conf from '../conf.json';
-import { Project, AnnotationPart } from '../models';
+import conf from '../../conf.json';
+import { Project, AnnotationPart } from '../../models';
 import { buildProjectSequenceRefFromParts } from './buildProjectSequenceRefFromParts';
 const { parentPort } = require("worker_threads");
 
