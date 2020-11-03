@@ -81,7 +81,7 @@ const GenomeBrowserForHistory = () => {
   
 
   const menu = (
-    <Menu onClick={onClick}>
+    <Menu onClick={(item)=>dispatch({type:'FETCH_HISTORY_SOURCE_FILE', data: item.key})}>
       {
         availableHistory.map((v,i)=>
           <Menu.Item key={v._id}>[
