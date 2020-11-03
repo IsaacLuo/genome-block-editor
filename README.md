@@ -1,6 +1,6 @@
 ## genome-block-editor
 
-This is a developing project for building a chromsome on webpages by dragging and dropping features blocks.
+This is a developing project for building a chromosome on webpages by dragging and dropping features blocks.
 
 ## sub projects
 
@@ -12,6 +12,9 @@ the api folder is a nodejs koa2 apollo-server socket.io mongoose project wich pr
 this service uses cailab-auth as the SSO authtication, unless the "lcoal mode" is set
 this service uses cailab-conf project(private) to generate conf.json and .env files, however handwriting conf.json is also OK according conf.default.json
 it links to webexe project for executing long time process written by other languages.
+mongodb, for saving the project data
+redis, optional, for caching the sequence and project data from mongodb
+
 
 ## Run projects by Docker
 
