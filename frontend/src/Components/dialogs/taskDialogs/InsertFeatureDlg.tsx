@@ -58,7 +58,7 @@ const InsertFeatureDlg = () => {
 
   const featureTypeMenu = (
     <Menu onClick={(v)=>{
-      setFeatureType(v.key);
+      setFeatureType(v.key as string);
     }}>
       <Menu.Item key="gene">
         
@@ -73,7 +73,7 @@ const InsertFeatureDlg = () => {
 
   const sequenceFragmentMenu = (
     <Menu onClick={(v)=>{
-      setSeqName(v.key);
+      setSeqName(v.key as string);
     }}>
       <Menu.Item key="loxP">
         loxP
