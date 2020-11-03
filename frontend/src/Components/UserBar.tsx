@@ -84,7 +84,6 @@ const UserBar = () => {
     showOperationMenu = true;
     loginControl = 
     <React.Fragment>
-      <Menu.Item key="1"><Link to="/">Cailab-GBE</Link></Menu.Item>
       <Menu.SubMenu style={{float: 'right'}} title={<span>{state.currentUser.fullName}<PortraitImg src='https://api.auth.cailab.org/api/user/current/portrait/s/profile.jpg'/></span>}>
         <Menu.Item key="2" onClick={onClickLogout}>logout</Menu.Item>
       </Menu.SubMenu>
