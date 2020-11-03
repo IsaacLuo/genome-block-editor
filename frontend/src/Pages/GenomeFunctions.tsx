@@ -16,7 +16,6 @@ import ReplaceCodonDlg from 'Components/dialogs/taskDialogs/ReplaceCodonDlg';
 import PartDetailDlg from 'Components/dialogs/PartDetailDlg';
 import InsertFeatureDlg from 'Components/dialogs/taskDialogs/InsertFeatureDlg';
 import DebugPanel from 'Components/DebugPanel';
-import GenomeOperationMenu from 'Components/GenomeOperationMenu';
 import { Collapse, Tabs } from 'antd';
 import RemoveIntronDlg from 'Components/dialogs/taskDialogs/RemoveIntronDlg';
 import SequenceEditorDlg from 'Components/dialogs/SequenceEditorDlg';
