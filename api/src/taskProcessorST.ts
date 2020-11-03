@@ -4,7 +4,7 @@ import socket from "socket.io";
 import TaskDict from './taskDict';
 import gbeWorkerHost from './gbeWorkerHost';
 import replaceCodon from './projectGlobalTasks/replaceCodon';
-import createPromoterTerminator from './projectGlobalTasks/createPromoterTerminator';
+import createPromoterTerminator from './projectGlobalTasks/createPromoterTerminator/createPromoterTerminator';
 import removeIntron from './projectGlobalTasks/removeIntron';
 
 

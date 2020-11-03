@@ -1,8 +1,8 @@
-import { Project, AnnotationPart } from '../models';
-import { readSequenceFromSequenceRef, generateSequenceRef } from '../sequenceRef';
+import { Project, AnnotationPart } from '../../models';
+import { readSequenceFromSequenceRef, generateSequenceRef } from '../../sequenceRef';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
-import conf from '../conf';
+import conf from '../../conf';
 
 /**
  * using the parts sequence to create the squence buffer file and put the reference in the project object.
