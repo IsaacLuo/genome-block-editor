@@ -71,7 +71,7 @@ const ProjectFunctions: React.FC = (props:any) => {
             dispatch({type:'GF_SET_TAB', data:'summaryTab'});
           }
         }}>
-          <Collapse.Panel header="more deails" key="1">
+          <Collapse.Panel header="more details" key="1">
             <Tabs activeKey={activeSummaryTabKey} onChange={(key)=>{
             dispatch({type:'GF_SET_TAB', data:key});
           }}>
