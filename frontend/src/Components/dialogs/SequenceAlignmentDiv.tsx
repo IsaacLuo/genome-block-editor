@@ -26,7 +26,7 @@ const SequenceAlignmentDiv = (
 ) => {
   const [sequence, setSequence] = useState<any>(undefined);
   useEffect(()=>{
-    axios.get(`${conf.backendURL}/api/part/${partId1}/seqAlignmetWith/${partId2}`).then((result)=>{
+    axios.get(`${conf.backendURL}/api/part/${partId1}/seqAlignmetWith/${partId2}`, {withCredentials: true}).then((result)=>{
       setSequence(result.data);
     })
   }, [partId1, partId2]);

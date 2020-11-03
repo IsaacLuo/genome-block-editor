@@ -75,7 +75,7 @@ function generateSocketAction(serverAction:IAction, extraPayload?:any):IAction {
 function* replaceCodonTaskHttp(action:IAction) {
   try {
     const {id, rules, selectedRange} = action.data;
-    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/replace_codons/from/${id}`, {rules, selectedRange})
+    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/replace_codons/from/${id}`, {rules, selectedRange}, {withCredentials: true})
     const {taskInfo} = result.data;
     // console.log(taskInfo);
     const {processId, serverURL} = taskInfo;
@@ -132,7 +132,7 @@ export function* replaceCodonTask(action:IAction) {
 function* insertPartAfterFeature(action:IAction) {
   try {
     const {id, featureType, direct, offset, sequenceType, sequence, selectedRange} = action.data;
-    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/insert_parts_after_features/from/${id}`, {featureType, direct, offset, sequenceType, sequence, selectedRange})
+    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/insert_parts_after_features/from/${id}`, {featureType, direct, offset, sequenceType, sequence, selectedRange}, {withCredentials: true})
     const {taskInfo} = result.data;
     // console.log(taskInfo);
     const {processId, serverURL} = taskInfo;
@@ -187,7 +187,7 @@ export function* startRemoveIntronTask(action:IAction) {
 function* startRemoveIntronTaskWebexe(action:IAction) {
   try {
     const {id, intronTypes, selectedRange} = action.data;
-    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/remove_introns/from/${id}`, {intronTypes, selectedRange})
+    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/remove_introns/from/${id}`, {intronTypes, selectedRange}, {withCredentials: true})
     const {taskInfo} = result.data;
     // console.log(taskInfo);
     const {processId, serverURL} = taskInfo;

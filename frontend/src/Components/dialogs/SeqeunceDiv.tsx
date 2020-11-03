@@ -17,7 +17,7 @@ const SequenceDiv = (
 ) => {
   const [sequence, setSequence] = useState<string>('');
   useEffect(()=>{
-    axios.get(`${conf.backendURL}/api/part/${partId}/sequence`).then((result)=>{
+    axios.get(`${conf.backendURL}/api/part/${partId}/sequence`, {withCredentials: true}).then((result)=>{
       setSequence(result.data.sequence);
     })
   }, [partId]);

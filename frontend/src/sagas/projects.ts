@@ -16,7 +16,7 @@ const client = apolloClient();
 function* exportSourceFileToGffJson(action:IAction) {
   try {
     const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
-    const result = yield call(axios.get, `${conf.backendURL}/api/project/${id}/gffJson`);
+    const result = yield call(axios.get, `${conf.backendURL}/api/project/${id}/gffJson`, {withCredentials: true});
     const gffJson = JSON.stringify(result.data);
     saveAs(new Blob([gffJson], {type: "text/plain;charset=utf-8"}), 'export.gff.json');
     console.log(gffJson);
@@ -108,7 +108,7 @@ function* revertToHistoryVersion(aciton:IAction) {
   const sourceFile:ISourceFile = yield select((state:IStoreState)=>state.sourceFile);
   if(sourceFile) {
     try {
-      const result = yield call(axios.post, `${conf.backendURL}/api/sourceFile/${sourceFile._id}/revert`);
+      const result = yield call(axios.post, `${conf.backendURL}/api/sourceFile/${sourceFile._id}/revert`, {withCredentials: true});
       yield put({type: 'LOAD_SOURCE_FILE', data:result.data._id});
       yield put({type:'GOTO_AND_FETCH_PROJECT_FILES'});
     } catch (err) {
@@ -140,7 +140,7 @@ function* revertToHistoryVersion(aciton:IAction) {
 function* loadSequence(action:IAction) {
   try {
     const {_id, start, end, strand} = action.data;
-    const result = yield call(axios.get, `${conf.backendURL}/api/project/${_id}/sequence?start=${start}&end=${end}&strand=${strand}`);
+    const result = yield call(axios.get, `${conf.backendURL}/api/project/${_id}/sequence?start=${start}&end=${end}&strand=${strand}`, {withCredentials: true});
     yield put({type:'SET_SEQUENCE_SEGMENT', data:result.data});
   } catch (err) {
     console.error(err);
@@ -189,7 +189,7 @@ function* exportProjectToGenbank(action:IAction) {
 
   try {
     const {id, start, end} = action.data;
-    const result = yield call(axios.get, `${conf.backendURL}/api/project/${id}/genbank?start=${start}&end=${end}`);
+    const result = yield call(axios.get, `${conf.backendURL}/api/project/${id}/genbank?start=${start}&end=${end}`, {withCredentials: true});
     const {taskInfo} = result.data;
     // console.log(taskInfo);
     const {processId, serverURL} = taskInfo;
@@ -213,14 +213,14 @@ function* exportProjectToGenbank(action:IAction) {
 
 export function* sequenceEdit(action:IAction) { 
   const {projectId, srcStart, srcEnd, newSequence} = action.data;
-  const response = yield call(axios.post, `${conf.backendURL}/api/project/${projectId}/sequence/${srcStart}/${srcEnd}`,{sequence:newSequence});
+  const response = yield call(axios.post, `${conf.backendURL}/api/project/${projectId}/sequence/${srcStart}/${srcEnd}`,{sequence:newSequence}, {withCredentials: true});
   yield put({type:'LOAD_SOURCE_FILE', data: response.data.projectId});
   console.log(response.data);
 }
 
 export function* loadProjectOperationLog(action:IAction) {
   const {projectId} = action.data;
-  const response = yield call(axios.get, `${conf.backendURL}/api/project/${projectId}/operationLog`);
+  const response = yield call(axios.get, `${conf.backendURL}/api/project/${projectId}/operationLog`, {withCredentials: true});
   yield put({type:'SET_PROJECT_OPERATION_LOG', data: response.data});
   console.log(response.data);
 }

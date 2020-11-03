@@ -26,7 +26,7 @@ const GeneralSequenceAlignmentDiv = (
 ) => {
   const [sequence, setSequence] = useState<any>(undefined);
   useEffect(()=>{
-    axios.post(`${conf.backendURL}/api/query/globalAlignment`, {sequence1, sequence2}).then((result)=>{
+    axios.post(`${conf.backendURL}/api/query/globalAlignment`, {sequence1, sequence2}, {withCredentials: true}).then((result)=>{
       setSequence(result.data);
     })
   }, [sequence1, sequence2]);
