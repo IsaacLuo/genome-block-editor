@@ -3,9 +3,9 @@ import http from 'http';
 import socket from "socket.io";
 import TaskDict from './taskDict';
 import gbeWorkerHost from './gbeWorkerHost';
-import replaceCodon from './projectGlobalTasks/replaceCodon';
+import replaceCodon from './projectGlobalTasks/replaceCodon/replaceCodon';
 import createPromoterTerminator from './projectGlobalTasks/createPromoterTerminator/createPromoterTerminator';
-import removeIntron from './projectGlobalTasks/removeIntron';
+import removeIntron from './projectGlobalTasks/removeIntron/removeIntron';
 
 
 global.taskDict = new TaskDict();

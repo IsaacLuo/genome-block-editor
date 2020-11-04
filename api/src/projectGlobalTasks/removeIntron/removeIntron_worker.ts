@@ -1,4 +1,4 @@
-/// <reference path="../@types/index.d.ts" />
+/// <reference path="../../@types/index.d.ts" />
 import removeIntron from './removeIntron';
 import taskWorker from '../taskWorker';
 console.log('> worker started removeIntron');

@@ -1,4 +1,4 @@
-/// <reference path="../@types/index.d.ts" />
+/// <reference path="../../@types/index.d.ts" />
 import replaceCodon from './replaceCodon';
 // const taskWorker = require('./taskWorker');
 import taskWorker from '../taskWorker';

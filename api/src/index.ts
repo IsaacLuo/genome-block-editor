@@ -17,7 +17,7 @@ import {useApolloServer} from './graphql';
 import serve from 'koa-static';
 import { userMust, beUser } from './userMust';
 // import createPromoterTerminators from './projectGlobalTasks/createPromoterTerminator'
-import removeGeneratedFeatures from './projectGlobalTasks/removeGeneratedFeatures'
+import removeGeneratedFeatures from './projectGlobalTasks/removeGeneratedFeatures/removeGeneratedFeatures'
 import redis from 'redis'
 import path from 'path';
 
@@ -27,8 +27,8 @@ import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProject
 import workerTs from './workerTs';
 import { forkProject, hideProject, revertProject } from './projectGlobalTasks/project';
 import { projectToGFFJSON, updateProjectByGFFJSON, updateProjectByGFFJSONPartial, projectToGFFJSONPartial, projectToGenbank } from './projectGlobalTasks/projectImportExport';
-import { replaceCodonOld } from './projectGlobalTasks/replaceCodonOld';
-import { removeIntron } from './projectGlobalTasks/removeIntronWebExe';
+import { replaceCodonOld } from './projectGlobalTasks/replaceCodon/replaceCodonOld';
+import { removeIntron } from './projectGlobalTasks/removeIntron/removeIntronWebExe';
 
 import axios from 'axios';
 import crypto from 'crypto';

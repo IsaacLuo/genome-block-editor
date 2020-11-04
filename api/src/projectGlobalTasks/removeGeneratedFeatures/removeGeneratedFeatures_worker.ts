@@ -1,4 +1,4 @@
-/// <reference path="../@types/index.d.ts" />
+/// <reference path="../../@types/index.d.ts" />
 import mongoose  from 'mongoose';
 import conf from '../../conf.json';
 import { Project, AnnotationPart } from '../../models';
