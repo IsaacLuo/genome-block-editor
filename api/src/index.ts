@@ -79,7 +79,10 @@ if (conf.redis.useRedis) {
 }
 
 
-app.use(cors({credentials: true}));
+app.use(cors({
+  origin: 'https://gbe.cailab.org',
+  credentials: true
+}));
 app.use(serve('./public'));
 app.use(koaBody());
 middleware(app);
