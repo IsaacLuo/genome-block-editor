@@ -287,7 +287,7 @@ export function* createPromoterTerminatorHttp(aciton:IAction) {
     const {processId, serverURL} = taskInfo;
 
     // 2. use socket.io
-    const socket = io(serverURL);
+    const socket = io(serverURL, {transports:['websocket']});
     sockets[processId] = socket;
     const channel = yield call(monitorSocket, socket);
 
@@ -320,7 +320,7 @@ export function* createPromoterTerminator(aciton:IAction) {
     const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
     const {promoterLength, terminatorLength, selectedRange} = aciton.data;
     // 2. use socket.io
-    const socket = io(conf.backendURL);
+    const socket = io(conf.backendURL, {transports:['websocket']});
     const channel = yield call(monitorSocket, socket);
     socket.emit('startTask', {taskName: 'createPromoterTerminator', taskParams: {_id:id, promoterLength, terminatorLength, selectedRange}});
 

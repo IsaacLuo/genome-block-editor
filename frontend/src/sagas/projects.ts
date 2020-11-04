@@ -195,7 +195,7 @@ function* exportProjectToGenbank(action:IAction) {
     const {processId, serverURL} = taskInfo;
 
     // 2. use socket.io
-    const socket = io(serverURL);
+    const socket = io(serverURL, {transports:['websocket']});
     const channel = yield call(monitorSocket, socket);
     socket.emit('startTask', processId, ()=>{})
     while (true) {
