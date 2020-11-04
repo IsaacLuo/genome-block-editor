@@ -22,7 +22,6 @@ import redis from 'redis'
 import path from 'path';
 
 import http from 'http';
-import socket from 'socket.io';
 import fs from 'fs';
 import { saveProject, deleteProject, loadProjectStr, saveProjectStr, loadProjectIdStr, saveProjectIdStr } from './redisCache';
 import workerTs from './workerTs';
@@ -80,7 +79,7 @@ if (conf.redis.useRedis) {
 
 
 app.use(cors({
-  origin: '*',
+  // origin: '*',
   credentials: true
 }));
 app.use(serve('./public'));
