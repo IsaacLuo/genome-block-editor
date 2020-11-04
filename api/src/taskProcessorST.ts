@@ -18,7 +18,7 @@ global.taskDict = new TaskDict();
  */
 
 export default function taskProcessorST(server:http.Server) {
-  const io = socket(server);
+  const io = socket(server, {transports: ['websocket']});
   io.origins('*:*');
   io.on('connection', async (socket)=>{
     console.log('connected /tasks');
