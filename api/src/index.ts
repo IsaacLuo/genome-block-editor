@@ -80,7 +80,7 @@ if (conf.redis.useRedis) {
 
 
 app.use(cors({
-  origin: 'https://gbe.cailab.org',
+  origin: '*',
   credentials: true
 }));
 app.use(serve('./public'));
