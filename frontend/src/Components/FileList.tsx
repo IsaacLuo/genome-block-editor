@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {useDispatch, useMappedState} from 'redux-react-hook';
-import axios from 'axios';
 import conf from 'conf.json';
 import ApolloClient from 'apollo-boost';
-import { gql } from "apollo-boost";
 import { FolderOutlined, FileOutlined } from '@ant-design/icons';
 import styles from "./FileList.module.scss";
 import styled from 'styled-components';

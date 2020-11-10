@@ -23,7 +23,7 @@ export function* cailabInstanceLogin(action: IAction) {
     yield call(axios.post, conf.backendURL + '/api/session', {}, {withCredentials: true});
     yield put({type: 'GET_CURRENT_USER', data: undefined});
   } catch (error) {
-    notification.error({
+    yield call(notification.error, {
       message: 'server error', 
       description: 'instance login error',
     });
@@ -53,7 +53,7 @@ export function* logout(action: IAction) {
     yield put({type: 'LOGOUT_DONE'});
   } catch (error) {
     console.warn(`failed in ${getFuncName()}`);
-    notification.error({
+    yield call(notification.error, {
       message: 'server error', 
       description: 'logout error',
     });
@@ -74,7 +74,7 @@ export function* loadSourceFile(action:IAction) {
     try {
       result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/${projectId}`, {withCredentials: true});
     } catch (error) {
-      notification.error({
+      yield call(notification.error, {
         message: 'server error', 
         description: 'unable get source file',
       });
@@ -106,7 +106,7 @@ export function* loadSourceFileByProjectId(action:IAction) {
     try{
       result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/byProjectId/${action.data}`, {withCredentials: true});
     } catch (err) {
-      notification.error({
+    yield call(notification.error, {
         message: 'server error', 
         description: 'unable get source file',
       });
@@ -140,6 +140,10 @@ export function* forkProject(action: IAction) {
     yield put({type: 'GOTO_AND_FETCH_PROJECT_FILES'});
   } catch (error) {
     console.warn(`failed in ${getFuncName()}`);
+    yield call(notification.error, {
+      message: 'server error', 
+      description: 'unable to fork project',
+    });
   }
 }
 
@@ -270,7 +274,10 @@ export function* removeCreatedFeatures (aciton:IAction) {
     yield put({type: 'GOTO_AND_FETCH_PROJECT_FILES'});
 
   } catch (error) {
-    yield call(notification.error, {message:error.toString()});
+    yield call(notification.error, {
+      message: 'server error', 
+      description: 'error in remove created features',
+    });
   }
 }
 
