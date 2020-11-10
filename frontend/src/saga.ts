@@ -23,6 +23,10 @@ export function* cailabInstanceLogin(action: IAction) {
     yield call(axios.post, conf.backendURL + '/api/session', {}, {withCredentials: true});
     yield put({type: 'GET_CURRENT_USER', data: undefined});
   } catch (error) {
+    notification.error({
+      message: 'server error', 
+      description: 'instance login error',
+    });
   }
 }
 
@@ -49,6 +53,10 @@ export function* logout(action: IAction) {
     yield put({type: 'LOGOUT_DONE'});
   } catch (error) {
     console.warn(`failed in ${getFuncName()}`);
+    notification.error({
+      message: 'server error', 
+      description: 'logout error',
+    });
   }
 }
 
@@ -62,7 +70,15 @@ export function* loadSourceFile(action:IAction) {
   try {
     yield put({type:'SET_GENOME_BROWSER_LOADING', data:true});
     const projectId = action.data;
-    const result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/${projectId}`, {withCredentials: true});
+    let result;
+    try {
+      result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/${projectId}`, {withCredentials: true});
+    } catch (error) {
+      notification.error({
+        message: 'server error', 
+        description: 'unable get source file',
+      });
+    }
     yield put({type:'SET_GENOME_BROWSER_LOADING', data:false});
     yield put({type: 'SET_SOURCE_FILE', data:result.data});
     if (result.data) {
@@ -86,7 +102,17 @@ export function* loadSourceFile(action:IAction) {
 export function* loadSourceFileByProjectId(action:IAction) {
   try {
     yield put({type:'SET_GENOME_BROWSER_LOADING', data:true});
-    const result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/byProjectId/${action.data}`, {withCredentials: true});
+    let result;
+    try{
+      result = yield call(axios.get, `${conf.backendURL}/api/sourceFile/byProjectId/${action.data}`, {withCredentials: true});
+    } catch (err) {
+      notification.error({
+        message: 'server error', 
+        description: 'unable get source file',
+      });
+      yield delay(2000);
+      window.location.href = '/genome_functions';
+    }
     yield put({type:'SET_GENOME_BROWSER_LOADING', data:false});
     yield put({type: 'SET_SOURCE_FILE', data:result.data});
     if (result.data) {
