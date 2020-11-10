@@ -146,13 +146,13 @@ const UserBar = () => {
         dispatch({type:'SHOW_CREATE_PROMOTER_TERMINATOR_DIALOG'})
       }
     },
-    {
-      name: 'remove non-gene annotations',
-      visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),
-      onClick: ()=>{
-        dispatch({type:'SHOW_REMOVE_CREATED_FEATURES_DIALOG'})
-      }
-    },
+    // {
+    //   name: 'remove non-gene annotations',
+    //   visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),
+    //   onClick: ()=>{
+    //     dispatch({type:'SHOW_REMOVE_CREATED_FEATURES_DIALOG'})
+    //   }
+    // },
     {
       name: 'replace codons',
       visible: (state:any) => state.sourceFile && (state.sourceFile.ctype === 'project' || state.sourceFile.ctype === 'flatProject'),

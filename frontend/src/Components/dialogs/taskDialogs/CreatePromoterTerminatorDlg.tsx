@@ -51,7 +51,7 @@ const CreatePromoterTermiatorDlg = () => {
 
   const dispatch = useDispatch();
   return <Modal
-    title="Title"
+    title="Create Promoter and Terminators"
     visible={showDialog}
     onOk={()=>{
       setConfirming(true);
@@ -96,7 +96,7 @@ const CreatePromoterTermiatorDlg = () => {
       <Checkbox checked={selectedSegmentOnly} onChange={(e)=>{setSelectedSegmentOnly(e.target.checked)}}>for selected segment only</Checkbox>
     }
     <Progress percent={progress} status={progressBarStatus}/>
-    <div>{progress}{message}</div>
+    <div>{message}</div>
   {/* <LogList>{outputLog}</LogList> */}
     {/* <Button type="primary" onClick={()=>dispatch({type:'CREATE_PROMOTER_TERMINATOR', data:{promoterLength, terminatorLength}})}>start</Button> */}
   </Modal>
