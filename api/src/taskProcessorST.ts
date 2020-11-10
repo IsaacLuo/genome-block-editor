@@ -3,9 +3,9 @@ import http from 'http';
 import socket from "socket.io";
 import TaskDict from './taskDict';
 import gbeWorkerHost from './gbeWorkerHost';
-import replaceCodon from './projectGlobalTasks/replaceCodon';
+import replaceCodon from './projectGlobalTasks/replaceCodon/replaceCodon';
 import createPromoterTerminator from './projectGlobalTasks/createPromoterTerminator/createPromoterTerminator';
-import removeIntron from './projectGlobalTasks/removeIntron';
+import removeIntron from './projectGlobalTasks/removeIntron/removeIntron';
 
 
 global.taskDict = new TaskDict();
@@ -18,7 +18,7 @@ global.taskDict = new TaskDict();
  */
 
 export default function taskProcessorST(server:http.Server) {
-  const io = socket(server);
+  const io = socket(server, {transports: ['websocket']});
   io.origins('*:*');
   io.on('connection', async (socket)=>{
     console.log('connected /tasks');

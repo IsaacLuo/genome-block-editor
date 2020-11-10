@@ -1,10 +1,10 @@
-/// <reference path="../@types/index.d.ts" />
-import {Project, AnnotationPart, ProjectLog} from '../models'
-import findOverlappedFeatures from './helper/findOverlappedFeatures';
-import getExtronSequence from './helper/getExtronSequence';
-import replaceExtronSequence from './helper/replaceExtronSequence';
-import { updateProject } from './projectImportExport';
-import { readSequenceFromSequenceRef, readSequenceBufferFromSequenceRef, generateSequenceRef, generateSequenceFilePath } from '../sequenceRef';
+/// <reference path="../../@types/index.d.ts" />
+import {Project, AnnotationPart, ProjectLog} from '../../models'
+import findOverlappedFeatures from '../helper/findOverlappedFeatures';
+import getExtronSequence from '../helper/getExtronSequence';
+import replaceExtronSequence from '../helper/replaceExtronSequence';
+import { updateProject } from '../projectImportExport';
+import { readSequenceFromSequenceRef, readSequenceBufferFromSequenceRef, generateSequenceRef, generateSequenceFilePath } from '../../sequenceRef';
 import { v1 as uuidv1 } from 'uuid';
 import fs from 'fs';
 const mongoose = require('mongoose');

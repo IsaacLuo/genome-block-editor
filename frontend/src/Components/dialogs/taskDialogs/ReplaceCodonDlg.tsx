@@ -48,7 +48,7 @@ const ReplaceCodonDlg = () => {
   }, [selectionEnabled])
 
   return <Modal
-    title="Title"
+    title="Replace Codon"
     visible={showDialog}
     onOk={()=>{
       setConfirming(true);
@@ -64,7 +64,7 @@ const ReplaceCodonDlg = () => {
       dispatch({type:'HIDE_REPLACE_CODON_DIALOG'});
       }}
   >
-    <p>replace codon</p>
+    <p>replace codon by giving a rule</p>
     <p>rules like "TAG:TAA TGA:TAA"</p>
 
     <Input value={rules} onChange={(event)=>setRules(event.target.value)} />

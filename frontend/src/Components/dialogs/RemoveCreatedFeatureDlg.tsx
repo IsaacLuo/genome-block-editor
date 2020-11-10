@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {useDispatch, useMappedState} from 'redux-react-hook';
 import { Modal, InputNumber, Progress, Button} from 'antd';
-import styled from 'styled-components'
-
-const LogList = styled.div`
-  height: 150px;
-  overflow-y: scroll;
-  margin-left:auto;
-  margin-right:auto;
-  background-color:#ddd;
-`
 
 const CreatePromoterTermiatorDlg = () => {
   const {

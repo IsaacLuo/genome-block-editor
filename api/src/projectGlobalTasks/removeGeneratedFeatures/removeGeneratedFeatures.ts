@@ -1,11 +1,7 @@
-/// <reference path="../@types/index.d.ts" />
-import { userMust, beUser } from '../userMust'
-import {User, Project, AnnotationPart} from '../models'
+/// <reference path="../../@types/index.d.ts" />
+import { userMust, beUser } from '../../userMust'
 import koa from 'koa';
-import axios from 'axios';
-import conf from '../conf.json';
-import FormData from 'form-data';
-import workerTs from '../workerTs';
+import workerTs from '../../workerTs';
 type Ctx = koa.ParameterizedContext<ICustomState>;
 type Next = ()=>Promise<any>;
 

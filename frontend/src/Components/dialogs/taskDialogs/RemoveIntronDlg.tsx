@@ -45,7 +45,7 @@ const RemoveIntronDlg = () => {
   };
 
   return <Modal
-    title="Insert Features"
+    title="Remove Introns"
     visible={showDialog}
     onOk={()=>{
       setConfirming(true);

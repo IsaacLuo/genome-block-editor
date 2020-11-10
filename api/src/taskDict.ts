@@ -4,7 +4,7 @@ import path from 'path';
 const uuid = require('uuid');
 
 const getProgramWorkerPath = (taskName:string) => {
-  return path.resolve(__dirname, `projectGlobalTasks/${taskName}_worker`);
+  return path.resolve(__dirname, `projectGlobalTasks/${taskName}/${taskName}_worker`);
 }
 
 export default class TaskDict {

@@ -108,7 +108,7 @@ function* revertToHistoryVersion(aciton:IAction) {
   const sourceFile:ISourceFile = yield select((state:IStoreState)=>state.sourceFile);
   if(sourceFile) {
     try {
-      const result = yield call(axios.post, `${conf.backendURL}/api/sourceFile/${sourceFile._id}/revert`, {withCredentials: true});
+      const result = yield call(axios.post, `${conf.backendURL}/api/sourceFile/${sourceFile._id}/revert`, {}, {withCredentials: true});
       yield put({type: 'LOAD_SOURCE_FILE', data:result.data._id});
       yield put({type:'GOTO_AND_FETCH_PROJECT_FILES'});
     } catch (err) {
@@ -195,7 +195,7 @@ function* exportProjectToGenbank(action:IAction) {
     const {processId, serverURL} = taskInfo;
 
     // 2. use socket.io
-    const socket = io(serverURL);
+    const socket = io(serverURL, {transports:['websocket']});
     const channel = yield call(monitorSocket, socket);
     socket.emit('startTask', processId, ()=>{})
     while (true) {

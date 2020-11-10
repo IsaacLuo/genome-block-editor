@@ -81,7 +81,7 @@ function* replaceCodonTaskHttp(action:IAction) {
     const {processId, serverURL} = taskInfo;
 
     // 2. use socket.io
-    const socket = io(serverURL);
+    const socket = io(serverURL, {transports:['websocket']});
     const channel = yield call(monitorSocket, socket);
     socket.emit('startTask', processId, ()=>{})
     while (true) {
@@ -104,7 +104,7 @@ export function* replaceCodonTask(action:IAction) {
   try {
     const {id, rules, selectedRange} = action.data;
     // use socket.io
-    const socket = io(conf.backendURL);
+    const socket = io(conf.backendURL, {transports:['websocket']});
     const channel = yield call(monitorSocket, socket);
     socket.emit('startTask', {taskName: 'replaceCodon', taskParams: {_id:id, rules:rules.split(' '), selectedRange}});
     while (true) {
@@ -138,7 +138,7 @@ function* insertPartAfterFeature(action:IAction) {
     const {processId, serverURL} = taskInfo;
 
     // 2. use socket.io
-    const socket = io(serverURL);
+    const socket = io(serverURL, {transports:['websocket']});
     const channel = yield call(monitorSocket, socket);
     socket.emit('startTask', processId, ()=>{})
     while (true) {
@@ -160,7 +160,7 @@ export function* startRemoveIntronTask(action:IAction) {
   try {
     const {id, intronTypes, selectedRange} = action.data;
     // use socket.io
-    const socket = io(conf.backendURL);
+    const socket = io(conf.backendURL, {transports:['websocket']});
     const channel = yield call(monitorSocket, socket);
     socket.emit('startTask', {taskName: 'removeIntron', taskParams: {_id:id, intronTypes, selectedRange}});
     while (true) {
@@ -193,7 +193,7 @@ function* startRemoveIntronTaskWebexe(action:IAction) {
     const {processId, serverURL} = taskInfo;
 
     // 2. use socket.io
-    const socket = io(serverURL);
+    const socket = io(serverURL, {transports:['websocket']});
     const channel = yield call(monitorSocket, socket);
     socket.emit('startTask', processId, ()=>{})
     while (true) {
