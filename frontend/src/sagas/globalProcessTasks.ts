@@ -130,9 +130,14 @@ export function* replaceCodonTask(action:IAction) {
 
 
 function* insertPartAfterFeature(action:IAction) {
+  const {id, featureType, direct, offset, sequenceType, sequence, selectedRange} = action.data;
+  let result;
   try {
-    const {id, featureType, direct, offset, sequenceType, sequence, selectedRange} = action.data;
-    const result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/insert_parts_after_features/from/${id}`, {featureType, direct, offset, sequenceType, sequence, selectedRange}, {withCredentials: true})
+    result = yield call(axios.post, `${conf.backendURL}/api/mapping_project/insert_parts_after_features/from/${id}`, {featureType, direct, offset, sequenceType, sequence, selectedRange}, {withCredentials: true});
+  } catch (error) {
+    yield call(notification.error, {message:error});
+  }
+  try {
     const {taskInfo} = result.data;
     // console.log(taskInfo);
     const {processId, serverURL} = taskInfo;
