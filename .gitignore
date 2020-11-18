@@ -18,3 +18,5 @@
 /api/public/sourceFileCaches/*
 *.log
 _gsdata_/*
+/worker/__pycache__
+*.pyc
