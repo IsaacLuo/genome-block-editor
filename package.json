@@ -1,0 +1,26 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "npm-run-all --parallel dev_frontend dev_api",
+    "dev_frontend": "yarn workspace gbe-frontend run start",
+    "dev_api": "yarn workspace gbe-api run dev"
+  },
+  "engines": {
+    "node": ">= 12.0.0",
+    "npm": "please-use-yarn"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn run lint"
+    }
+  },
+  "workspaces": [
+    "frontend",
+    "api"
+  ],
+  "devDependencies": {},
+  "dependencies": {
+    "jest": "^24.9.0",
+    "npm-run-all": "^4.1.5"
+  }
+}

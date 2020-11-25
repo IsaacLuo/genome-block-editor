@@ -1,5 +1,5 @@
 {
-  "name": "cailab-auth-api",
+  "name": "gbe-api",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -42,8 +42,8 @@
     "build": "cross-env NODE_ENV=production tsc",
     "preproduction": "cross-env NODE_ENV=production tsc",
     "production": "cross-env NODE_ENV=production node --max-old-space-size=4096 build/src/index.js",
-    "dev": "node ./node_modules/nodemon/bin/nodemon.js",
-    "debug": "node ./node_modules/nodemon/bin/nodemon.js --inspect",
+    "dev": "node ../node_modules/nodemon/bin/nodemon.js",
+    "debug": "node ../node_modules/nodemon/bin/nodemon.js --inspect",
     "importDB": "cd utility && pipenv run python import_data.py",
     "testScript": "ts-node src/script/testScript.ts",
     "shell": "ts-node",

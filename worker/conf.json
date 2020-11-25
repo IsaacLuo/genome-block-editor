@@ -1,0 +1,30 @@
+{
+    "env": {
+        "PORT": 10302
+    },
+    "domain": "local.cailab.org:10302",
+    "url": "http://local.cailab.org:10302",
+    "redis": {
+        "useRedis": false,
+        "prefetchMaxSize": 800000000
+    },
+    "secret": {
+        "jwt": {
+            "key": "asjdfklhj8py6471uhfjdsakcjq7a8"
+        },
+        "mongoDB": {
+            "url": "mongodb://localhost:27017/genome_editor"
+        },
+        "redis": {
+            "host": "localhost",
+            "port": 6379
+        }
+    },
+    "webexe": {
+        "url": "http://local.cailab.org:10202",
+        "internalUrl": "http://local.cailab.org:10202"
+    },
+    "localMode": true,
+    "token": "jGq0yKcyixlp9nFG781d1kpO114X8eqQ",
+    "rootStorageFolder": "public"
+}

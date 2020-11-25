@@ -167,6 +167,9 @@ def create_promoter_terminator(project_id, promoter_length, terminator_length, *
         else:
             new_parts.append(part_id)
     
+    old_project_id = project._id
+    old_project_ctype = project.ctype
+    
     project.history = [{
         '_id': project._id,
         'updatedAt': project.updatedAt,
@@ -174,11 +177,17 @@ def create_promoter_terminator(project_id, promoter_length, terminator_length, *
     }] + project.history
     project._id = ObjectId()
     project.parts = new_parts
+    project.ctype = 'project'
     project.changelog = 'created promoter and terminators'
     
     # create new project
     insert_result = db.projects.insert_one(project)
     if insert_result.acknowledged:
+        # mark old project as history
+        if old_project_ctype != 'source':
+            modify_result = db.projects.update_one({'id':old_project_id}, { "$set": { "ctype": "history" } })
+            if not modify_result.acknowledged:
+                raise Exception('unable modify old project')
         yield percentage_counter.build_result(100, 'done', project._id)
     else:
         raise Exception('not inserted')
