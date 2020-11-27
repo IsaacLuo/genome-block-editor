@@ -10,10 +10,10 @@
     },
     "secret": {
         "jwt": {
-            "key": "asjdfklhj8py6471uhfjdsakcjq7a8"
+            "key": "fMqTMS68uOHnievcguivra1roednhi"
         },
         "mongoDB": {
-            "url": "mongodb://localhost:27017/genome_editor"
+            "url": "mongodb://172.25.80.1:27017/genome_editor"
         },
         "redis": {
             "host": "localhost",
