@@ -7,8 +7,15 @@ import datetime
 import time
 from munch import Munch, munchify
 
-
-def create_promoter_terminator(project_id, promoter_length, terminator_length, **kwargs):
+# _id: string, projectId
+# promoterLength: number, 
+# terminatorLength: number,
+# selectedRange (optional): {start:number, end:number},
+def create_promoter_terminator(**kwargs):
+    project_id = kwargs['_id']
+    promoter_length = kwargs['promoterLength']
+    terminator_length = kwargs['terminatorLength']
+    
     db = get_mongo_instance()
     project_models = db.projects
     project = munchify(project_models.find_one({'_id':ObjectId(project_id)}))
@@ -17,10 +24,10 @@ def create_promoter_terminator(project_id, promoter_length, terminator_length, *
         '_id':{'$in': project['parts']},
         'featureType': 'gene',
     }
-    if 'start' in kwargs:
-        part_search_condition['start'] = {'$gte': kwargs['start']}
-    if 'end' in kwargs:
-        part_search_condition['end'] =  {'$lt': kwargs['end']}    
+    if 'selectedRange' in kwargs:
+        part_search_condition['start'] = {'$gte': kwargs['selectedRange']['start']}
+        part_search_condition['end'] =  {'$lt': kwargs['selectedRange']['end']}    
+        
     genes = db.annotation_parts.find(part_search_condition).sort([('start',pymongo.ASCENDING), ('end',pymongo.DESCENDING)])
     genes_len = genes.count()
     
@@ -150,11 +157,11 @@ def create_promoter_terminator(project_id, promoter_length, terminator_length, *
             replace_id_map[part._id] = [promoter._id, part._id, terminator._id]
         
         if len(new_part_list) >= 1000:
-            x = db.abandon.insert_many(new_part_list)
+            x = db.annotation_parts.insert_many(new_part_list)
             new_part_id_list += x.inserted_ids
             new_part_list = []
     if len(new_part_list) > 0:
-        x = db.abandon.insert_many(new_part_list)
+        x = db.annotation_parts.insert_many(new_part_list)
         new_part_id_list += x.inserted_ids
         new_part_list = []
         
@@ -185,10 +192,10 @@ def create_promoter_terminator(project_id, promoter_length, terminator_length, *
     if insert_result.acknowledged:
         # mark old project as history
         if old_project_ctype != 'source':
-            modify_result = db.projects.update_one({'id':old_project_id}, { "$set": { "ctype": "history" } })
+            modify_result = db.projects.update_one({'_id':old_project_id}, { "$set": { "ctype": "history" } })
             if not modify_result.acknowledged:
                 raise Exception('unable modify old project')
-        yield percentage_counter.build_result(100, 'done', project._id)
+        yield percentage_counter.build_result(100, 'done', {'newProjectId': str(project._id)})
     else:
         raise Exception('not inserted')
     

@@ -9,29 +9,35 @@
     $(document).ready(function(){
         namespace = '/';
         
-            const socket = io.connect('http://' + document.domain + ':' + location.port + namespace , {forceNew:false});
+            // const socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
+            // const socket = io.connect('http://api.local.cailab.org:10303/', {transports:['websocket']});
+            const socket = io.connect('http://api.local.cailab.org:10303/');
             // upon the connetion, the client emits an event to the server called 'connection'  
             socket.on('connect', function(){
 
             });
         
-            socket.on('room_created', function(response){
+            socket.on('taskCreated', function(response){
                 const roomId = response.room_id
                 $('#receive_div').append(`<div id="${response.room_id}">${response.room_id}:     <span id="room_${response.room_id}_content"></span>`);
             });
             // 'response' event invokes the client callback function to greet the client with a message 
             // after running background tasks through celery   
-            socket.on('response', function(response){
-                var response_str = response.percentage + '% '+response.message + "&&&" + response.taskId;   
+            socket.on('progress', function(response){
+                var response_str = response.algorithm + ' : ' + response.percentage + '% '+response.message
+                $(`#room_${response.taskId}_content`).text(response_str);
+            });
+
+            socket.on('result', function(response){
+                var response_str = response.algorithm + ' : ' + response.percentage + '% '+response.message
                 $(`#room_${response.taskId}_content`).text(response_str);
             });
 
             $('#start_task').click(function(){
                 console.log('create_task');
-                socket.emit('create_task', {
-                    sessionToken: 'no-token',
-                    taskName: 'create_promoter_terminator',
-                    params: {
+                socket.emit('startTask', {
+                    algorithmName: 'do_nothing',
+                    taskParams: {
                         projectId: '',
                         promoterLength: 500,
                         terminatorLength: 200,

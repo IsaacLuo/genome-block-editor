@@ -346,7 +346,7 @@ export function* createPromoterTerminatorHttp(aciton:IAction) {
   }
 }
 
-export function* createPromoterTerminator(aciton:IAction) {
+export function* createPromoterTerminatorLocal(aciton:IAction) {
   // 1. call api to start webexe process at back-end
   try {
     console.log('createPromoterTerminator')
@@ -369,6 +369,41 @@ export function* createPromoterTerminator(aciton:IAction) {
         break;
       } else {
         const reduxAction = yield call(generateLocalSocketAction, serverAction);
+        yield put(reduxAction);
+      }
+    }
+    
+  } catch (error) {
+    yield call(notification.error, {message:error});
+  }
+}
+
+export function* createPromoterTerminator(aciton:IAction) {
+  // 1. call api to start webexe process at back-end
+  try {
+    console.log('createPromoterTerminator')
+    const {id} = yield select((state:IStoreState)=>({id:state.sourceFile!._id}));
+    const {promoterLength, terminatorLength, selectedRange} = aciton.data;
+    // 2. use socket.io
+    const socket = io(conf.workerURL, {transports:['websocket']});
+    const channel = yield call(monitorSocket, socket);
+    // socket.emit('startTask', {taskName: 'create_promoter_terminator', taskParams: {_id:id, promoterLength, terminatorLength, selectedRange}});
+    console.log('emit startTask')
+    socket.emit('startTask', {algorithmName: 'create_promoter_terminator', taskParams: {_id:id, promoterLength, terminatorLength, selectedRange}});
+
+    while (true) {
+      const serverAction = yield take(channel);
+      if (serverAction.type === 'result') {
+        yield put({type:'PROGRESS',data: serverAction.data})
+        yield put({type:LOAD_SOURCE_FILE, data: serverAction.data.data.newProjectId});
+        yield call(notification.success, {
+          message: 'success',
+          description:
+            'promoters and terminators are created',
+        });        
+        break;
+      } else {
+        const reduxAction = yield call(generateSocketAction, serverAction);
         yield put(reduxAction);
       }
     }
